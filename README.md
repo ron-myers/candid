@@ -151,6 +151,8 @@ candid/
 ├── .claude-plugin/
 │   ├── plugin.json           # Plugin metadata
 │   └── marketplace.json      # Marketplace config
+├── commands/
+│   └── candid-review.md      # /candid-review command
 ├── skills/
 │   └── candid-review/
 │       └── SKILL.md          # Main skill
