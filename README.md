@@ -24,8 +24,11 @@ I'm a big fan of [Superpowers](https://github.com/obra/superpowers) and recommen
 
 ```bash
 # From Claude Code
-/plugin install candid
+/plugin marketplace add ron-myers/candid
+/plugin install candid@candid
 ```
+
+Then restart Claude Code.
 
 ## Usage
 
