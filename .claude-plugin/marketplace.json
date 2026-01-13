@@ -1,0 +1,29 @@
+{
+  "name": "candid",
+  "owner": {
+    "name": "Ron Myers"
+  },
+  "plugins": [
+    {
+      "name": "candid",
+      "source": "./",
+      "description": "Configurable code reviews with radical candor - choose between harsh or constructive tone. Features Technical.md for project standards, architectural context analysis, actionable fixes, and seamless todo integration.",
+      "version": "1.0.0",
+      "author": {
+        "name": "Ron Myers"
+      },
+      "homepage": "https://github.com/ron-myers/candid",
+      "repository": "https://github.com/ron-myers/candid",
+      "license": "MIT",
+      "keywords": [
+        "code-review",
+        "radical-candor",
+        "feedback",
+        "quality",
+        "architecture",
+        "full-stack",
+        "todos"
+      ]
+    }
+  ]
+}

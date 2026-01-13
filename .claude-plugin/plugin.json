@@ -1,0 +1,20 @@
+{
+  "name": "candid",
+  "description": "Configurable code review with radical candor - choose between harsh direct feedback or constructive caring criticism. Features Technical.md for project standards, architectural context analysis, actionable fixes, and seamless todo integration.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Ron Myers"
+  },
+  "homepage": "https://github.com/ron-myers/candid",
+  "repository": "https://github.com/ron-myers/candid",
+  "license": "MIT",
+  "keywords": [
+    "code-review",
+    "radical-candor",
+    "feedback",
+    "todos",
+    "quality",
+    "architecture",
+    "full-stack"
+  ]
+}
