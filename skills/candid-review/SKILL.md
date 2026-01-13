@@ -217,25 +217,39 @@ For each issue, provide this structured format:
 > const email = user.email;
 > ```
 
-### Step 7: Todo Selection
+### Step 7: Fix Selection
 
-After presenting all issues, help the user select which to track. Use AskUserQuestion with multi-select:
+After presenting all issues, prompt the user to select which fixes to apply. Use AskUserQuestion with multi-select.
 
-**Question:** "Which issues should I add to your todo list?"
+**Before the prompt, remind the user:** "Scroll up to review the detailed context and proposed fixes for each issue."
+
+**Question:** "Which fixes should I apply?"
 
 Create one option per issue with format:
 - Label: `[Icon] [#]. [Short title]`
 - Description: `[File:line] - [Brief problem summary]`
 
 Also include shortcut options:
-- **All issues** - Add everything to todos
-- **Critical + Major only** - Add only 🔥 and ⚠️ issues
+- **All fixes** - Apply all proposed fixes
+- **Critical + Major only** - Apply only 🔥 and ⚠️ fixes
+- **None (track as todos)** - Don't apply fixes, just add to todo list for later
 
 Enable multi-select so user can pick multiple specific issues.
 
-### Step 8: Create Todos
+### Step 8: Apply Fixes or Create Todos
 
-For each selected issue, create a todo using TodoWrite:
+**If user selected fixes to apply:**
+
+1. Create a todo list of the selected fixes using TodoWrite (all as `pending`)
+2. Work through each fix sequentially:
+   - Mark the current fix as `in_progress`
+   - Apply the fix using Edit tool
+   - Mark as `completed` when done
+3. After all fixes are applied, summarize what was changed
+
+**If user selected "None (track as todos)":**
+
+Create todos for all issues using TodoWrite:
 
 ```json
 {
@@ -264,7 +278,7 @@ Present your review in this order:
 6. **🤔 Missing Edge Cases** - Scenarios to handle (if any)
 7. **💭 Architectural Concerns** - Design issues (if any)
 8. **✅ What's Good** - Acknowledge good practices (keep brief)
-9. **Todo Selection** - Multi-select prompt for tracking issues
+9. **Fix Selection** - Multi-select prompt for which fixes to apply (remind user to scroll up for context)
 
 ## Your Character
 
