@@ -217,9 +217,13 @@ For each issue, provide this structured format:
 > const email = user.email;
 > ```
 
-### Step 7: Fix Selection
+### Step 7: Fix Selection (MANDATORY)
 
-After presenting all issues, prompt the user to select which fixes to apply. Use AskUserQuestion with multi-select.
+**⚠️ CRITICAL: This step is MANDATORY. If ANY issues were identified in Steps 5-6, you MUST present the fix selection prompt. Never skip this step when issues exist.**
+
+**Pre-condition:** If Steps 5-6 identified zero issues, skip to a summary stating "No issues found" and end the review. Otherwise, proceed with this mandatory step.
+
+After presenting all issues, prompt the user to select which fixes to apply using AskUserQuestion with multi-select capability.
 
 **Before the prompt, remind the user:** "Scroll up to review the detailed context and proposed fixes for each issue."
 
@@ -235,6 +239,8 @@ Also include shortcut options:
 - **None (track as todos)** - Don't apply fixes, just add to todo list for later
 
 Enable multi-select so user can pick multiple specific issues.
+
+**Enforcement:** Do not proceed to Step 8 without completing this prompt. Do not auto-select fixes or assume user intent. The user MUST explicitly choose which fixes to apply.
 
 ### Step 8: Apply Fixes or Create Todos
 
