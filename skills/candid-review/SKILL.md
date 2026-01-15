@@ -223,43 +223,93 @@ For each issue, provide this structured format:
 
 **Pre-condition:** If Steps 5-6 identified zero issues, skip to a summary stating "No issues found" and end the review. Otherwise, proceed with this mandatory step.
 
-After presenting all issues, prompt the user to select which fixes to apply using AskUserQuestion with multi-select capability.
+After presenting all issues, use a three-phase selection process:
 
-**Before the prompt, remind the user:** "Scroll up to review the detailed context and proposed fixes for each issue."
+#### Phase 7a: Bulk Action Choice
 
-**Question:** "Which fixes should I apply?"
+Before the prompt, remind the user: "Scroll up to review the detailed context and proposed fixes for each issue."
 
-Create one option per issue with format:
-- Label: `[Icon] [#]. [Short title]`
-- Description: `[File:line] - [Brief problem summary]`
+Use AskUserQuestion to offer bulk action shortcuts:
 
-Also include shortcut options:
-- **All fixes** - Apply all proposed fixes
-- **Critical + Major only** - Apply only 🔥 and ⚠️ fixes
-- **None (track as todos)** - Don't apply fixes, just add to todo list for later
+**Question:** "How would you like to handle the fixes?"
 
-Enable multi-select so user can pick multiple specific issues.
+**Options:**
+1. "Apply all fixes" - Apply all proposed fixes without individual review
+2. "Apply Critical + Major only" - Apply only 🔥 and ⚠️ fixes automatically
+3. "Review each fix individually" - Go through each fix one by one (proceeds to Phase 7b)
+4. "None (track as todos)" - Don't apply any fixes, add all to todo list
 
-**Enforcement:** Do not proceed to Step 8 without completing this prompt. Do not auto-select fixes or assume user intent. The user MUST explicitly choose which fixes to apply.
+Store the user's choice and proceed based on their selection:
+- If "Apply all fixes" → Add all issues to selectedFixes array, skip to Phase 7c
+- If "Apply Critical + Major only" → Add only 🔥 and ⚠️ issues to selectedFixes array, skip to Phase 7c
+- If "Review each fix individually" → Proceed to Phase 7b
+- If "None (track as todos)" → Set selectedFixes to empty array, skip to Step 8
+
+#### Phase 7b: Individual Fix Review (Only if "Review individually" was chosen)
+
+Loop through each issue identified in Steps 5-6. For each issue:
+
+1. **Show issue context:**
+   - Display issue number and total count (e.g., "[1/5]")
+   - Show icon, title, file location, and brief problem summary
+
+2. **Call AskUserQuestion:**
+   - **Question:** "Apply this fix?"
+   - **Context to display before options:**
+     ```
+     [Icon] [Title]
+     File: [path/to/file.ts:line]
+     Problem: [Brief description]
+     ```
+   - **Options:**
+     - "Yes, apply this fix"
+     - "No, skip this fix"
+
+3. **Track selection:**
+   - If "Yes" → Add this issue to selectedFixes array
+   - If "No" → Continue to next issue without adding
+
+Repeat for all issues. After completing the loop, proceed to Phase 7c.
+
+#### Phase 7c: Confirmation (Only if selectedFixes is not empty)
+
+Before applying fixes, show a summary and get final confirmation:
+
+1. **Display summary:**
+   - Show count: "Ready to apply [N] selected fixes:"
+   - List each selected fix with: number, icon, short title, file:line
+
+2. **Call AskUserQuestion for confirmation:**
+   - **Question:** "Apply these fixes?"
+   - **Options:**
+     - "Yes, apply all selected" - Proceed to Step 8 with selectedFixes
+     - "No, let me review again" - Return to Phase 7a and start over
+
+**Enforcement:** Do not proceed to Step 8 without completing this prompt. Do not auto-select fixes or assume user intent. The user MUST explicitly choose which fixes to apply through one of these paths.
 
 ### Step 8: Apply Fixes or Create Todos
 
-**If user selected fixes to apply:**
+Use the selectedFixes array from Step 7 to determine what action to take.
+
+**If selectedFixes contains fixes to apply (not empty):**
 
 1. Create a todo list of the selected fixes using TodoWrite (all as `pending`)
+   - Use format: `[Icon] Fix: [issue summary] at [file:line]`
 2. Work through each fix sequentially:
    - Mark the current fix as `in_progress`
    - Apply the fix using Edit tool
    - Mark as `completed` when done
-3. After all fixes are applied, summarize what was changed
+3. After all fixes are applied, summarize what was changed:
+   - State how many fixes were applied
+   - List the files that were modified
 
-**If user selected "None (track as todos)":**
+**If selectedFixes is empty (user chose "None" in Step 7):**
 
-Create todos for all issues using TodoWrite:
+Create todos for ALL issues found in Steps 5-6 using TodoWrite:
 
 ```json
 {
-  "content": "[Icon] Fix: [issue summary] in [file]",
+  "content": "[Icon] Fix: [issue summary] at [file:line]",
   "activeForm": "Fixing [issue summary] in [file]",
   "status": "pending"
 }
@@ -270,7 +320,7 @@ Create todos for all issues using TodoWrite:
 - `⚠️ Fix: N+1 query in OrderRepository.findAll() at orders.ts:88`
 - `📜 Fix: missing error handling per Technical.md at api.ts:15`
 
-After creating todos, confirm to user how many were added.
+After creating todos, confirm to user how many were added and remind them they can review the todos later.
 
 ## Output Structure
 
