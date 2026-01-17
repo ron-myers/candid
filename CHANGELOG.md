@@ -5,6 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.3] - 2026-01-17
+
+### Added
+
+- **Config File Support for Tone Persistence**: Users can now persist their tone preference across review sessions using config files, eliminating the need to select tone every time.
+  - **Three-tier precedence**: CLI flags → project config → user config → interactive prompt
+  - **User config**: `~/.candid/config.json` for user-wide defaults
+  - **Project config**: `.candid/config.json` for project-specific overrides
+  - **Graceful error handling**: Invalid configs show warnings and fall back to next precedence level
+  - **Source transparency**: Always shows where tone preference came from
+  - **Forward compatibility**: Unknown fields ignored; optional version field for future schema changes
+  - **Example configs**: Ready-to-use examples in `examples/harsh/` and `examples/constructive/`
+  - **Comprehensive validation**: Uses `jq` for JSON parsing with type and value checks
+  - **Documentation**: CONFIG.md with reusable validation procedure, README.md with setup examples
+
+### Changed
+
+- **Step numbering normalized**: Renamed Step 2.5 to Step 3; all subsequent steps renumbered (3→4, 3.5→4.5, 4→5, 5→6, 6→7, 7→8)
+- **Phase numbering normalized**: Phase 6a/6b/6c renamed to Phase 7a/7b/7c to match new Step 7
+- **New Step 3 (Load Tone Preference)**: Config loading with detailed JSON validation using `jq` commands
+
 ## [1.0.2] - 2026-01-15
 
 ### Fixed

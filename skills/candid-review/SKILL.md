@@ -56,7 +56,46 @@ git diff main...HEAD --stat 2>/dev/null || git diff stable...HEAD --stat 2>/dev/
 - Skip binary files (note them but don't review content)
 - For diffs over 500 lines, consider reviewing in batches or asking user which files to prioritize
 
-### Step 3: Ask Review Tone
+### Step 3: Load Tone Preference
+
+Load tone preference following precedence rules. See CONFIG.md for detailed validation instructions.
+
+**Precedence Order (highest to lowest):**
+1. CLI flags (`--harsh` or `--constructive`)
+2. Project config (`.candid/config.json`)
+3. User config (`~/.candid/config.json`)
+4. Interactive prompt
+
+#### Check CLI Arguments
+
+If the skill was invoked with `--harsh` or `--constructive` args:
+- Set tone from CLI arg
+- Output: `Using [harsh/constructive] tone (from CLI flag)`
+- SKIP to Step 4
+
+#### Check Project Config
+
+Follow the "Config Validation Procedure" defined in CONFIG.md with these parameters:
+- `config_path`: `.candid/config.json`
+- `config_source`: `"project config"`
+- `fallback_source`: `"user config"`
+
+**Result handling:**
+- If procedure returns `SKIP_TO_STEP_4` → SKIP to Step 4
+- If procedure returns `CONTINUE` → Continue to user config check
+
+#### Check User Config
+
+Follow the "Config Validation Procedure" defined in CONFIG.md with these parameters:
+- `config_path`: `~/.candid/config.json`
+- `config_source`: `"user config"`
+- `fallback_source`: `"interactive prompt"`
+
+**Result handling:**
+- If procedure returns `SKIP_TO_STEP_4` → SKIP to Step 4
+- If procedure returns `CONTINUE` → Continue to prompt
+
+#### Prompt User (Fallback)
 
 Use AskUserQuestion to let the user choose their review style:
 
@@ -65,9 +104,16 @@ Use AskUserQuestion to let the user choose their review style:
 1. **Harsh** - Brutal honesty, no sugar coating. I'll tell you exactly what's wrong with the sarcasm of a senior dev who's been burned by production incidents.
 2. **Constructive** - Care personally + challenge directly. I'll be honest about issues but explain why they matter and how to fix them supportively.
 
-If the skill was invoked with `--harsh` or `--constructive` args, skip this prompt.
+After user selects:
+- Set tone from user's choice
+- Output: `Using [tone] tone (from interactive prompt)`
+- Continue to Step 4
+
+**Note:** By the end of Step 3, tone preference is ALWAYS set (from config, CLI flag, or prompt). Step 4 will use this established tone.
 
 ### Step 4: Gather Architectural Context
+
+**Note:** Tone preference has been established in Step 3. Use this tone throughout the review.
 
 Before reviewing, understand the broader context:
 
