@@ -12,21 +12,30 @@ Valid config file format:
 ```json
 {
   "version": 1,
-  "tone": "harsh" | "constructive"
+  "tone": "harsh" | "constructive",
+  "exclude": ["*.generated.ts", "vendor/*"],
+  "focus": "security" | "performance" | "architecture"
 }
 ```
 
 **Field descriptions:**
 - `version` (optional): Config schema version. Defaults to 1 if omitted. Used for future-proofing.
 - `tone` (optional): Review tone preference. Must be exactly `"harsh"` or `"constructive"`. If not specified, the config file is treated as having no preference, and the system continues to the next precedence level.
+- `exclude` (optional): Array of glob patterns for files to skip during review. Patterns are merged from project config, user config, and CLI `--exclude` flags. Common patterns:
+  - `*.generated.ts` - Generated code
+  - `*.min.js` - Minified files
+  - `vendor/*` - Third-party code
+  - `**/*.test.ts` - Test files (if you want to skip them)
+- `focus` (optional): Default focus area for reviews. Must be exactly `"security"`, `"performance"`, or `"architecture"`. CLI `--focus` flag overrides this. When set, only relevant issue categories are checked.
 
 ## Validation Rules
 
 1. **File must be valid JSON** - Must parse without errors
 2. **Tone field type** - If `tone` field is present, must be a string (not boolean, number, array, or object)
 3. **Tone field validation** - If `tone` is a string, value must be exactly `"harsh"` or `"constructive"` (case-sensitive)
-4. **Unknown fields ignored** - Any fields other than `tone` are ignored for forward compatibility
-5. **Empty object is valid** - `{}` is a valid config with no tone preference set, system continues to next source
+4. **Focus field validation** - If `focus` field is present, must be exactly `"security"`, `"performance"`, or `"architecture"` (case-sensitive). Invalid values show warning and are ignored.
+5. **Unknown fields ignored** - Any fields other than `tone`, `exclude`, and `focus` are ignored for forward compatibility
+6. **Empty object is valid** - `{}` is a valid config with no preferences set, system continues to next source
 
 ## Config Validation Procedure
 
@@ -64,10 +73,10 @@ This reusable procedure applies to both project and user configs:
 6. **Success:**
    - Set tone from config
    - Output: `Using [tone] tone (from [config_source])`
-   - Return `SKIP_TO_STEP_4`
+   - Return `SKIP_TO_STEP_5`
 
 **Return values:**
-- `SKIP_TO_STEP_4` - Valid config found, skip remaining checks
+- `SKIP_TO_STEP_5` - Valid config found, skip remaining checks
 - `CONTINUE` - No valid config, continue to next precedence level
 
 ## Error Handling Instructions
@@ -163,6 +172,32 @@ Using constructive tone (from interactive prompt)
 **No preference (empty):**
 ```json
 {}
+```
+
+**With exclusions:**
+```json
+{
+  "tone": "harsh",
+  "exclude": ["*.generated.ts", "vendor/*", "**/*.min.js"]
+}
+```
+
+**With focus area:**
+```json
+{
+  "tone": "constructive",
+  "focus": "security"
+}
+```
+
+**Full config:**
+```json
+{
+  "version": 1,
+  "tone": "harsh",
+  "exclude": ["*.generated.ts", "vendor/*"],
+  "focus": "performance"
+}
 ```
 
 **With future fields (ignored):**

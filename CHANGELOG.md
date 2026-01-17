@@ -5,6 +5,48 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2026-01-17
+
+### Added
+
+- **Re-Review Mode** (`--re-review`): Compare current review against a previous review to track progress
+  - Shows ✅ Fixed, 🔄 Still Present, and 🆕 New issues
+  - Review state automatically saved to `.candid/last-review.json` after each review
+  - Stable issue IDs using SHA256 hash of file:line:category:title
+  - Net change summary showing improvement or regression
+
+- **Technical.md Validator** (`/candid-validate-standards`): Check your standards file for effectiveness
+  - 🌫️ Detects vague rules ("write clean code", "use best practices")
+  - 📏 Flags missing thresholds ("keep functions small" → needs number)
+  - 🔧 Identifies linter overlap (rules your ESLint/Prettier already handles)
+  - `--fix` flag suggests specific rewrites for vague rules
+
+- **New Templates**:
+  - `Technical-node.md`: Node.js/backend standards (API design, database, security, async)
+  - `Technical-python.md`: Python standards (type hints, testing, asyncio, logging)
+
+- **New Documentation**:
+  - `docs/review-scope.md`: How to control what gets reviewed (scope, exclusions, focus, subagents)
+  - `docs/technical-md-writing-guide.md`: Good rules vs bad rules with examples
+  - `docs/integration/ci-cd.md`: CI/CD integration (GitHub Actions, GitLab, CircleCI, Azure DevOps)
+  - `docs/integration/pre-commit.md`: Pre-commit hook setup (Git hooks, Husky, pre-commit framework, Lefthook)
+
+- **Focus Mode Precedence**: Focus area (`--focus security/performance/architecture`) now follows same precedence as tone:
+  - CLI flag → project config → user config → no focus (all categories)
+  - Can be set in `.candid/config.json` with `"focus": "security"`
+
+- **Fix Confidence Levels**: Each fix now rated to help prioritize:
+  - Safe ✓: Mechanical fix, low risk
+  - Verify ⚡: Logic change, needs testing
+  - Careful ⚠️: Architectural change, may have side effects
+
+### Changed
+
+- **Command definition expanded**: `commands/candid-review.md` now includes full YAML frontmatter with all argument definitions
+- **Template references**: `candid-init` now points to actual template files instead of vague descriptions
+- **Step 10 added**: Review state saving after completion
+- **ID generation specified**: Uses SHA256 hash (first 12 chars) of `${relativePath}:${line}:${category}:${title}`
+
 ## [1.0.3] - 2026-01-17
 
 ### Added

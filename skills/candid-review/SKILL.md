@@ -56,7 +56,89 @@ git diff main...HEAD --stat 2>/dev/null || git diff stable...HEAD --stat 2>/dev/
 - Skip binary files (note them but don't review content)
 - For diffs over 500 lines, consider reviewing in batches or asking user which files to prioritize
 
-### Step 3: Load Tone Preference
+### Step 3: Parse Review Options
+
+Check CLI arguments for review options:
+
+#### Focus Mode (`--focus`)
+
+**Focus Precedence (highest to lowest):**
+1. CLI flag (`--focus security`)
+2. Project config (`.candid/config.json` → `focus` field)
+3. User config (`~/.candid/config.json` → `focus` field)
+4. No focus (review all categories)
+
+If focus is set, limit review to specific categories:
+
+| Focus Area | Categories Checked |
+|------------|-------------------|
+| `security` | 🔥 Critical (security-related), ⚠️ Major (auth/validation) |
+| `performance` | ⚠️ Major (N+1, blocking), 📋 Code Smell (complexity), 🤔 Edge Case (pagination) |
+| `architecture` | 💭 Architectural, 📋 Code Smell (coupling, SRP), 📜 Standards |
+
+If no focus specified at any level, check all categories (default behavior).
+
+Output when focus is set: `Focusing review on: [area]`
+
+#### File Exclusions (`--exclude`)
+
+If `--exclude <pattern>` is provided (can be repeated), exclude matching files from review.
+
+Also check config files for exclusions:
+1. `.candid/config.json` → `exclude` array
+2. `~/.candid/config.json` → `exclude` array
+
+Common patterns:
+- `*.generated.ts` - Generated code
+- `*.min.js` - Minified files
+- `vendor/*` - Third-party code
+- `**/node_modules/**` - Dependencies
+
+Merge CLI exclusions with config exclusions. Apply to file list in Step 2.
+
+Output when exclusions active: `Excluding files matching: [patterns]`
+
+#### Re-Review Mode (`--re-review`)
+
+If `--re-review` flag is provided, load the previous review state and compare:
+
+**1. Load previous review state:**
+```bash
+cat .candid/last-review.json 2>/dev/null
+```
+
+**2. If no previous review exists:**
+```
+No previous review found. Running fresh review.
+(Previous reviews are saved to .candid/last-review.json)
+```
+Then proceed with normal review.
+
+**3. If previous review exists:**
+- Parse the JSON to get previous issues (file, line, category, description)
+- Store in `previousIssues` array for comparison in Step 7
+- Output: `Re-review mode: comparing against review from [timestamp]`
+
+**Previous Review State Format:**
+```json
+{
+  "timestamp": "2026-01-17T10:30:00Z",
+  "commit": "abc123",
+  "branch": "feature/auth",
+  "issues": [
+    {
+      "id": "hash-of-file-line-category",
+      "file": "src/auth.ts",
+      "line": 42,
+      "category": "critical",
+      "title": "Null check missing",
+      "description": "user.email accessed without null check"
+    }
+  ]
+}
+```
+
+### Step 4: Load Tone Preference
 
 Load tone preference following precedence rules. See CONFIG.md for detailed validation instructions.
 
@@ -71,7 +153,7 @@ Load tone preference following precedence rules. See CONFIG.md for detailed vali
 If the skill was invoked with `--harsh` or `--constructive` args:
 - Set tone from CLI arg
 - Output: `Using [harsh/constructive] tone (from CLI flag)`
-- SKIP to Step 4
+- SKIP to Step 5
 
 #### Check Project Config
 
@@ -81,7 +163,7 @@ Follow the "Config Validation Procedure" defined in CONFIG.md with these paramet
 - `fallback_source`: `"user config"`
 
 **Result handling:**
-- If procedure returns `SKIP_TO_STEP_4` → SKIP to Step 4
+- If procedure returns `SKIP_TO_STEP_5` → SKIP to Step 5
 - If procedure returns `CONTINUE` → Continue to user config check
 
 #### Check User Config
@@ -92,7 +174,7 @@ Follow the "Config Validation Procedure" defined in CONFIG.md with these paramet
 - `fallback_source`: `"interactive prompt"`
 
 **Result handling:**
-- If procedure returns `SKIP_TO_STEP_4` → SKIP to Step 4
+- If procedure returns `SKIP_TO_STEP_5` → SKIP to Step 5
 - If procedure returns `CONTINUE` → Continue to prompt
 
 #### Prompt User (Fallback)
@@ -107,13 +189,13 @@ Use AskUserQuestion to let the user choose their review style:
 After user selects:
 - Set tone from user's choice
 - Output: `Using [tone] tone (from interactive prompt)`
-- Continue to Step 4
+- Continue to Step 5
 
-**Note:** By the end of Step 3, tone preference is ALWAYS set (from config, CLI flag, or prompt). Step 4 will use this established tone.
+**Note:** By the end of Step 4, tone preference is ALWAYS set (from config, CLI flag, or prompt). Step 5 will use this established tone.
 
-### Step 4: Gather Architectural Context
+### Step 5: Gather Architectural Context
 
-**Note:** Tone preference has been established in Step 3. Use this tone throughout the review.
+**Note:** Tone preference has been established in Step 4. Use this tone throughout the review.
 
 Before reviewing, understand the broader context:
 
@@ -128,7 +210,7 @@ This enables catching:
 - API contract breaks (signature changes affecting consumers)
 - Missing test coverage for changed code
 
-### Step 4.5: Dispatch Subagent for Complex Changes (Optional)
+### Step 5.5: Dispatch Subagent for Complex Changes (Optional)
 
 For complex changes, dispatch the `code-reviewer` subagent for parallel deep analysis.
 
@@ -156,7 +238,7 @@ The subagent returns JSON. Convert each issue to the markdown format in Step 6:
 
 Merge subagent findings with your own analysis before presenting.
 
-### Step 5: Review and Categorize
+### Step 6: Review and Categorize
 
 Analyze every change with the chosen tone. Categorize issues by severity:
 
@@ -220,13 +302,14 @@ Analyze every change with the chosen tone. Categorize issues by severity:
 - Missing observability (logging, metrics)
 - Tight coupling between modules
 
-### Step 6: Present Issues with Fixes
+### Step 7: Present Issues with Fixes
 
 For each issue, provide this structured format:
 
 ```markdown
 ### [Icon] [Title]
 **File:** path/to/file.ts:42-45
+**Confidence:** [Safe ✓ | Verify ⚡ | Careful ⚠️]
 **Problem:** Clear description of what's wrong
 **Impact:** Why this matters (production, performance, maintenance, security)
 **Fix:**
@@ -235,11 +318,24 @@ For each issue, provide this structured format:
 ```
 ```
 
+#### Fix Confidence Levels
+
+Assess each fix's risk level to help users prioritize:
+
+| Level | Icon | When to Use | Examples |
+|-------|------|-------------|----------|
+| Safe | ✓ | Mechanical fix, low risk, no behavior change | Add null check, fix typo, add missing import |
+| Verify | ⚡ | Logic change, needs testing | Refactor algorithm, change error handling |
+| Careful | ⚠️ | Architectural change, may have side effects | Change data flow, modify API contract, alter state management |
+
+Include confidence in every issue. Users can use this to decide whether to apply fixes immediately or test first.
+
 **Tone Variations:**
 
 *Harsh tone example:*
 > ### 🔥 Null check? Never heard of her
 > **File:** src/user.ts:42
+> **Confidence:** Safe ✓
 > **Problem:** `user.email` accessed without checking if user exists.
 > **Impact:** This WILL crash in production. It's not a matter of if, but when.
 > **Fix:**
@@ -253,6 +349,7 @@ For each issue, provide this structured format:
 *Constructive tone example:*
 > ### 🔥 Missing null check on user access
 > **File:** src/user.ts:42
+> **Confidence:** Safe ✓
 > **Problem:** The code accesses `user.email` without verifying the user object exists.
 > **Impact:** If the user lookup fails or returns null, this will cause a runtime crash. This is especially risky in authentication flows where invalid states are common.
 > **Fix:**
@@ -263,15 +360,15 @@ For each issue, provide this structured format:
 > const email = user.email;
 > ```
 
-### Step 7: Fix Selection (MANDATORY)
+### Step 8: Fix Selection (MANDATORY)
 
-**⚠️ CRITICAL: This step is MANDATORY. If ANY issues were identified in Steps 5-6, you MUST present the fix selection prompt. Never skip this step when issues exist.**
+**⚠️ CRITICAL: This step is MANDATORY. If ANY issues were identified in Steps 6-7, you MUST present the fix selection prompt. Never skip this step when issues exist.**
 
-**Pre-condition:** If Steps 5-6 identified zero issues, skip to a summary stating "No issues found" and end the review. Otherwise, proceed with this mandatory step.
+**Pre-condition:** If Steps 6-7 identified zero issues, skip to a summary stating "No issues found" and end the review. Otherwise, proceed with this mandatory step.
 
 After presenting all issues, use a three-phase selection process:
 
-#### Phase 7a: Bulk Action Choice
+#### Phase 8a: Bulk Action Choice
 
 Before the prompt, remind the user: "Scroll up to review the detailed context and proposed fixes for each issue."
 
@@ -282,18 +379,18 @@ Use AskUserQuestion to offer bulk action shortcuts:
 **Options:**
 1. "Apply all fixes" - Apply all proposed fixes without individual review
 2. "Apply Critical + Major only" - Apply only 🔥 and ⚠️ fixes automatically
-3. "Review each fix individually" - Go through each fix one by one (proceeds to Phase 7b)
+3. "Review each fix individually" - Go through each fix one by one (proceeds to Phase 8b)
 4. "None (track as todos)" - Don't apply any fixes, add all to todo list
 
 Store the user's choice and proceed based on their selection:
-- If "Apply all fixes" → Add all issues to selectedFixes array, skip to Phase 7c
-- If "Apply Critical + Major only" → Add only 🔥 and ⚠️ issues to selectedFixes array, skip to Phase 7c
-- If "Review each fix individually" → Proceed to Phase 7b
-- If "None (track as todos)" → Set selectedFixes to empty array, skip to Step 8
+- If "Apply all fixes" → Add all issues to selectedFixes array, skip to Phase 8c
+- If "Apply Critical + Major only" → Add only 🔥 and ⚠️ issues to selectedFixes array, skip to Phase 8c
+- If "Review each fix individually" → Proceed to Phase 8b
+- If "None (track as todos)" → Set selectedFixes to empty array, skip to Step 9
 
-#### Phase 7b: Individual Fix Review (Only if "Review individually" was chosen)
+#### Phase 8b: Individual Fix Review (Only if "Review individually" was chosen)
 
-Loop through each issue identified in Steps 5-6. For each issue:
+Loop through each issue identified in Steps 6-7. For each issue:
 
 1. **Show issue context:**
    - Display issue number and total count (e.g., "[1/5]")
@@ -315,9 +412,9 @@ Loop through each issue identified in Steps 5-6. For each issue:
    - If "Yes" → Add this issue to selectedFixes array
    - If "No" → Continue to next issue without adding
 
-Repeat for all issues. After completing the loop, proceed to Phase 7c.
+Repeat for all issues. After completing the loop, proceed to Phase 8c.
 
-#### Phase 7c: Confirmation (Only if selectedFixes is not empty)
+#### Phase 8c: Confirmation (Only if selectedFixes is not empty)
 
 Before applying fixes, show a summary and get final confirmation:
 
@@ -328,14 +425,14 @@ Before applying fixes, show a summary and get final confirmation:
 2. **Call AskUserQuestion for confirmation:**
    - **Question:** "Apply these fixes?"
    - **Options:**
-     - "Yes, apply all selected" - Proceed to Step 8 with selectedFixes
-     - "No, let me review again" - Return to Phase 7a and start over
+     - "Yes, apply all selected" - Proceed to Step 9 with selectedFixes
+     - "No, let me review again" - Return to Phase 8a and start over
 
-**Enforcement:** Do not proceed to Step 8 without completing this prompt. Do not auto-select fixes or assume user intent. The user MUST explicitly choose which fixes to apply through one of these paths.
+**Enforcement:** Do not proceed to Step 9 without completing this prompt. Do not auto-select fixes or assume user intent. The user MUST explicitly choose which fixes to apply through one of these paths.
 
-### Step 8: Apply Fixes or Create Todos
+### Step 9: Apply Fixes or Create Todos
 
-Use the selectedFixes array from Step 7 to determine what action to take.
+Use the selectedFixes array from Step 8 to determine what action to take.
 
 **If selectedFixes contains fixes to apply (not empty):**
 
@@ -349,9 +446,9 @@ Use the selectedFixes array from Step 7 to determine what action to take.
    - State how many fixes were applied
    - List the files that were modified
 
-**If selectedFixes is empty (user chose "None" in Step 7):**
+**If selectedFixes is empty (user chose "None" in Step 8):**
 
-Create todos for ALL issues found in Steps 5-6 using TodoWrite:
+Create todos for ALL issues found in Steps 6-7 using TodoWrite:
 
 ```json
 {
@@ -368,6 +465,42 @@ Create todos for ALL issues found in Steps 5-6 using TodoWrite:
 
 After creating todos, confirm to user how many were added and remind them they can review the todos later.
 
+### Step 10: Save Review State
+
+After completing the review (regardless of whether fixes were applied), save the review state for future comparisons:
+
+**1. Create .candid directory if needed:**
+```bash
+mkdir -p .candid
+```
+
+**2. Generate review state JSON:**
+
+Create a JSON object with:
+- `timestamp`: Current ISO timestamp
+- `commit`: Current commit hash (`git rev-parse HEAD`)
+- `branch`: Current branch name (`git branch --show-current`)
+- `issues`: Array of all issues found (not just selected ones)
+
+For each issue, generate a stable ID:
+1. Concatenate: `${relativePath}:${line}:${category}:${title}`
+2. Use first 12 characters of SHA256 hash
+
+Example: `src/auth.ts:42:critical:Null check missing` → `a1b2c3d4e5f6`
+
+**3. Write to file:**
+```bash
+# Write JSON to .candid/last-review.json
+```
+
+**4. Output:**
+```
+Review state saved to .candid/last-review.json
+Run /candid-review --re-review to compare against this review later.
+```
+
+**Note:** The `.candid/last-review.json` should typically be added to `.gitignore` as it's user-specific state.
+
 ## Output Structure
 
 Present your review in this order:
@@ -381,6 +514,70 @@ Present your review in this order:
 7. **💭 Architectural Concerns** - Design issues (if any)
 8. **✅ What's Good** - Acknowledge good practices (keep brief)
 9. **Fix Selection** - Multi-select prompt for which fixes to apply (remind user to scroll up for context)
+
+### Re-Review Output Structure
+
+When `--re-review` flag is used and previous review state exists, modify the output:
+
+**1. Add comparison header:**
+```markdown
+## Re-Review Comparison
+
+Comparing against review from [timestamp] (commit [short-hash])
+
+| Status | Count |
+|--------|-------|
+| ✅ Fixed | [N] |
+| 🔄 Still Present | [M] |
+| 🆕 New Issues | [P] |
+```
+
+**2. Categorize each issue:**
+
+For each issue found in current review:
+- Compare against `previousIssues` using the stable ID
+- If ID exists in previous → mark as 🔄 Still Present
+- If ID doesn't exist → mark as 🆕 New
+
+For each issue in `previousIssues`:
+- If ID not found in current issues → mark as ✅ Fixed
+
+**3. Present issues in groups:**
+
+```markdown
+## ✅ Fixed Issues (N)
+
+These issues from the previous review have been resolved:
+
+1. ~~🔥 Null check missing in auth.ts:42~~ ✅
+2. ~~⚠️ N+1 query in orders.ts:88~~ ✅
+
+---
+
+## 🔄 Still Present (M)
+
+These issues remain from the previous review:
+
+### 🔥 SQL injection vulnerability
+**File:** src/db.ts:15 (was line 12)
+...
+
+---
+
+## 🆕 New Issues (P)
+
+Issues introduced since last review:
+
+### ⚠️ Missing error handling
+**File:** src/api.ts:42
+...
+```
+
+**4. Summary includes comparison:**
+```
+Re-review complete: [N] fixed, [M] remaining, [P] new issues.
+Net change: [+/-X] issues
+```
 
 ## Your Character
 

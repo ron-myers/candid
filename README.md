@@ -8,6 +8,10 @@ A Claude Code plugin for configurable code reviews that combine thoroughness wit
 - **Technical.md Support** - Define project standards that inform every review
 - **Architectural Context** - Reviews consider file relationships and patterns, not just the diff
 - **Actionable Fixes** - Every issue comes with concrete code to fix it
+- **Fix Confidence Levels** - Each fix is rated Safe/Verify/Careful to help prioritize
+- **Focus Mode** - Review only security, performance, or architecture aspects
+- **File Exclusions** - Skip generated code, vendor files, and other noise
+- **Auto-Generate Standards** - `/candid-init` creates Technical.md from codebase analysis
 - **Todo Integration** - Select issues to add as todos with one multi-select prompt
 - **Categorized Issues** - Organized by severity for easy prioritization
 
@@ -72,6 +76,56 @@ The skill will:
 
 Skip the tone prompt and go directly to the review.
 
+### Focus Mode
+
+Review only specific aspects of your code:
+
+```
+/candid-review --focus security      # Security vulnerabilities, auth issues
+/candid-review --focus performance   # N+1 queries, blocking operations
+/candid-review --focus architecture  # Design patterns, coupling, SRP
+```
+
+### Exclude Files
+
+Skip generated code, vendor files, or other noise:
+
+```
+/candid-review --exclude "*.generated.ts"
+/candid-review --exclude "vendor/*" --exclude "*.min.js"
+```
+
+Or set exclusions in config (see Configuration below).
+
+### Re-Review Mode
+
+Compare current issues against a previous review:
+
+```
+/candid-review --re-review
+```
+
+Shows:
+- ✅ **Fixed** - Issues from the previous review that are now resolved
+- 🔄 **Still Present** - Issues that remain
+- 🆕 **New** - Issues introduced since last review
+
+Review state is automatically saved to `.candid/last-review.json` after each review.
+
+### Validate Standards
+
+Check your Technical.md for effectiveness:
+
+```
+/candid-validate-standards              # Validate Technical.md
+/candid-validate-standards --fix        # Include suggested rewrites
+```
+
+Flags:
+- 🌫️ Vague rules ("write clean code")
+- 📏 Missing thresholds ("keep functions small")
+- 🔧 Linter overlap (rules your linter handles)
+
 ## Configuration
 
 Candid supports optional config files to persist your tone preference across reviews. No more selecting your preferred tone every time.
@@ -90,20 +144,10 @@ This means you can set a user-wide default and override it per-project, while CL
 ### Config Format
 
 ```json
-{
-  "version": 1,
-  "tone": "harsh"
-}
+{"tone": "harsh"}
 ```
 
-Or:
-
-```json
-{
-  "version": 1,
-  "tone": "constructive"
-}
-```
+All fields are optional. See [CONFIG.md](skills/candid-review/CONFIG.md) for the full schema specification including `exclude` patterns and `focus` areas.
 
 ### Example Setup
 
@@ -163,9 +207,22 @@ Technical.md lets you define project-specific standards that candid enforces dur
 
 ### Quick Setup
 
+**Option 1: Auto-generate from your codebase**
+```
+/candid-init              # Auto-detect framework
+/candid-init react        # React-specific standards
+/candid-init node         # Node.js-specific standards
+/candid-init minimal      # Bare minimum starter
+```
+
+**Option 2: Copy a template**
 ```bash
-# Copy the template to your project
-cp templates/Technical.md ./Technical.md
+cp templates/Technical-minimal.md ./Technical.md    # Start small
+cp templates/Technical-react.md ./Technical.md      # React projects
+cp templates/Technical-node.md ./Technical.md       # Node.js backend
+cp templates/Technical-python.md ./Technical.md     # Python projects
+cp templates/Technical-nextjs-vercel-supabase-clerk-loop.md ./Technical.md  # Next.js full-stack
+cp templates/Technical.md ./Technical.md            # Comprehensive template
 ```
 
 Or create `.claude/Technical.md` if you prefer to keep it out of the project root.
@@ -230,6 +287,16 @@ for (let i = 0; i < MAX_RETRIES; i++) { ... }
 | 🤔 | Edge Case | 5 | Unhandled scenarios: null, empty, timeout |
 | 💭 | Architectural | 6 | Design: coupling, SRP violations |
 
+## Fix Confidence Levels
+
+Each fix is rated to help you decide how to proceed:
+
+| Level | Icon | Meaning |
+|-------|------|---------|
+| Safe | ✓ | Mechanical fix, low risk. Apply confidently. |
+| Verify | ⚡ | Logic change, needs testing. Review before applying. |
+| Careful | ⚠️ | Architectural change, may have side effects. Test thoroughly. |
+
 ## Todo Integration
 
 After the review, you'll see a multi-select prompt:
@@ -258,16 +325,43 @@ candid/
 │   ├── plugin.json           # Plugin metadata
 │   └── marketplace.json      # Marketplace config
 ├── commands/
-│   └── candid-review.md      # /candid-review command
+│   ├── candid-review.md      # /candid-review command
+│   ├── candid-init.md        # /candid-init command
+│   └── candid-validate-standards.md  # /candid-validate-standards command
 ├── skills/
-│   └── candid-review/
-│       └── SKILL.md          # Main skill
+│   ├── candid-review/
+│   │   ├── SKILL.md          # Main review skill
+│   │   └── CONFIG.md         # Config validation
+│   ├── candid-init/
+│   │   └── SKILL.md          # Technical.md generator
+│   └── candid-validate-standards/
+│       └── SKILL.md          # Technical.md validator
 ├── agents/
 │   └── code-reviewer.md      # Deep review agent
 ├── templates/
-│   └── Technical.md          # Template for projects
+│   ├── Technical.md          # Comprehensive template
+│   ├── Technical-minimal.md  # Minimal starter (15 rules)
+│   ├── Technical-react.md    # React/frontend template
+│   ├── Technical-node.md     # Node.js/backend template
+│   ├── Technical-python.md   # Python template
+│   └── Technical-nextjs-vercel-supabase-clerk-loop.md  # Next.js full-stack + Loop.so
 ├── docs/
-│   └── Technical-md-best-practices.md
+│   ├── getting-started.md    # 5-minute quickstart
+│   ├── review-scope.md       # Controlling what gets reviewed
+│   ├── troubleshooting.md    # FAQ and common issues
+│   ├── team-adoption.md      # Rolling out to teams
+│   ├── Technical-md-best-practices.md
+│   ├── technical-md-writing-guide.md  # How to write effective rules
+│   ├── integration/
+│   │   ├── ci-cd.md          # CI/CD integration guide
+│   │   └── pre-commit.md     # Pre-commit hook setup
+│   └── example-reviews/
+│       ├── security-review.md
+│       ├── performance-review.md
+│       └── clean-code-review.md
+├── examples/
+│   ├── harsh/config.json
+│   └── constructive/config.json
 ├── README.md
 ├── LICENSE
 └── CHANGELOG.md
@@ -303,6 +397,18 @@ MIT License - see [LICENSE](LICENSE) for details.
 ## Author
 
 Ron Myers
+
+## Documentation
+
+- [Getting Started](docs/getting-started.md) - 5-minute quickstart
+- [Review Scope](docs/review-scope.md) - Controlling what gets reviewed
+- [Troubleshooting](docs/troubleshooting.md) - FAQ and common issues
+- [Team Adoption](docs/team-adoption.md) - Rolling out to your team
+- [Technical.md Best Practices](docs/Technical-md-best-practices.md) - Writing effective standards
+- [Technical.md Writing Guide](docs/technical-md-writing-guide.md) - Good rules vs bad rules
+- [CI/CD Integration](docs/integration/ci-cd.md) - Automate reviews in pipelines
+- [Pre-Commit Hooks](docs/integration/pre-commit.md) - Review before every commit
+- [Example Reviews](docs/example-reviews/) - See what reviews look like
 
 ## Links
 
