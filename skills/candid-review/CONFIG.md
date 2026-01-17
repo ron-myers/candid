@@ -27,7 +27,7 @@ Valid config file format:
   - `*.min.js` - Minified files
   - `vendor/*` - Third-party code
   - `**/*.test.ts` - Test files (if you want to skip them)
-- `focus` (optional): Default focus area for reviews. Must be exactly `"security"`, `"performance"`, or `"architecture"`. CLI `--focus` flag overrides this. When set, only relevant issue categories are checked.
+- `focus` (optional): Default focus area for reviews. Must be exactly `"security"`, `"performance"`, `"architecture"`, or `"edge-case"`. CLI `--focus` flag overrides this. When set, only relevant issue categories are checked.
 - `mergeTargetBranches` (optional): Array of branch names for comparing branch diffs. Candid tries each in order, using the first that exists. Defaults to `["main", "stable", "master"]`. Common patterns:
   - `["main"]` - GitHub Flow
   - `["develop", "main"]` - Git Flow
@@ -39,7 +39,7 @@ Valid config file format:
 1. **File must be valid JSON** - Must parse without errors
 2. **Tone field type** - If `tone` field is present, must be a string (not boolean, number, array, or object)
 3. **Tone field validation** - If `tone` is a string, value must be exactly `"harsh"` or `"constructive"` (case-sensitive)
-4. **Focus field validation** - If `focus` field is present, must be exactly `"security"`, `"performance"`, or `"architecture"` (case-sensitive). Invalid values show warning and are ignored.
+4. **Focus field validation** - If `focus` field is present, must be exactly `"security"`, `"performance"`, `"architecture"`, or `"edge-case"` (case-sensitive). Invalid values show warning and are ignored.
 5. **mergeTargetBranches field validation** - If present, must be an array of non-empty strings. Empty arrays or invalid values show warning and are ignored.
 6. **Unknown fields ignored** - Any fields other than `tone`, `exclude`, `focus`, and `mergeTargetBranches` are ignored for forward compatibility
 7. **Empty object is valid** - `{}` is a valid config with no preferences set, system continues to next source

@@ -17,6 +17,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - **Graceful fallback**: Tries each branch in order, uses first that exists
   - **Backward compatible**: Default behavior unchanged for existing users
 
+- **Edge-Case Focus Mode** (`--focus edge-case`): New focus mode dedicated to finding boundary conditions and error scenarios
+  - Systematically checks every code path for edge cases using comprehensive checklists
+  - Finds 2-3x more edge case issues than general reviews
+  - Groups related edge cases into comprehensive, actionable issues
+  - 8 systematic check categories:
+    - Input Validation Matrix: null/undefined, empty collections, type validation, boundary values, special characters, whitespace
+    - Async Operation Safety: timeouts, cancellation, error handling, race conditions, double-invocation, state validity
+    - Data Structure Edge Cases: empty results, single items, pagination, sorting/filtering, duplicates
+    - Network Resilience: timeouts, retry logic, error codes, offline handling, partial failures, loading states
+    - State Lifecycle: cleanup, concurrent updates, navigation safety, re-initialization, memory leaks
+    - Date/Time Edge Cases: timezone, DST, leap year/second, invalid dates, locale formatting
+    - Browser/Environment: API availability, mobile/desktop, keyboard accessibility, storage availability, screen sizes
+    - Security Edge Cases: CSRF tokens, session timeout, permission changes, token refresh, XSS vectors
+  - Can be set via CLI flag: `/candid-review --focus edge-case`
+  - Can be set in config files: `{"focus": "edge-case"}`
+  - New documentation: `docs/example-reviews/edge-case-review.md` with side-by-side comparison showing general vs edge-case reviews
+
 - **New Example Configs**:
   - `examples/git-flow/config.json`: Git Flow workflow (develop → main)
   - `examples/trunk-based/config.json`: Trunk-based development (trunk)
@@ -28,6 +45,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Focus Mode Options**: Added "edge-case" as valid value for `focus` field in config files and CLI
+- **Config Validation**: Updated to accept "edge-case" alongside "security", "performance", and "architecture"
 - **Documentation updates**: README.md, review-scope.md, troubleshooting.md, and ci-cd.md updated with merge target configuration guidance
 - **New Step 2.5**: Load Merge Target Branches procedure added to SKILL.md with full validation logic
 - **CONFIG.md schema expanded**: Added `mergeTargetBranches` field with validation rules
