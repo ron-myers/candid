@@ -6,9 +6,9 @@ import { join } from 'path';
 
 type BumpType = 'major' | 'minor' | 'patch';
 
-const PLUGIN_JSON_PATH = '.claude-plugin/plugin.json';
-const MARKETPLACE_JSON_PATH = '.claude-plugin/marketplace.json';
-const CHANGELOG_PATH = 'CHANGELOG.md';
+const PLUGIN_JSON_PATH = '../.claude-plugin/plugin.json';
+const MARKETPLACE_JSON_PATH = '../.claude-plugin/marketplace.json';
+const CHANGELOG_PATH = '../CHANGELOG.md';
 const TARGET_BRANCH = 'stable';
 
 /**

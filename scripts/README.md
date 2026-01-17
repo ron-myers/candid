@@ -23,9 +23,10 @@ The script performs the following operations in sequence:
 
 ### Installation
 
-First time setup:
+First time setup (run from the `scripts/` directory):
 
 ```bash
+cd scripts
 npm install
 ```
 
@@ -33,7 +34,10 @@ This installs the required dependencies (`tsx` and `@types/node`).
 
 ### Usage
 
+Run from the `scripts/` directory:
+
 ```bash
+cd scripts
 npm run bump <bump-type>
 ```
 
@@ -46,18 +50,21 @@ npm run bump <bump-type>
 
 **Patch release** (bug fixes):
 ```bash
+cd scripts
 npm run bump patch
 # 1.2.0 → 1.2.1
 ```
 
 **Minor release** (new features, backward compatible):
 ```bash
+cd scripts
 npm run bump minor
 # 1.2.0 → 1.3.0
 ```
 
 **Major release** (breaking changes):
 ```bash
+cd scripts
 npm run bump major
 # 1.2.0 → 2.0.0
 ```
@@ -126,12 +133,13 @@ Typical release workflow:
 
 1. **Update CHANGELOG.md** with your changes under the appropriate sections
 2. **Ensure git is clean**: `git status`
-3. **Run version bump**: `npm run bump patch` (or `minor`/`major`)
-4. **Verify the release**:
+3. **Navigate to scripts directory**: `cd scripts`
+4. **Run version bump**: `npm run bump patch` (or `minor`/`major`)
+5. **Verify the release**:
    - Check that files were updated correctly
    - Check the git log: `git log -1`
    - Check the tag: `git tag -l`
-5. **The script automatically pushes** to `origin/stable`
+6. **The script automatically pushes** to `origin/stable`
 
 ### Advanced: Manual Rollback
 
@@ -159,7 +167,7 @@ git push origin HEAD:stable
 ### Technical Details
 
 - **Language**: TypeScript (executed with `tsx`)
-- **Configuration**: Uses `tsconfig.json` from repository root
+- **Configuration**: Uses `tsconfig.json` from scripts directory
 - **Node version**: Requires Node.js 18+ (for ES2022 features)
 - **Semantic versioning**: Follows [semver.org](https://semver.org/) specification
 - **Changelog format**: Follows [Keep a Changelog](https://keepachangelog.com/) standard
