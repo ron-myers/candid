@@ -31,12 +31,16 @@ Candid will:
 
 Create project standards that every review enforces:
 
-```bash
-# Copy the minimal starter
-cp ~/.claude/plugins/candid/templates/Technical-minimal.md ./Technical.md
+```
+# Use candid-init to generate standards based on your codebase
+/candid-init
+
+# Or specify a framework
+/candid-init react
+/candid-init minimal
 ```
 
-Edit to match your project's rules. See [best practices](./Technical-md-best-practices.md).
+Edit the generated file to match your project's rules. See [best practices](./Technical-md-best-practices.md).
 
 ## 4. Save Your Tone Preference
 

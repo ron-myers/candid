@@ -33,8 +33,9 @@ Valid config file format:
 1. **File must be valid JSON** - Must parse without errors
 2. **Tone field type** - If `tone` field is present, must be a string (not boolean, number, array, or object)
 3. **Tone field validation** - If `tone` is a string, value must be exactly `"harsh"` or `"constructive"` (case-sensitive)
-4. **Unknown fields ignored** - Any fields other than `tone` are ignored for forward compatibility
-5. **Empty object is valid** - `{}` is a valid config with no tone preference set, system continues to next source
+4. **Focus field validation** - If `focus` field is present, must be exactly `"security"`, `"performance"`, or `"architecture"` (case-sensitive). Invalid values show warning and are ignored.
+5. **Unknown fields ignored** - Any fields other than `tone`, `exclude`, and `focus` are ignored for forward compatibility
+6. **Empty object is valid** - `{}` is a valid config with no preferences set, system continues to next source
 
 ## Config Validation Procedure
 
@@ -72,10 +73,10 @@ This reusable procedure applies to both project and user configs:
 6. **Success:**
    - Set tone from config
    - Output: `Using [tone] tone (from [config_source])`
-   - Return `SKIP_TO_STEP_4`
+   - Return `SKIP_TO_STEP_5`
 
 **Return values:**
-- `SKIP_TO_STEP_4` - Valid config found, skip remaining checks
+- `SKIP_TO_STEP_5` - Valid config found, skip remaining checks
 - `CONTINUE` - No valid config, continue to next precedence level
 
 ## Error Handling Instructions

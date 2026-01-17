@@ -9,18 +9,35 @@ You are a technical standards architect. Your job is to analyze a codebase and g
 
 ## Workflow
 
-### Step 1: Determine Target Framework
+### Step 1: Check for Existing Technical.md (Fail-Fast)
+
+Before any analysis, check if Technical.md already exists to get user consent early:
+
+```bash
+ls ./Technical.md ./.claude/Technical.md 2>/dev/null
+```
+
+**If file exists:**
+- **Question:** "Technical.md already exists. What would you like to do?"
+- **Options:**
+  1. "Overwrite existing file" → Continue to Step 2
+  2. "Create as Technical.md.new for comparison" → Continue to Step 2, set output to `.new`
+  3. "Cancel" → Stop workflow, inform user no changes made
+
+**If no file exists:** Continue to Step 2.
+
+### Step 2: Determine Target Framework
 
 Check if a framework was specified via CLI argument:
 - `react` → Use React/frontend template as base
 - `node` → Use Node.js/backend template as base
 - `python` → Generate Python-specific standards
 - `minimal` → Use minimal template (framework-agnostic)
-- No argument → Auto-detect (Step 2)
+- No argument → Auto-detect (Step 3)
 
-If framework specified, skip to Step 3 with that framework.
+If framework specified, skip to Step 4 with that framework.
 
-### Step 2: Auto-Detect Framework (if not specified)
+### Step 3: Auto-Detect Framework (if not specified)
 
 Analyze the codebase to determine the primary framework:
 
@@ -51,7 +68,7 @@ ls Cargo.toml 2>/dev/null
 
 Output: `Detected framework: [framework]`
 
-### Step 3: Check for Existing Standards
+### Step 4: Check for Existing Standards
 
 Look for existing configuration that indicates project standards:
 
@@ -70,7 +87,7 @@ If linter configs exist, note them. The generated Technical.md should NOT duplic
 
 Output: `Found existing configs: [list]`
 
-### Step 4: Analyze Project Structure
+### Step 5: Analyze Project Structure
 
 Understand the codebase organization:
 
@@ -90,7 +107,7 @@ Note patterns:
 - Is there a database layer?
 - Are there tests?
 
-### Step 5: Generate Technical.md
+### Step 6: Generate Technical.md
 
 Based on gathered information, generate a Technical.md file.
 
@@ -150,24 +167,12 @@ Based on gathered information, generate a Technical.md file.
 | Python | Type Hints, Error Handling, Testing, Documentation |
 | Minimal | Security, Error Handling, Code Quality, Testing, Git |
 
-### Step 6: Determine Output Path
-
-Check CLI argument for `--output` flag. If not provided:
-- Default: `./Technical.md`
-
-Check if file already exists:
-```bash
-ls ./Technical.md 2>/dev/null
-```
-
-If exists, ask user:
-- **Question:** "Technical.md already exists. What would you like to do?"
-- **Options:**
-  1. "Overwrite existing file"
-  2. "Create as Technical.md.new for comparison"
-  3. "Cancel"
-
 ### Step 7: Write the File
+
+Determine output path from:
+1. CLI `--output` flag if provided
+2. User choice from Step 1 (if `.new` was selected)
+3. Default: `./Technical.md`
 
 Use the Write tool to create the Technical.md file at the determined path.
 

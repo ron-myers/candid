@@ -115,18 +115,10 @@ This means you can set a user-wide default and override it per-project, while CL
 ### Config Format
 
 ```json
-{
-  "version": 1,
-  "tone": "harsh",
-  "exclude": ["*.generated.ts", "vendor/*"],
-  "focus": "security"
-}
+{"tone": "harsh"}
 ```
 
-All fields are optional:
-- `tone`: `"harsh"` or `"constructive"`
-- `exclude`: Array of glob patterns to skip
-- `focus`: Default focus area (`"security"`, `"performance"`, `"architecture"`)
+All fields are optional. See [CONFIG.md](skills/candid-review/CONFIG.md) for the full schema specification including `exclude` patterns and `focus` areas.
 
 ### Example Setup
 
@@ -198,7 +190,7 @@ Technical.md lets you define project-specific standards that candid enforces dur
 ```bash
 cp templates/Technical-minimal.md ./Technical.md    # Start small
 cp templates/Technical-react.md ./Technical.md      # React projects
-cp templates/Technical-nextjs-vercel-supabase-clerk.md ./Technical.md  # Next.js + Vercel + Supabase + Clerk
+cp templates/Technical-nextjs-vercel-supabase-clerk-loop.md ./Technical.md  # Next.js + Vercel + Supabase + Clerk + Loop.so
 cp templates/Technical.md ./Technical.md            # Comprehensive template
 ```
 
@@ -316,7 +308,7 @@ candid/
 │   ├── Technical.md          # Comprehensive template
 │   ├── Technical-minimal.md  # Minimal starter (15 rules)
 │   ├── Technical-react.md    # React/frontend template
-│   └── Technical-nextjs-vercel-supabase-clerk.md  # Next.js full-stack
+│   └── Technical-nextjs-vercel-supabase-clerk-loop.md  # Next.js full-stack + Loop.so
 ├── docs/
 │   ├── getting-started.md    # 5-minute quickstart
 │   ├── troubleshooting.md    # FAQ and common issues
