@@ -11,7 +11,7 @@
         "url": "https://github.com/ron-myers/candid.git"
       },
       "description": "Configurable code reviews with radical candor - choose between harsh or constructive tone. Features Technical.md for project standards, architectural context analysis, actionable fixes, and seamless todo integration.",
-      "version": "1.2.0",
+      "version": "1.2.1",
       "author": {
         "name": "Ron Myers"
       },
