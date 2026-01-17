@@ -56,6 +56,42 @@ git diff main...HEAD --stat 2>/dev/null || git diff stable...HEAD --stat 2>/dev/
 - Skip binary files (note them but don't review content)
 - For diffs over 500 lines, consider reviewing in batches or asking user which files to prioritize
 
+### Step 2.5: Parse Review Options
+
+Check CLI arguments for review options:
+
+#### Focus Mode (`--focus`)
+
+If `--focus <area>` is provided, limit review to specific categories:
+
+| Focus Area | Categories Checked |
+|------------|-------------------|
+| `security` | 🔥 Critical (security-related), ⚠️ Major (auth/validation) |
+| `performance` | ⚠️ Major (N+1, blocking), 📋 Code Smell (complexity), 🤔 Edge Case (pagination) |
+| `architecture` | 💭 Architectural, 📋 Code Smell (coupling, SRP), 📜 Standards |
+
+If no focus specified, check all categories (default behavior).
+
+Output when focus is set: `Focusing review on: [area]`
+
+#### File Exclusions (`--exclude`)
+
+If `--exclude <pattern>` is provided (can be repeated), exclude matching files from review.
+
+Also check config files for exclusions:
+1. `.candid/config.json` → `exclude` array
+2. `~/.candid/config.json` → `exclude` array
+
+Common patterns:
+- `*.generated.ts` - Generated code
+- `*.min.js` - Minified files
+- `vendor/*` - Third-party code
+- `**/node_modules/**` - Dependencies
+
+Merge CLI exclusions with config exclusions. Apply to file list in Step 2.
+
+Output when exclusions active: `Excluding files matching: [patterns]`
+
 ### Step 3: Load Tone Preference
 
 Load tone preference following precedence rules. See CONFIG.md for detailed validation instructions.
@@ -227,6 +263,7 @@ For each issue, provide this structured format:
 ```markdown
 ### [Icon] [Title]
 **File:** path/to/file.ts:42-45
+**Confidence:** [Safe ✓ | Verify ⚡ | Careful ⚠️]
 **Problem:** Clear description of what's wrong
 **Impact:** Why this matters (production, performance, maintenance, security)
 **Fix:**
@@ -235,11 +272,24 @@ For each issue, provide this structured format:
 ```
 ```
 
+#### Fix Confidence Levels
+
+Assess each fix's risk level to help users prioritize:
+
+| Level | Icon | When to Use | Examples |
+|-------|------|-------------|----------|
+| Safe | ✓ | Mechanical fix, low risk, no behavior change | Add null check, fix typo, add missing import |
+| Verify | ⚡ | Logic change, needs testing | Refactor algorithm, change error handling |
+| Careful | ⚠️ | Architectural change, may have side effects | Change data flow, modify API contract, alter state management |
+
+Include confidence in every issue. Users can use this to decide whether to apply fixes immediately or test first.
+
 **Tone Variations:**
 
 *Harsh tone example:*
 > ### 🔥 Null check? Never heard of her
 > **File:** src/user.ts:42
+> **Confidence:** Safe ✓
 > **Problem:** `user.email` accessed without checking if user exists.
 > **Impact:** This WILL crash in production. It's not a matter of if, but when.
 > **Fix:**
@@ -253,6 +303,7 @@ For each issue, provide this structured format:
 *Constructive tone example:*
 > ### 🔥 Missing null check on user access
 > **File:** src/user.ts:42
+> **Confidence:** Safe ✓
 > **Problem:** The code accesses `user.email` without verifying the user object exists.
 > **Impact:** If the user lookup fails or returns null, this will cause a runtime crash. This is especially risky in authentication flows where invalid states are common.
 > **Fix:**

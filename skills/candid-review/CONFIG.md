@@ -12,13 +12,21 @@ Valid config file format:
 ```json
 {
   "version": 1,
-  "tone": "harsh" | "constructive"
+  "tone": "harsh" | "constructive",
+  "exclude": ["*.generated.ts", "vendor/*"],
+  "focus": "security" | "performance" | "architecture"
 }
 ```
 
 **Field descriptions:**
 - `version` (optional): Config schema version. Defaults to 1 if omitted. Used for future-proofing.
 - `tone` (optional): Review tone preference. Must be exactly `"harsh"` or `"constructive"`. If not specified, the config file is treated as having no preference, and the system continues to the next precedence level.
+- `exclude` (optional): Array of glob patterns for files to skip during review. Patterns are merged from project config, user config, and CLI `--exclude` flags. Common patterns:
+  - `*.generated.ts` - Generated code
+  - `*.min.js` - Minified files
+  - `vendor/*` - Third-party code
+  - `**/*.test.ts` - Test files (if you want to skip them)
+- `focus` (optional): Default focus area for reviews. Must be exactly `"security"`, `"performance"`, or `"architecture"`. CLI `--focus` flag overrides this. When set, only relevant issue categories are checked.
 
 ## Validation Rules
 
@@ -163,6 +171,32 @@ Using constructive tone (from interactive prompt)
 **No preference (empty):**
 ```json
 {}
+```
+
+**With exclusions:**
+```json
+{
+  "tone": "harsh",
+  "exclude": ["*.generated.ts", "vendor/*", "**/*.min.js"]
+}
+```
+
+**With focus area:**
+```json
+{
+  "tone": "constructive",
+  "focus": "security"
+}
+```
+
+**Full config:**
+```json
+{
+  "version": 1,
+  "tone": "harsh",
+  "exclude": ["*.generated.ts", "vendor/*"],
+  "focus": "performance"
+}
 ```
 
 **With future fields (ignored):**
