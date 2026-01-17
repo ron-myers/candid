@@ -87,16 +87,24 @@ Or:
 
 ### Example Setup
 
-**Set user-wide default:**
+**Set user-wide default (harsh tone):**
 ```bash
 mkdir -p ~/.candid
-echo '{"tone": "harsh"}' > ~/.candid/config.json
+cp examples/harsh/config.json ~/.candid/config.json
+```
+
+**Set user-wide default (constructive tone):**
+```bash
+mkdir -p ~/.candid
+cp examples/constructive/config.json ~/.candid/config.json
 ```
 
 **Override for a specific project:**
 ```bash
 mkdir -p .candid
-echo '{"tone": "constructive"}' > .candid/config.json
+cp examples/harsh/config.json .candid/config.json
+# Or for constructive:
+cp examples/constructive/config.json .candid/config.json
 ```
 
 **CLI flag always overrides:**
@@ -117,9 +125,9 @@ Using constructive tone (from interactive prompt)
 
 ### Example Configs
 
-See the `examples/` directory for sample config files:
-- `examples/config-harsh.json` - Harsh tone config
-- `examples/config-constructive.json` - Constructive tone config
+See the `examples/` directory for ready-to-use config files:
+- `examples/harsh/config.json` - Harsh tone config (just copy to `.candid/` or `~/.candid/`)
+- `examples/constructive/config.json` - Constructive tone config
 
 ### Invalid Configs
 
