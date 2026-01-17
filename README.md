@@ -73,6 +73,7 @@ This means you can set a user-wide default and override it per-project, while CL
 
 ```json
 {
+  "version": 1,
   "tone": "harsh"
 }
 ```
@@ -81,6 +82,7 @@ Or:
 
 ```json
 {
+  "version": 1,
   "tone": "constructive"
 }
 ```
