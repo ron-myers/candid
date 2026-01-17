@@ -84,6 +84,7 @@ Review only specific aspects of your code:
 /candid-review --focus security      # Security vulnerabilities, auth issues
 /candid-review --focus performance   # N+1 queries, blocking operations
 /candid-review --focus architecture  # Design patterns, coupling, SRP
+/candid-review --focus edge-case     # Boundary conditions, error handling, unusual inputs
 ```
 
 ### Exclude Files
