@@ -196,10 +196,12 @@ Next steps:
 
 The generated content should be based on these templates but customized for the detected project:
 
-- **React:** See templates/Technical-react.md
-- **Minimal:** See templates/Technical-minimal.md
-- **Node.js:** Similar to minimal but with API/database focus
-- **Python:** Type hints, docstrings, testing patterns
+- **React:** See `templates/Technical-react.md`
+- **Node.js:** See `templates/Technical-node.md`
+- **Python:** See `templates/Technical-python.md`
+- **Minimal:** See `templates/Technical-minimal.md`
+
+Each template follows the same structure with framework-specific categories. Use as a starting point and adapt to the detected project.
 
 ## Remember
 

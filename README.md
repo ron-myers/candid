@@ -97,6 +97,35 @@ Skip generated code, vendor files, or other noise:
 
 Or set exclusions in config (see Configuration below).
 
+### Re-Review Mode
+
+Compare current issues against a previous review:
+
+```
+/candid-review --re-review
+```
+
+Shows:
+- ✅ **Fixed** - Issues from the previous review that are now resolved
+- 🔄 **Still Present** - Issues that remain
+- 🆕 **New** - Issues introduced since last review
+
+Review state is automatically saved to `.candid/last-review.json` after each review.
+
+### Validate Standards
+
+Check your Technical.md for effectiveness:
+
+```
+/candid-validate-standards              # Validate Technical.md
+/candid-validate-standards --fix        # Include suggested rewrites
+```
+
+Flags:
+- 🌫️ Vague rules ("write clean code")
+- 📏 Missing thresholds ("keep functions small")
+- 🔧 Linter overlap (rules your linter handles)
+
 ## Configuration
 
 Candid supports optional config files to persist your tone preference across reviews. No more selecting your preferred tone every time.
@@ -190,7 +219,9 @@ Technical.md lets you define project-specific standards that candid enforces dur
 ```bash
 cp templates/Technical-minimal.md ./Technical.md    # Start small
 cp templates/Technical-react.md ./Technical.md      # React projects
-cp templates/Technical-nextjs-vercel-supabase-clerk-loop.md ./Technical.md  # Next.js + Vercel + Supabase + Clerk + Loop.so
+cp templates/Technical-node.md ./Technical.md       # Node.js backend
+cp templates/Technical-python.md ./Technical.md     # Python projects
+cp templates/Technical-nextjs-vercel-supabase-clerk-loop.md ./Technical.md  # Next.js full-stack
 cp templates/Technical.md ./Technical.md            # Comprehensive template
 ```
 
@@ -295,25 +326,35 @@ candid/
 │   └── marketplace.json      # Marketplace config
 ├── commands/
 │   ├── candid-review.md      # /candid-review command
-│   └── candid-init.md        # /candid-init command
+│   ├── candid-init.md        # /candid-init command
+│   └── candid-validate-standards.md  # /candid-validate-standards command
 ├── skills/
 │   ├── candid-review/
 │   │   ├── SKILL.md          # Main review skill
 │   │   └── CONFIG.md         # Config validation
-│   └── candid-init/
-│       └── SKILL.md          # Technical.md generator
+│   ├── candid-init/
+│   │   └── SKILL.md          # Technical.md generator
+│   └── candid-validate-standards/
+│       └── SKILL.md          # Technical.md validator
 ├── agents/
 │   └── code-reviewer.md      # Deep review agent
 ├── templates/
 │   ├── Technical.md          # Comprehensive template
 │   ├── Technical-minimal.md  # Minimal starter (15 rules)
 │   ├── Technical-react.md    # React/frontend template
+│   ├── Technical-node.md     # Node.js/backend template
+│   ├── Technical-python.md   # Python template
 │   └── Technical-nextjs-vercel-supabase-clerk-loop.md  # Next.js full-stack + Loop.so
 ├── docs/
 │   ├── getting-started.md    # 5-minute quickstart
+│   ├── review-scope.md       # Controlling what gets reviewed
 │   ├── troubleshooting.md    # FAQ and common issues
 │   ├── team-adoption.md      # Rolling out to teams
 │   ├── Technical-md-best-practices.md
+│   ├── technical-md-writing-guide.md  # How to write effective rules
+│   ├── integration/
+│   │   ├── ci-cd.md          # CI/CD integration guide
+│   │   └── pre-commit.md     # Pre-commit hook setup
 │   └── example-reviews/
 │       ├── security-review.md
 │       ├── performance-review.md
@@ -360,9 +401,13 @@ Ron Myers
 ## Documentation
 
 - [Getting Started](docs/getting-started.md) - 5-minute quickstart
+- [Review Scope](docs/review-scope.md) - Controlling what gets reviewed
 - [Troubleshooting](docs/troubleshooting.md) - FAQ and common issues
 - [Team Adoption](docs/team-adoption.md) - Rolling out to your team
 - [Technical.md Best Practices](docs/Technical-md-best-practices.md) - Writing effective standards
+- [Technical.md Writing Guide](docs/technical-md-writing-guide.md) - Good rules vs bad rules
+- [CI/CD Integration](docs/integration/ci-cd.md) - Automate reviews in pipelines
+- [Pre-Commit Hooks](docs/integration/pre-commit.md) - Review before every commit
 - [Example Reviews](docs/example-reviews/) - See what reviews look like
 
 ## Links

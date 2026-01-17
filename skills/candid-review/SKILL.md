@@ -98,6 +98,46 @@ Merge CLI exclusions with config exclusions. Apply to file list in Step 2.
 
 Output when exclusions active: `Excluding files matching: [patterns]`
 
+#### Re-Review Mode (`--re-review`)
+
+If `--re-review` flag is provided, load the previous review state and compare:
+
+**1. Load previous review state:**
+```bash
+cat .candid/last-review.json 2>/dev/null
+```
+
+**2. If no previous review exists:**
+```
+No previous review found. Running fresh review.
+(Previous reviews are saved to .candid/last-review.json)
+```
+Then proceed with normal review.
+
+**3. If previous review exists:**
+- Parse the JSON to get previous issues (file, line, category, description)
+- Store in `previousIssues` array for comparison in Step 7
+- Output: `Re-review mode: comparing against review from [timestamp]`
+
+**Previous Review State Format:**
+```json
+{
+  "timestamp": "2026-01-17T10:30:00Z",
+  "commit": "abc123",
+  "branch": "feature/auth",
+  "issues": [
+    {
+      "id": "hash-of-file-line-category",
+      "file": "src/auth.ts",
+      "line": 42,
+      "category": "critical",
+      "title": "Null check missing",
+      "description": "user.email accessed without null check"
+    }
+  ]
+}
+```
+
 ### Step 4: Load Tone Preference
 
 Load tone preference following precedence rules. See CONFIG.md for detailed validation instructions.
@@ -425,6 +465,42 @@ Create todos for ALL issues found in Steps 6-7 using TodoWrite:
 
 After creating todos, confirm to user how many were added and remind them they can review the todos later.
 
+### Step 10: Save Review State
+
+After completing the review (regardless of whether fixes were applied), save the review state for future comparisons:
+
+**1. Create .candid directory if needed:**
+```bash
+mkdir -p .candid
+```
+
+**2. Generate review state JSON:**
+
+Create a JSON object with:
+- `timestamp`: Current ISO timestamp
+- `commit`: Current commit hash (`git rev-parse HEAD`)
+- `branch`: Current branch name (`git branch --show-current`)
+- `issues`: Array of all issues found (not just selected ones)
+
+For each issue, generate a stable ID:
+1. Concatenate: `${relativePath}:${line}:${category}:${title}`
+2. Use first 12 characters of SHA256 hash
+
+Example: `src/auth.ts:42:critical:Null check missing` → `a1b2c3d4e5f6`
+
+**3. Write to file:**
+```bash
+# Write JSON to .candid/last-review.json
+```
+
+**4. Output:**
+```
+Review state saved to .candid/last-review.json
+Run /candid-review --re-review to compare against this review later.
+```
+
+**Note:** The `.candid/last-review.json` should typically be added to `.gitignore` as it's user-specific state.
+
 ## Output Structure
 
 Present your review in this order:
@@ -438,6 +514,70 @@ Present your review in this order:
 7. **💭 Architectural Concerns** - Design issues (if any)
 8. **✅ What's Good** - Acknowledge good practices (keep brief)
 9. **Fix Selection** - Multi-select prompt for which fixes to apply (remind user to scroll up for context)
+
+### Re-Review Output Structure
+
+When `--re-review` flag is used and previous review state exists, modify the output:
+
+**1. Add comparison header:**
+```markdown
+## Re-Review Comparison
+
+Comparing against review from [timestamp] (commit [short-hash])
+
+| Status | Count |
+|--------|-------|
+| ✅ Fixed | [N] |
+| 🔄 Still Present | [M] |
+| 🆕 New Issues | [P] |
+```
+
+**2. Categorize each issue:**
+
+For each issue found in current review:
+- Compare against `previousIssues` using the stable ID
+- If ID exists in previous → mark as 🔄 Still Present
+- If ID doesn't exist → mark as 🆕 New
+
+For each issue in `previousIssues`:
+- If ID not found in current issues → mark as ✅ Fixed
+
+**3. Present issues in groups:**
+
+```markdown
+## ✅ Fixed Issues (N)
+
+These issues from the previous review have been resolved:
+
+1. ~~🔥 Null check missing in auth.ts:42~~ ✅
+2. ~~⚠️ N+1 query in orders.ts:88~~ ✅
+
+---
+
+## 🔄 Still Present (M)
+
+These issues remain from the previous review:
+
+### 🔥 SQL injection vulnerability
+**File:** src/db.ts:15 (was line 12)
+...
+
+---
+
+## 🆕 New Issues (P)
+
+Issues introduced since last review:
+
+### ⚠️ Missing error handling
+**File:** src/api.ts:42
+...
+```
+
+**4. Summary includes comparison:**
+```
+Re-review complete: [N] fixed, [M] remaining, [P] new issues.
+Net change: [+/-X] issues
+```
 
 ## Your Character
 
