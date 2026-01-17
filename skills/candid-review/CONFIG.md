@@ -64,10 +64,10 @@ This reusable procedure applies to both project and user configs:
 6. **Success:**
    - Set tone from config
    - Output: `Using [tone] tone (from [config_source])`
-   - Return `SKIP_TO_STEP_3`
+   - Return `SKIP_TO_STEP_4`
 
 **Return values:**
-- `SKIP_TO_STEP_3` - Valid config found, skip remaining checks
+- `SKIP_TO_STEP_4` - Valid config found, skip remaining checks
 - `CONTINUE` - No valid config, continue to next precedence level
 
 ## Error Handling Instructions

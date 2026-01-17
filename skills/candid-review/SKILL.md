@@ -56,7 +56,7 @@ git diff main...HEAD --stat 2>/dev/null || git diff stable...HEAD --stat 2>/dev/
 - Skip binary files (note them but don't review content)
 - For diffs over 500 lines, consider reviewing in batches or asking user which files to prioritize
 
-### Step 2.5: Load Tone Preference
+### Step 3: Load Tone Preference
 
 Load tone preference following precedence rules. See CONFIG.md for detailed validation instructions.
 
@@ -71,7 +71,7 @@ Load tone preference following precedence rules. See CONFIG.md for detailed vali
 If the skill was invoked with `--harsh` or `--constructive` args:
 - Set tone from CLI arg
 - Output: `Using [harsh/constructive] tone (from CLI flag)`
-- SKIP to Step 3
+- SKIP to Step 4
 
 #### Check Project Config
 
@@ -81,7 +81,7 @@ Follow the "Config Validation Procedure" defined in CONFIG.md with these paramet
 - `fallback_source`: `"user config"`
 
 **Result handling:**
-- If procedure returns `SKIP_TO_STEP_3` → SKIP to Step 3
+- If procedure returns `SKIP_TO_STEP_4` → SKIP to Step 4
 - If procedure returns `CONTINUE` → Continue to user config check
 
 #### Check User Config
@@ -92,7 +92,7 @@ Follow the "Config Validation Procedure" defined in CONFIG.md with these paramet
 - `fallback_source`: `"interactive prompt"`
 
 **Result handling:**
-- If procedure returns `SKIP_TO_STEP_3` → SKIP to Step 3
+- If procedure returns `SKIP_TO_STEP_4` → SKIP to Step 4
 - If procedure returns `CONTINUE` → Continue to prompt
 
 #### Prompt User (Fallback)
@@ -107,13 +107,13 @@ Use AskUserQuestion to let the user choose their review style:
 After user selects:
 - Set tone from user's choice
 - Output: `Using [tone] tone (from interactive prompt)`
-- Continue to Step 3
+- Continue to Step 4
 
-**Note:** By the end of Step 2.5, tone preference is ALWAYS set (from config, CLI flag, or prompt). Step 3 will use this established tone.
+**Note:** By the end of Step 3, tone preference is ALWAYS set (from config, CLI flag, or prompt). Step 4 will use this established tone.
 
-### Step 3: Gather Architectural Context
+### Step 4: Gather Architectural Context
 
-**Note:** Tone preference has been established in Step 2.5. Use this tone throughout the review.
+**Note:** Tone preference has been established in Step 3. Use this tone throughout the review.
 
 Before reviewing, understand the broader context:
 
@@ -128,7 +128,7 @@ This enables catching:
 - API contract breaks (signature changes affecting consumers)
 - Missing test coverage for changed code
 
-### Step 3.5: Dispatch Subagent for Complex Changes (Optional)
+### Step 4.5: Dispatch Subagent for Complex Changes (Optional)
 
 For complex changes, dispatch the `code-reviewer` subagent for parallel deep analysis.
 
@@ -146,7 +146,7 @@ Use the Task tool with the code-reviewer agent. Provide:
 - Specific focus area (security, performance, architecture)
 
 **Merging results:**
-The subagent returns JSON. Convert each issue to the markdown format in Step 5:
+The subagent returns JSON. Convert each issue to the markdown format in Step 6:
 - `critical` → 🔥 Critical
 - `major` → ⚠️ Major
 - `standards` → 📜 Standards
@@ -156,7 +156,7 @@ The subagent returns JSON. Convert each issue to the markdown format in Step 5:
 
 Merge subagent findings with your own analysis before presenting.
 
-### Step 4: Review and Categorize
+### Step 5: Review and Categorize
 
 Analyze every change with the chosen tone. Categorize issues by severity:
 
@@ -220,7 +220,7 @@ Analyze every change with the chosen tone. Categorize issues by severity:
 - Missing observability (logging, metrics)
 - Tight coupling between modules
 
-### Step 5: Present Issues with Fixes
+### Step 6: Present Issues with Fixes
 
 For each issue, provide this structured format:
 
@@ -263,15 +263,15 @@ For each issue, provide this structured format:
 > const email = user.email;
 > ```
 
-### Step 6: Fix Selection (MANDATORY)
+### Step 7: Fix Selection (MANDATORY)
 
-**⚠️ CRITICAL: This step is MANDATORY. If ANY issues were identified in Steps 4-5, you MUST present the fix selection prompt. Never skip this step when issues exist.**
+**⚠️ CRITICAL: This step is MANDATORY. If ANY issues were identified in Steps 5-6, you MUST present the fix selection prompt. Never skip this step when issues exist.**
 
-**Pre-condition:** If Steps 4-5 identified zero issues, skip to a summary stating "No issues found" and end the review. Otherwise, proceed with this mandatory step.
+**Pre-condition:** If Steps 5-6 identified zero issues, skip to a summary stating "No issues found" and end the review. Otherwise, proceed with this mandatory step.
 
 After presenting all issues, use a three-phase selection process:
 
-#### Phase 6a: Bulk Action Choice
+#### Phase 7a: Bulk Action Choice
 
 Before the prompt, remind the user: "Scroll up to review the detailed context and proposed fixes for each issue."
 
@@ -286,14 +286,14 @@ Use AskUserQuestion to offer bulk action shortcuts:
 4. "None (track as todos)" - Don't apply any fixes, add all to todo list
 
 Store the user's choice and proceed based on their selection:
-- If "Apply all fixes" → Add all issues to selectedFixes array, skip to Phase 6c
-- If "Apply Critical + Major only" → Add only 🔥 and ⚠️ issues to selectedFixes array, skip to Phase 6c
-- If "Review each fix individually" → Proceed to Phase 6b
-- If "None (track as todos)" → Set selectedFixes to empty array, skip to Step 7
+- If "Apply all fixes" → Add all issues to selectedFixes array, skip to Phase 7c
+- If "Apply Critical + Major only" → Add only 🔥 and ⚠️ issues to selectedFixes array, skip to Phase 7c
+- If "Review each fix individually" → Proceed to Phase 7b
+- If "None (track as todos)" → Set selectedFixes to empty array, skip to Step 8
 
-#### Phase 6b: Individual Fix Review (Only if "Review individually" was chosen)
+#### Phase 7b: Individual Fix Review (Only if "Review individually" was chosen)
 
-Loop through each issue identified in Steps 4-5. For each issue:
+Loop through each issue identified in Steps 5-6. For each issue:
 
 1. **Show issue context:**
    - Display issue number and total count (e.g., "[1/5]")
@@ -315,9 +315,9 @@ Loop through each issue identified in Steps 4-5. For each issue:
    - If "Yes" → Add this issue to selectedFixes array
    - If "No" → Continue to next issue without adding
 
-Repeat for all issues. After completing the loop, proceed to Phase 6c.
+Repeat for all issues. After completing the loop, proceed to Phase 7c.
 
-#### Phase 6c: Confirmation (Only if selectedFixes is not empty)
+#### Phase 7c: Confirmation (Only if selectedFixes is not empty)
 
 Before applying fixes, show a summary and get final confirmation:
 
@@ -328,14 +328,14 @@ Before applying fixes, show a summary and get final confirmation:
 2. **Call AskUserQuestion for confirmation:**
    - **Question:** "Apply these fixes?"
    - **Options:**
-     - "Yes, apply all selected" - Proceed to Step 7 with selectedFixes
-     - "No, let me review again" - Return to Phase 6a and start over
+     - "Yes, apply all selected" - Proceed to Step 8 with selectedFixes
+     - "No, let me review again" - Return to Phase 7a and start over
 
-**Enforcement:** Do not proceed to Step 7 without completing this prompt. Do not auto-select fixes or assume user intent. The user MUST explicitly choose which fixes to apply through one of these paths.
+**Enforcement:** Do not proceed to Step 8 without completing this prompt. Do not auto-select fixes or assume user intent. The user MUST explicitly choose which fixes to apply through one of these paths.
 
-### Step 7: Apply Fixes or Create Todos
+### Step 8: Apply Fixes or Create Todos
 
-Use the selectedFixes array from Step 6 to determine what action to take.
+Use the selectedFixes array from Step 7 to determine what action to take.
 
 **If selectedFixes contains fixes to apply (not empty):**
 
@@ -349,9 +349,9 @@ Use the selectedFixes array from Step 6 to determine what action to take.
    - State how many fixes were applied
    - List the files that were modified
 
-**If selectedFixes is empty (user chose "None" in Step 6):**
+**If selectedFixes is empty (user chose "None" in Step 7):**
 
-Create todos for ALL issues found in Steps 4-5 using TodoWrite:
+Create todos for ALL issues found in Steps 5-6 using TodoWrite:
 
 ```json
 {

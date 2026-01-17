@@ -22,8 +22,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- **Step 2.5 Added to SKILL.md**: New config loading step with detailed JSON validation using `jq` commands
-- **Step numbering**: Original Step 3 renumbered; all subsequent steps shifted accordingly
+- **Step numbering normalized**: Renamed Step 2.5 to Step 3; all subsequent steps renumbered (3→4, 3.5→4.5, 4→5, 5→6, 6→7, 7→8)
+- **Phase numbering normalized**: Phase 6a/6b/6c renamed to Phase 7a/7b/7c to match new Step 7
+- **New Step 3 (Load Tone Preference)**: Config loading with detailed JSON validation using `jq` commands
 
 ## [1.0.2] - 2026-01-15
 
