@@ -54,6 +54,81 @@ The skill will:
 
 Skip the tone prompt and go directly to the review.
 
+## Configuration
+
+Candid supports optional config files to persist your tone preference across reviews. No more selecting your preferred tone every time.
+
+### Config Locations
+
+Candid checks for config files in this order (first match wins):
+
+1. **CLI flags:** `--harsh` or `--constructive` (highest priority)
+2. **Project config:** `.candid/config.json` (in project root)
+3. **User config:** `~/.candid/config.json` (in your home directory)
+4. **Interactive prompt** (fallback if no config found)
+
+This means you can set a user-wide default and override it per-project, while CLI flags always take precedence.
+
+### Config Format
+
+```json
+{
+  "tone": "harsh"
+}
+```
+
+Or:
+
+```json
+{
+  "tone": "constructive"
+}
+```
+
+### Example Setup
+
+**Set user-wide default:**
+```bash
+mkdir -p ~/.candid
+echo '{"tone": "harsh"}' > ~/.candid/config.json
+```
+
+**Override for a specific project:**
+```bash
+mkdir -p .candid
+echo '{"tone": "constructive"}' > .candid/config.json
+```
+
+**CLI flag always overrides:**
+```bash
+/candid-review --harsh  # Uses harsh even if config says constructive
+```
+
+### Config Files in Action
+
+When candid loads a config, you'll see where the preference came from:
+
+```
+Using harsh tone (from user config)
+Using constructive tone (from project config)
+Using harsh tone (from CLI flag)
+Using constructive tone (from interactive prompt)
+```
+
+### Example Configs
+
+See the `examples/` directory for sample config files:
+- `examples/config-harsh.json` - Harsh tone config
+- `examples/config-constructive.json` - Constructive tone config
+
+### Invalid Configs
+
+If a config file is malformed or has an invalid tone value, candid shows a warning and falls back to the next precedence level:
+
+```
+⚠️  Invalid config at .candid/config.json: malformed JSON. Falling back to user config.
+```
+
 ## Technical.md
 
 Technical.md lets you define project-specific standards that candid enforces during reviews. Violations appear as 📜 Standards Violation.
