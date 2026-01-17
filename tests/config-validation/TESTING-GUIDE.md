@@ -96,6 +96,30 @@ Run `/candid-review` in each scenario and verify behavior:
     - Expected: Treated as invalid JSON
     - Verify: Warning shown, fallback occurs
 
+### Merge Target Branch Tests
+
+16. **Valid single merge target**
+    - Config: `valid-merge-target-single.json`
+    - Expected: Uses `["develop"]`
+    - Verify: Shows "Using merge target branches: ["develop"] (from project config)"
+
+17. **Valid multiple merge targets**
+    - Config: `valid-merge-target-multiple.json`
+    - Expected: Tries in order, uses first available
+
+18. **Invalid empty array**
+    - Config: `invalid-merge-target-empty.json`
+    - Expected: Warning shown, uses default `["main", "stable", "master"]`
+
+19. **Invalid type (string not array)**
+    - Config: `invalid-merge-target-string.json`
+    - Expected: Warning shown, falls back to default
+
+20. **CLI override test**
+    - Config with `["main"]`, run with `--merge-target develop`
+    - Expected: Uses `["develop"]` from CLI
+    - Verify: Shows "(from CLI flags)"
+
 ## Quick Test Commands
 
 ```bash

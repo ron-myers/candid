@@ -8,7 +8,7 @@ Candid detects changes in this priority order:
 
 1. **Staged changes** (`git diff --cached`) - Files you've `git add`ed
 2. **Unstaged changes** (`git diff`) - Modified files not yet staged
-3. **Branch diff** (`git diff main...HEAD`) - All commits since branching from main/stable
+3. **Branch diff** - All commits since branching from the merge target (configurable via `mergeTargetBranches`, defaults to main/stable/master)
 
 The first non-empty result is reviewed. This means:
 - If you have staged changes, only those are reviewed
@@ -140,6 +140,36 @@ Focus can also be set in config:
 ```
 
 CLI flag overrides config.
+
+## Merge Target Configuration
+
+### Default Behavior
+By default, Candid compares your branch to the first available: `main`, `stable`, or `master`.
+
+### Custom Merge Targets
+
+**Git Flow (develop as integration branch):**
+```json
+{"mergeTargetBranches": ["develop", "main"]}
+```
+
+**Trunk-based development:**
+```json
+{"mergeTargetBranches": ["trunk"]}
+```
+
+**CI/CD with remote branches:**
+```json
+{"mergeTargetBranches": ["origin/main", "main"]}
+```
+
+### CLI Override
+```bash
+/candid-review --merge-target develop
+```
+
+### Branch Selection
+Candid tries each branch in order until one succeeds. The selected branch is shown in the output.
 
 ## Binary Files
 

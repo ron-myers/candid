@@ -42,19 +42,64 @@ git diff --cached --stat
 # Then unstaged changes
 git diff --stat
 
-# If on a branch, compare to main/stable
-git diff main...HEAD --stat 2>/dev/null || git diff stable...HEAD --stat 2>/dev/null || git diff master...HEAD --stat 2>/dev/null
+# If on a branch, compare to configured merge target branches (from Step 2.5)
+# Build fallback chain dynamically from mergeTargetBranches
+# For each branch: git diff <branch>...HEAD --stat 2>/dev/null
+# Example for ["develop", "main"]: git diff develop...HEAD --stat 2>/dev/null || git diff main...HEAD --stat 2>/dev/null
 ```
 
 **3. Decide what to review:**
 - If staged changes exist → review with `git diff --cached`
 - Else if unstaged changes exist → review with `git diff`
-- Else if branch differs from main → review with `git diff main...HEAD`
+- Else if branch differs from merge target → review with `git diff <branch>...HEAD` (using first successful branch from mergeTargetBranches)
 - Else → inform user: "No changes detected to review"
 
 **4. Handle special cases:**
 - Skip binary files (note them but don't review content)
 - For diffs over 500 lines, consider reviewing in batches or asking user which files to prioritize
+
+### Step 2.5: Load Merge Target Branches
+
+Determine which branches to compare against, following config precedence.
+
+**Precedence (highest to lowest):**
+1. CLI flags (`--merge-target <branch>`, repeatable)
+2. Project config (`.candid/config.json` → `mergeTargetBranches`)
+3. User config (`~/.candid/config.json` → `mergeTargetBranches`)
+4. Default (`["main", "stable", "master"]`)
+
+#### Check CLI Arguments
+If `--merge-target` flags provided:
+- Build array from args (e.g., `--merge-target develop --merge-target main` → `["develop", "main"]`)
+- Output: `Using merge target branches: [list] (from CLI flags)`
+- Skip to Step 3
+
+#### Check Project Config
+Read `.candid/config.json`:
+1. Check file existence → if missing, continue to user config
+2. Validate JSON (use `jq empty`) → if invalid, warn and continue
+3. Extract field: `jq -r '.mergeTargetBranches // null'`
+4. Validate:
+   - If null → continue to user config
+   - If not array → warn and continue
+   - If empty array → warn and continue
+   - If contains non-strings → warn and continue
+5. Success: Output `Using merge target branches: [list] (from project config)`, skip to Step 3
+
+#### Check User Config
+Same procedure as project config, using `~/.candid/config.json`.
+Success: Output `Using merge target branches: [list] (from user config)`, skip to Step 3
+
+#### Use Default
+Set to `["main", "stable", "master"]` (silent, no output)
+
+#### Runtime Branch Selection (used in Step 2)
+When executing the git diff command:
+1. For each branch in `mergeTargetBranches`:
+   - Try `git diff <branch>...HEAD --stat 2>/dev/null`
+   - If successful (exit 0, non-empty), use this result
+   - Track which branch succeeded for messaging
+2. If all fail: Output `Could not find merge target branch. Tried: [list]`
 
 ### Step 3: Parse Review Options
 
