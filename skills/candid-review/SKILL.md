@@ -75,50 +75,34 @@ If the skill was invoked with `--harsh` or `--constructive` args:
 
 #### Check Project Config
 
-Use Read tool to check `.candid/config.json` in project root:
+Follow the "Config Validation Procedure" defined in CONFIG.md with these parameters:
+- `config_path`: `.candid/config.json`
+- `config_source`: `"project config"`
+- `fallback_source`: `"user config"`
 
-**If file exists:**
-1. Attempt to parse as JSON
-2. Validate per CONFIG.md rules:
-   - Must be valid JSON
-   - If `tone` field present, must be exactly `"harsh"` or `"constructive"`
-   - Unknown fields are ignored (forward compatibility)
-3. **If valid and has tone field:**
-   - Set tone from config
-   - Output: `Using [tone] tone (from project config)`
-   - SKIP to Step 3
-4. **If invalid (malformed JSON or bad tone value):**
-   - Show warning: `⚠️  Invalid config at .candid/config.json: [specific error]. Falling back to user config.`
-   - Continue to user config check
-5. **If valid but empty `{}` or no tone field:**
-   - Continue to user config check (silent, no warning)
-
-**If file doesn't exist:**
-- Continue to user config check (silent)
+**Result handling:**
+- If procedure returns `SKIP_TO_STEP_3` → SKIP to Step 3
+- If procedure returns `CONTINUE` → Continue to user config check
 
 #### Check User Config
 
-Use Read tool to check `~/.candid/config.json`:
+Follow the "Config Validation Procedure" defined in CONFIG.md with these parameters:
+- `config_path`: `~/.candid/config.json`
+- `config_source`: `"user config"`
+- `fallback_source`: `"interactive prompt"`
 
-**If file exists:**
-1. Attempt to parse as JSON
-2. Validate per CONFIG.md rules
-3. **If valid and has tone field:**
-   - Set tone from config
-   - Output: `Using [tone] tone (from user config)`
-   - SKIP to Step 3
-4. **If invalid:**
-   - Show warning: `⚠️  Invalid config at ~/.candid/config.json: [specific error]. Falling back to interactive prompt.`
-   - Continue to prompt
-5. **If valid but empty or no tone field:**
-   - Continue to prompt (silent)
-
-**If file doesn't exist:**
-- Continue to prompt (silent)
+**Result handling:**
+- If procedure returns `SKIP_TO_STEP_3` → SKIP to Step 3
+- If procedure returns `CONTINUE` → Continue to prompt
 
 #### Prompt User (Fallback)
 
-Use AskUserQuestion with the tone selection options (defined in original Step 3).
+Use AskUserQuestion to let the user choose their review style:
+
+**Question:** "Choose your review style"
+**Options:**
+1. **Harsh** - Brutal honesty, no sugar coating. I'll tell you exactly what's wrong with the sarcasm of a senior dev who's been burned by production incidents.
+2. **Constructive** - Care personally + challenge directly. I'll be honest about issues but explain why they matter and how to fix them supportively.
 
 After user selects:
 - Set tone from user's choice
@@ -309,7 +293,7 @@ Store the user's choice and proceed based on their selection:
 
 #### Phase 6b: Individual Fix Review (Only if "Review individually" was chosen)
 
-Loop through each issue identified in Steps 5-6. For each issue:
+Loop through each issue identified in Steps 4-5. For each issue:
 
 1. **Show issue context:**
    - Display issue number and total count (e.g., "[1/5]")

@@ -11,18 +11,64 @@ Valid config file format:
 
 ```json
 {
+  "version": 1,
   "tone": "harsh" | "constructive"
 }
 ```
 
-The `tone` field is optional. If not specified, the config file is treated as having no preference, and the system continues to the next precedence level.
+**Field descriptions:**
+- `version` (optional): Config schema version. Defaults to 1 if omitted. Used for future-proofing.
+- `tone` (optional): Review tone preference. Must be exactly `"harsh"` or `"constructive"`. If not specified, the config file is treated as having no preference, and the system continues to the next precedence level.
 
 ## Validation Rules
 
 1. **File must be valid JSON** - Must parse without errors
-2. **Tone field validation** - If `tone` field is present, value must be exactly `"harsh"` or `"constructive"`
-3. **Unknown fields ignored** - Any fields other than `tone` are ignored for forward compatibility
-4. **Empty object is valid** - `{}` is a valid config with no tone preference set, system continues to next source
+2. **Tone field type** - If `tone` field is present, must be a string (not boolean, number, array, or object)
+3. **Tone field validation** - If `tone` is a string, value must be exactly `"harsh"` or `"constructive"` (case-sensitive)
+4. **Unknown fields ignored** - Any fields other than `tone` are ignored for forward compatibility
+5. **Empty object is valid** - `{}` is a valid config with no tone preference set, system continues to next source
+
+## Config Validation Procedure
+
+This reusable procedure applies to both project and user configs:
+
+**Inputs:**
+- `config_path`: Path to the config file (`.candid/config.json` or `~/.candid/config.json`)
+- `config_source`: Source name for messages (`"project config"` or `"user config"`)
+- `fallback_source`: What to fall back to on error (`"user config"` or `"interactive prompt"`)
+
+**Steps:**
+1. **Check file existence:**
+   - If file doesn't exist → Return `CONTINUE` (silent, no warning)
+
+2. **Read file content:**
+   - Use Read tool to get file content
+   - If read fails (permissions, etc.) → Show warning, return `CONTINUE`
+
+3. **Validate JSON syntax:**
+   ```bash
+   jq empty [config_path] 2>&1
+   ```
+   - If command fails → Show warning "malformed JSON", return `CONTINUE`
+
+4. **Extract tone value:**
+   ```bash
+   jq -r '.tone // "none"' [config_path]
+   ```
+
+5. **Validate tone field:**
+   - If tone is "none" (field missing) → Return `CONTINUE` (silent)
+   - If tone is not a string type → Show warning "invalid type", return `CONTINUE`
+   - If tone ≠ "harsh" AND tone ≠ "constructive" → Show warning with valid values, return `CONTINUE`
+
+6. **Success:**
+   - Set tone from config
+   - Output: `Using [tone] tone (from [config_source])`
+   - Return `SKIP_TO_STEP_3`
+
+**Return values:**
+- `SKIP_TO_STEP_3` - Valid config found, skip remaining checks
+- `CONTINUE` - No valid config, continue to next precedence level
 
 ## Error Handling Instructions
 
@@ -95,6 +141,14 @@ Using constructive tone (from interactive prompt)
 **Harsh tone:**
 ```json
 {
+  "tone": "harsh"
+}
+```
+
+**Harsh tone with version:**
+```json
+{
+  "version": 1,
   "tone": "harsh"
 }
 ```
