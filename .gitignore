@@ -1,6 +1,2 @@
 # Conductor workspace files
 .context/
-
-# Node.js dependencies
-node_modules/
-package-lock.json
