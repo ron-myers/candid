@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Configurable Merge Target Branches**: Specify which branches to compare against when reviewing branch diffs, replacing the hardcoded `main → stable → master` fallback chain.
+  - **Config field**: `mergeTargetBranches` accepts an array of branch names (e.g., `["develop", "main"]`)
+  - **CLI flag**: `--merge-target <branch>` (repeatable) for one-off overrides
+  - **Four-tier precedence**: CLI flags → project config → user config → default (`["main", "stable", "master"]`)
+  - **Workflow examples**: New example configs for Git Flow, trunk-based, and GitHub Flow in `examples/`
+  - **Graceful fallback**: Tries each branch in order, uses first that exists
+  - **Backward compatible**: Default behavior unchanged for existing users
+
 - **Edge-Case Focus Mode** (`--focus edge-case`): New focus mode dedicated to finding boundary conditions and error scenarios
   - Systematically checks every code path for edge cases using comprehensive checklists
   - Finds 2-3x more edge case issues than general reviews
@@ -26,10 +34,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Can be set in config files: `{"focus": "edge-case"}`
   - New documentation: `docs/example-reviews/edge-case-review.md` with side-by-side comparison showing general vs edge-case reviews
 
+- **New Example Configs**:
+  - `examples/git-flow/config.json`: Git Flow workflow (develop → main)
+  - `examples/trunk-based/config.json`: Trunk-based development (trunk)
+  - `examples/github-flow/config.json`: GitHub Flow (main only)
+
+- **New Test Cases**: 5 validation test files for merge target branch configuration
+  - `valid-merge-target-single.json`, `valid-merge-target-multiple.json`, `valid-merge-target-with-remote.json`
+  - `invalid-merge-target-empty.json`, `invalid-merge-target-string.json`
+
 ### Changed
 
 - **Focus Mode Options**: Added "edge-case" as valid value for `focus` field in config files and CLI
 - **Config Validation**: Updated to accept "edge-case" alongside "security", "performance", and "architecture"
+- **Documentation updates**: README.md, review-scope.md, troubleshooting.md, and ci-cd.md updated with merge target configuration guidance
+- **New Step 2.5**: Load Merge Target Branches procedure added to SKILL.md with full validation logic
+- **CONFIG.md schema expanded**: Added `mergeTargetBranches` field with validation rules
 
 ## [1.1.0] - 2026-01-17
 

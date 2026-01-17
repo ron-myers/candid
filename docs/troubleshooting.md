@@ -26,8 +26,12 @@ Common issues and how to fix them.
    ```
 
 3. **Check your branch**
-   If you're on a feature branch with no local changes, Candid compares to main/stable:
+   If you're on a feature branch with no local changes, Candid compares to your configured merge target branches (default: main/stable/master):
    ```bash
+   # Check which branches exist
+   git branch -a
+
+   # Try your merge target
    git diff main...HEAD --stat
    ```
    If nothing shows, your branch has no new commits.
@@ -65,6 +69,29 @@ Common issues and how to fix them.
    ```
    ⚠️ Invalid config at .candid/config.json: malformed JSON. Falling back to user config.
    ```
+
+---
+
+## Wrong Merge Target Branch
+
+**Symptoms:** Review compares to the wrong branch, missing or including unexpected commits.
+
+**Diagnosis:**
+1. Check which branch was used (shown in review output)
+2. Verify config: `jq '.mergeTargetBranches' .candid/config.json`
+3. Check precedence: CLI flags > project config > user config > default
+
+**Solutions:**
+```bash
+# Override for this review
+/candid-review --merge-target develop
+
+# Set project default
+echo '{"mergeTargetBranches": ["develop"]}' > .candid/config.json
+
+# Check current setting
+jq '.mergeTargetBranches' .candid/config.json
+```
 
 ---
 

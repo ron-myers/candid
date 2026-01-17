@@ -191,8 +191,15 @@ Using constructive tone (from interactive prompt)
 ### Example Configs
 
 See the `examples/` directory for ready-to-use config files:
-- `examples/harsh/config.json` - Harsh tone config (just copy to `.candid/` or `~/.candid/`)
-- `examples/constructive/config.json` - Constructive tone config
+
+**By tone:**
+- `examples/harsh/config.json` - Harsh tone
+- `examples/constructive/config.json` - Constructive tone
+
+**By workflow:**
+- `examples/git-flow/config.json` - Git Flow (develop → main)
+- `examples/trunk-based/config.json` - Trunk-based development
+- `examples/github-flow/config.json` - GitHub Flow (main only)
 
 ### Invalid Configs
 
@@ -201,6 +208,36 @@ If a config file is malformed or has an invalid tone value, candid shows a warni
 ```
 ⚠️  Invalid config at .candid/config.json: malformed JSON. Falling back to user config.
 ```
+
+### Merge Target Branches
+
+Specify which branches to compare against when reviewing branch diffs.
+
+**Config file:**
+```json
+{
+  "mergeTargetBranches": ["develop", "main"]
+}
+```
+
+**CLI flag:**
+```bash
+/candid-review --merge-target develop
+/candid-review --merge-target develop --merge-target main  # Fallback chain
+```
+
+**Common configurations:**
+
+| Workflow | Config |
+|----------|--------|
+| GitHub Flow | `["main"]` |
+| Git Flow | `["develop", "main"]` |
+| Trunk-based | `["trunk"]` |
+| CI (remote branches) | `["origin/main", "main"]` |
+
+**Default:** If not specified, uses `["main", "stable", "master"]`.
+
+**How it works:** Candid tries each branch in order and uses the first that exists. You'll see which branch was selected in the output.
 
 ## Technical.md
 

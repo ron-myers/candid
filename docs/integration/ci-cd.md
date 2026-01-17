@@ -303,9 +303,16 @@ Speed up CI by caching the plugin:
 
 For large repos, review only changed paths:
 
+**Tip:** For Git Flow or custom workflows, configure merge target in `.candid/config.json`:
+```json
+{"mergeTargetBranches": ["develop"]}
+```
+
 ```bash
 # Get changed files
-CHANGED_FILES=$(git diff --name-only origin/main...HEAD | grep -E '\.(ts|js|py)$' | head -20)
+# Automatically uses configured merge target
+# Or specify explicitly for CI:
+CHANGED_FILES=$(git diff --name-only origin/develop...HEAD | grep -E '\.(ts|js|py)$' | head -20)
 
 # Review them
 claude code "/candid-review $CHANGED_FILES"
