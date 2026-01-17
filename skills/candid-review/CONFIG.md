@@ -26,14 +26,14 @@ Valid config file format:
   - `*.min.js` - Minified files
   - `vendor/*` - Third-party code
   - `**/*.test.ts` - Test files (if you want to skip them)
-- `focus` (optional): Default focus area for reviews. Must be exactly `"security"`, `"performance"`, or `"architecture"`. CLI `--focus` flag overrides this. When set, only relevant issue categories are checked.
+- `focus` (optional): Default focus area for reviews. Must be exactly `"security"`, `"performance"`, `"architecture"`, or `"edge-case"`. CLI `--focus` flag overrides this. When set, only relevant issue categories are checked.
 
 ## Validation Rules
 
 1. **File must be valid JSON** - Must parse without errors
 2. **Tone field type** - If `tone` field is present, must be a string (not boolean, number, array, or object)
 3. **Tone field validation** - If `tone` is a string, value must be exactly `"harsh"` or `"constructive"` (case-sensitive)
-4. **Focus field validation** - If `focus` field is present, must be exactly `"security"`, `"performance"`, or `"architecture"` (case-sensitive). Invalid values show warning and are ignored.
+4. **Focus field validation** - If `focus` field is present, must be exactly `"security"`, `"performance"`, `"architecture"`, or `"edge-case"` (case-sensitive). Invalid values show warning and are ignored.
 5. **Unknown fields ignored** - Any fields other than `tone`, `exclude`, and `focus` are ignored for forward compatibility
 6. **Empty object is valid** - `{}` is a valid config with no preferences set, system continues to next source
 
