@@ -30,6 +30,24 @@ I'm a big fan of [Superpowers](https://github.com/obra/superpowers) and recommen
 
 Then restart Claude Code.
 
+## Updating
+
+To update Candid to the latest version:
+
+```bash
+claude plugin update candid@candid
+```
+
+Or from within Claude Code:
+
+```bash
+/plugin install candid@candid
+```
+
+Then restart Claude Code.
+
+See [CHANGELOG.md](CHANGELOG.md) for what's new in each version.
+
 ## Usage
 
 ### Basic Review
