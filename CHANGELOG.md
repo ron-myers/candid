@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+### Changed
+
+### Fixed
+
+## [1.2.0] - 2026-01-17
+
+### Added
+
 - **Configurable Merge Target Branches**: Specify which branches to compare against when reviewing branch diffs, replacing the hardcoded `main → stable → master` fallback chain.
   - **Config field**: `mergeTargetBranches` accepts an array of branch names (e.g., `["develop", "main"]`)
   - **CLI flag**: `--merge-target <branch>` (repeatable) for one-off overrides
