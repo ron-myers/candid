@@ -1,6 +1,6 @@
 ---
 name: candid-review
-description: Use when reviewing code changes before commit or PR - provides configurable code review (harsh or constructive tone) with project standards from Technical.md, architectural context, categorized issues with actionable fixes, and todo integration for tracking selected issues
+description: Use when reviewing code changes before commit or PR - provides configurable code review (harsh or constructive tone) with project standards from Technical.md, architectural context, categorized issues with actionable fixes, todo integration for tracking selected issues, and optional automatic commit of applied fixes
 ---
 
 # Radical Candor Code Review
@@ -184,7 +184,41 @@ Then proceed with normal review.
 }
 ```
 
+#### Commit Mode (`--commit`)
+
+If `--commit` flag is provided, automatically create git commit after successfully applying fixes.
+
+**Requirements:**
+- Must be in git repository
+- At least one fix must be applied
+- Working directory must have changes after fixes
+
+**Commit behavior:**
+- Only commits files modified by candid-review (not other unstaged changes)
+- Commit message includes list of all applied fixes with file locations
+- Includes co-author tag: `Co-authored-by: Claude Sonnet 4.5 <noreply@anthropic.com>`
+- Commit failures preserve applied fixes and continue review
+
+**Output when enabled:** `Commit enabled: will create git commit after applying fixes (from CLI flag)`
+
 ### Step 4: Load Tone Preference
+
+#### Check for --commit flag
+
+Parse CLI arguments to determine if automatic commit is requested.
+
+If `--commit` flag is provided:
+- Set `commitEnabled = true`
+- Output: `Commit enabled: will create git commit after applying fixes (from CLI flag)`
+- Note: Commit will only be created if fixes are successfully applied
+
+If `--commit` flag is NOT provided:
+- Set `commitEnabled = false`
+- (No output - default behavior)
+
+Store the `commitEnabled` boolean for use in Step 9.5.
+
+#### Load Tone Preference
 
 Load tone preference following precedence rules. See CONFIG.md for detailed validation instructions.
 
@@ -559,11 +593,13 @@ Use the selectedFixes array from Step 8 to determine what action to take.
 
 1. Create a todo list of the selected fixes using TodoWrite (all as `pending`)
    - Use format: `[Icon] Fix: [issue summary] at [file:line]`
-2. Work through each fix sequentially:
+2. Initialize empty set `modifiedFiles` to track changed files
+3. Work through each fix sequentially:
    - Mark the current fix as `in_progress`
    - Apply the fix using Edit tool
+   - Add the file path to `modifiedFiles` set
    - Mark as `completed` when done
-3. After all fixes are applied, summarize what was changed:
+4. After all fixes are applied, summarize what was changed:
    - State how many fixes were applied
    - List the files that were modified
 
@@ -585,6 +621,92 @@ Create todos for ALL issues found in Steps 6-7 using TodoWrite:
 - `📜 Fix: missing error handling per Technical.md at api.ts:15`
 
 After creating todos, confirm to user how many were added and remind them they can review the todos later.
+
+### Step 9.5: Create Git Commit (Optional)
+
+**Pre-condition:** Only execute this step if ALL of the following are true:
+1. `commitEnabled = true` (--commit flag was provided in Step 4)
+2. `selectedFixes` is not empty (fixes were applied in Step 9)
+3. Git repository is available (detected in Step 2)
+
+If any condition is false, skip this step entirely and proceed to Step 10.
+
+**Execution:**
+
+**1. Verify changes exist:**
+```bash
+git diff --stat
+```
+If output is empty:
+- Output: `No file changes detected, skipping commit`
+- Skip to Step 10
+
+**2. Stage modified files:**
+
+Stage only the files that were modified by candid-review:
+```bash
+git add <file1> <file2> <file3> ...
+```
+
+Use files from `modifiedFiles` set (tracked in Step 9).
+
+If staging fails:
+- Output: `⚠️ Failed to stage files: [error]. Fixes applied but not committed.`
+- Skip to Step 10
+
+**3. Generate commit message:**
+
+Create detailed commit message with this format:
+```
+Apply candid-review fixes ([N] issues)
+
+Fixed issues:
+- [icon] [title] in [relative-path]:[line]
+- [icon] [title] in [relative-path]:[line]
+[... list continues ...]
+
+Co-authored-by: Claude Sonnet 4.5 <noreply@anthropic.com>
+```
+
+For each fix in `selectedFixes`:
+- Include icon (🔥, ⚠️, 📜, 📋, 🤔, 💭)
+- Include issue title
+- Include file path (relative to repo root)
+- Include line number
+
+**Truncation:** If more than 10 fixes were applied:
+- List first 10 fixes
+- Add line: `- ... and [N] more fixes`
+
+**4. Create commit using heredoc pattern:**
+
+```bash
+git commit -m "$(cat <<'EOF'
+[generated commit message from step 3]
+EOF
+)"
+```
+
+Use single-quote heredoc (`<<'EOF'`) to safely handle special characters.
+
+**Success:**
+- Output: `✅ Created commit: "Apply candid-review fixes ([N] issues)"`
+- Proceed to Step 10
+
+**If commit fails:**
+- Output: `⚠️ Commit failed: [error message]`
+- Output: `Fixes have been applied but not committed. You can:`
+- Output: `  - Review changes: git diff --staged`
+- Output: `  - Commit manually: git commit`
+- Proceed to Step 10 (do not fail review)
+
+**Error Handling:**
+- Pre-commit hook failure: Show hook output, suggest manual commit
+- Merge conflict state: Detect and skip with message
+- Permission errors: Display error, suggest checking permissions
+- Any other error: Show message, provide recovery instructions
+
+**Critical:** Commit failures never cause review to fail. Fixes are already applied in Step 9.
 
 ### Step 10: Save Review State
 
@@ -635,6 +757,7 @@ Present your review in this order:
 7. **💭 Architectural Concerns** - Design issues (if any)
 8. **✅ What's Good** - Acknowledge good practices (keep brief)
 9. **Fix Selection** - Multi-select prompt for which fixes to apply (remind user to scroll up for context)
+10. **Commit Summary** - If --commit was used and successful, confirmation message
 
 ### Re-Review Output Structure
 

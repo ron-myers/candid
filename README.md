@@ -113,6 +113,25 @@ Shows:
 
 Review state is automatically saved to `.candid/last-review.json` after each review.
 
+### Commit Applied Fixes Automatically
+
+```
+/candid-review --commit
+```
+
+Automatically create a git commit after successfully applying fixes.
+
+- Only commits files modified by candid-review (not other unstaged changes)
+- Commit message includes detailed list of all fixes with file locations
+- Includes co-author tag
+- Commit failures preserve applied fixes
+
+Example combining with other flags:
+```
+/candid-review --harsh --commit
+/candid-review --focus security --commit
+```
+
 ### Validate Standards
 
 Check your Technical.md for effectiveness:

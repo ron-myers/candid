@@ -9,6 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Automatic commit mode** (`--commit` flag): candid-review can now automatically create git commits after applying fixes
+  - Commit message includes detailed list of all applied fixes with file locations and line numbers
+  - Only stages files modified by candid-review (preserves other unstaged changes)
+  - Includes co-author tag following repository convention
+  - Graceful error handling - commit failures preserve applied fixes and continue review
+  - Usage: `/candid-review --commit` or combined with other flags like `/candid-review --harsh --commit`
+
 ### Changed
 
 ### Fixed

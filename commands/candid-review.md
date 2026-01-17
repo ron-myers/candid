@@ -18,6 +18,9 @@ args:
   - name: re-review
     description: Compare against previous review to show fixed/remaining/new issues
     required: false
+  - name: commit
+    description: Automatically create git commit after applying fixes with detailed message listing all changes
+    required: false
 ---
 
 Run a code review on your current changes with configurable tone and focus.
