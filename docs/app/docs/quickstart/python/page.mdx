@@ -1,0 +1,80 @@
+# Candid for Python
+
+Get Candid running with your Python project.
+
+## Install Candid
+
+```bash
+claude plugin marketplace add ron-myers/candid
+claude plugin install candid@candid
+```
+
+## Initialize Standards
+
+```
+/candid-init --template python
+```
+
+This generates a Technical.md with Python-specific rules.
+
+## Recommended Rules for Python
+
+Add these to your Technical.md:
+
+```markdown
+## Python Code
+
+- Functions under 50 lines (split if larger)
+- Type hints on all public function signatures
+- No mutable default arguments (use None and check)
+- Context managers for file and connection handling
+
+## Error Handling
+
+- Specific exceptions caught (never bare except)
+- Custom exceptions inherit from appropriate base class
+- Error messages include context for debugging
+- Failed operations logged before re-raising
+
+## Security
+
+- User input sanitized before use
+- SQL queries use parameterized statements
+- No secrets in code (use environment variables)
+- File paths validated against traversal attacks
+
+## Testing
+
+- New features require pytest tests
+- Test files named test_*.py or *_test.py
+- Fixtures used for common test setup
+- Mocks used for external dependencies
+```
+
+## Focus Modes for Python
+
+### Security audit
+
+```
+/candid-review --focus security
+```
+
+Check for SQL injection, secret exposure, and input validation issues.
+
+### Before code review
+
+```
+/candid-review --focus edge-case
+```
+
+Find unhandled exceptions, missing error states, and boundary conditions.
+
+## Run Your First Review
+
+Make some changes and run:
+
+```
+/candid-review
+```
+
+Candid will analyze your Python code against your Technical.md standards.

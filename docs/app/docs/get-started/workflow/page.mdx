@@ -1,0 +1,80 @@
+# Workflow
+
+Why Candid's integrated approach changes everything.
+
+## Your Standards, Always Enforced
+
+Candid adds a [Technical.md]](/docs/core-features/technical-md) file to your project—a single source of truth for all the technical expectations you and your team expect to be true when any change happens in the codebase. Things like:
+
+- Error handling patterns
+- Testing requirements
+- Security practices
+- Performance thresholds
+- Code organization rules
+
+Every review checks your changes against these standards, so nothing slips through.
+
+[Learn more about Technical.md →](/docs/core-features/technical-md)
+
+## The Old Way
+
+Traditional Claude Code review means constant context-switching:
+
+1. Type out or copy in a code review prompt
+1. Wait for analysis
+1. Get a list of items to review
+1. Copy out the review to an editor 
+1. Add your notes
+1. Paste your notes back into Claude Code
+7. Keep the context of what you are looking to fix in you head
+8. Repeat...
+
+This workflow is fragmented, slow, and loses context at every step.
+
+## The Candid Way
+
+Candid runs directly in Claude Code:
+
+1. Run `/candid-review`
+2. Review findings in context being asked item-by-item which items to fix.
+3. Apply fixes directly
+4. Done. (with the ability to rerun)
+
+No context-switching. No copy-paste. Everything happens where you're already working.
+
+## Context Matters
+
+Because Candid runs in Claude Code, it has access to:
+
+- Your full codebase structure
+- Related files and dependencies
+- Your Technical.md standards
+- Git history and changes
+
+This context makes reviews more accurate and fixes more applicable.
+
+## Integrated Workflow
+
+Candid integrates with your existing workflow:
+
+- Reviews your actual git changes
+- Applies fixes directly to files
+- Tracks issues as todos
+- Commits with detailed messages, if you run in [auto commit mode](/docs/core-features/auto-commit)
+
+Everything stays in one place.
+
+## Streamlined Fix Workflow
+
+No more copying big blocks of text and pasting them one by one. No more replying "Continue" to get through a review.
+
+Candid asks you how you want to handle each issue it finds:
+
+- **Apply all** — Fix everything automatically
+- **Critical + Major only** — Focus on what matters most
+- **Review individually** — Go through each fix one by one
+- **Skip** — Move on without applying
+
+For each fix you choose to review, Candid shows you the code and asks if you want to apply it. Simple yes/no decisions instead of manual copy-paste.
+
+**Note:** we recommend you use `Review individually` until you are comfortable with the types of issues identified for the combination of your codebase, Technical.md and LLM model you are using.

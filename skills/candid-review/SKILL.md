@@ -184,9 +184,9 @@ Then proceed with normal review.
 }
 ```
 
-#### Commit Mode (`--commit`)
+#### Commit Mode (`--auto-commit`)
 
-If `--commit` flag is provided, automatically create git commit after successfully applying fixes.
+If `--auto-commit` flag is provided, automatically create git commit after successfully applying fixes.
 
 **Requirements:**
 - Must be in git repository
@@ -203,16 +203,16 @@ If `--commit` flag is provided, automatically create git commit after successful
 
 ### Step 4: Load Tone Preference
 
-#### Check for --commit flag
+#### Check for --auto-commit flag
 
 Parse CLI arguments to determine if automatic commit is requested.
 
-If `--commit` flag is provided:
+If `--auto-commit` flag is provided:
 - Set `commitEnabled = true`
 - Output: `Commit enabled: will create git commit after applying fixes (from CLI flag)`
 - Note: Commit will only be created if fixes are successfully applied
 
-If `--commit` flag is NOT provided:
+If `--auto-commit` flag is NOT provided:
 - Set `commitEnabled = false`
 - (No output - default behavior)
 
@@ -625,7 +625,7 @@ After creating todos, confirm to user how many were added and remind them they c
 ### Step 9.5: Create Git Commit (Optional)
 
 **Pre-condition:** Only execute this step if ALL of the following are true:
-1. `commitEnabled = true` (--commit flag was provided in Step 4)
+1. `commitEnabled = true` (--auto-commit flag was provided in Step 4)
 2. `selectedFixes` is not empty (fixes were applied in Step 9)
 3. Git repository is available (detected in Step 2)
 
@@ -757,7 +757,7 @@ Present your review in this order:
 7. **💭 Architectural Concerns** - Design issues (if any)
 8. **✅ What's Good** - Acknowledge good practices (keep brief)
 9. **Fix Selection** - Multi-select prompt for which fixes to apply (remind user to scroll up for context)
-10. **Commit Summary** - If --commit was used and successful, confirmation message
+10. **Commit Summary** - If --auto-commit was used and successful, confirmation message
 
 ### Re-Review Output Structure
 

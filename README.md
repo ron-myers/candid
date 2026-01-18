@@ -15,37 +15,22 @@ A Claude Code plugin for configurable code reviews that combine thoroughness wit
 - **Todo Integration** - Select issues to add as todos with one multi-select prompt
 - **Categorized Issues** - Organized by severity for easy prioritization
 
-## Recommended: Install Superpowers First
-
-I'm a big fan of [Superpowers](https://github.com/obra/superpowers) and recommend installing it before candid. Superpowers provides foundational skills for Claude Code that enhance your overall workflow, and candid builds on top of that foundation nicely.
-
-```bash
-/plugin marketplace add obra/superpowers
-/plugin install superpowers
-```
-
 ## Installation
 
 ```bash
-# From Claude Code
-/plugin marketplace add ron-myers/candid
-/plugin install candid@candid
+# From a terminal
+claude plugin marketplace add ron-myers/candid
+claude plugin install candid@candid
 ```
 
 Then restart Claude Code.
 
 ## Updating
 
-To update Candid to the latest version:
+To update Candid to the latest version, from a terminal:
 
 ```bash
 claude plugin update candid@candid
-```
-
-Or from within Claude Code:
-
-```bash
-/plugin install candid@candid
 ```
 
 Then restart Claude Code.
@@ -116,7 +101,7 @@ Review state is automatically saved to `.candid/last-review.json` after each rev
 ### Commit Applied Fixes Automatically
 
 ```
-/candid-review --commit
+/candid-review --auto-commit
 ```
 
 Automatically create a git commit after successfully applying fixes.
@@ -128,8 +113,8 @@ Automatically create a git commit after successfully applying fixes.
 
 Example combining with other flags:
 ```
-/candid-review --harsh --commit
-/candid-review --focus security --commit
+/candid-review --harsh --auto-commit
+/candid-review --focus security --auto-commit
 ```
 
 ### Validate Standards

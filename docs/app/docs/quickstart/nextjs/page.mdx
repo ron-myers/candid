@@ -1,0 +1,62 @@
+# Candid for Next.js
+
+Get Candid running with your Next.js project.
+
+## Install Candid
+
+```bash
+claude plugin marketplace add ron-myers/candid
+claude plugin install candid@candid
+```
+
+## Initialize Standards
+
+```
+/candid-init --template react
+```
+
+This generates a Technical.md with React and Next.js-specific rules.
+
+## Recommended Rules for Next.js
+
+Add these to your Technical.md:
+
+```markdown
+## Next.js
+
+- API routes validate all request parameters
+- getServerSideProps handles errors gracefully
+- Pages use appropriate data fetching method (SSG vs SSR vs ISR)
+- No client-side secrets exposed (use NEXT_PUBLIC_ prefix intentionally)
+- Image component used for all images (not img tags)
+- Dynamic imports used for heavy components
+- Middleware handles authentication consistently
+```
+
+## Focus Modes for Next.js
+
+### Before deploying to Vercel
+
+```
+/candid-review --focus security
+```
+
+Check for exposed secrets, API vulnerabilities, and authentication issues.
+
+### After adding new pages
+
+```
+/candid-review --focus performance
+```
+
+Ensure optimal data fetching and bundle size.
+
+## Run Your First Review
+
+Make some changes and run:
+
+```
+/candid-review
+```
+
+Candid will analyze your Next.js code against your Technical.md standards.

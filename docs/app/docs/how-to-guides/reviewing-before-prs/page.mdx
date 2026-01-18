@@ -1,0 +1,85 @@
+# Reviewing Before PRs
+
+Catch issues before code review to reduce PR back-and-forth.
+
+## Why Review Before PRs?
+
+Running `/candid-review` before opening a PR:
+
+- **Catches issues early** - Fix problems before they reach reviewers
+- **Reduces PR cycles** - Fewer comments, faster approvals
+- **Builds good habits** - Consistent quality from the start
+- **Shows professionalism** - Clean PRs demonstrate care
+
+## The Workflow
+
+### 1. Make Your Changes
+
+Write your code as usual. Commit as you go or save commits for later.
+
+### 2. Review Before Pushing
+
+Before opening a PR, run:
+
+```
+/candid-review
+```
+
+### 3. Fix Critical & Major Issues
+
+Focus on the high-severity issues:
+
+- 🔥 **Critical** - Fix immediately
+- ⚠️ **Major** - Should address before merge
+
+Code smells and architectural notes can be tech debt tickets.
+
+### 4. Re-Review If Needed
+
+After fixing issues, run:
+
+```
+/candid-review --re-review
+```
+
+This shows what's fixed and any new issues introduced.
+
+### 5. Open Your PR
+
+Once the review is clean (or remaining issues are acceptable), open your PR.
+
+## Quick Options
+
+### Security-Focused PR
+
+```
+/candid-review --focus security
+```
+
+Run this before PRs touching authentication, data handling, or external integrations.
+
+### Performance-Sensitive PR
+
+```
+/candid-review --focus performance
+```
+
+Run this before PRs affecting hot paths or data processing.
+
+### Auto-Commit Fixes
+
+```
+/candid-review --auto-commit
+```
+
+Apply fixes and commit them in one step with a detailed commit message.
+
+## Team Recommendation
+
+Set this as a team practice:
+
+1. Everyone runs `/candid-review` before opening PRs
+2. Share the habit in your team documentation
+3. Celebrate when PRs need minimal changes
+
+This isn't about gatekeeping—it's about catching the easy stuff automatically so reviewers can focus on design and logic.

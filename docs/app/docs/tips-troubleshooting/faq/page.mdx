@@ -1,0 +1,70 @@
+# FAQ & Known Issues
+
+Frequently asked questions and known issues.
+
+## Frequently Asked Questions
+
+### Does Candid work with any language?
+
+Yes, Candid reviews code in any language Claude Code supports. Your Technical.md standards can be language-specific or universal.
+
+### How does Candid pay for Claude Code?
+
+Candid uses Claude Code however you're already logged in. If you're using an API key, Candid uses that. If you're on Claude Pro or Max, Candid uses that.
+
+### Can I use Candid with my team?
+
+Yes. Share your Technical.md and `.candid/config.json` in your repo. Everyone gets the same standards and configuration automatically.
+
+### What's the difference between Harsh and Constructive tone?
+
+- **Harsh** - Brutally honest feedback, great for finding issues you might miss
+- **Constructive** - Caring but direct feedback, based on Radical Candor principles
+
+### Where does Candid save its state?
+
+- Config: `.candid/config.json` (project) or `~/.candid/config.json` (user)
+- Review state: `.candid/last-review.json` (for re-review mode)
+- Standards: `Technical.md` or `.claude/Technical.md`
+
+### Can I ignore certain files?
+
+Yes, use the `exclude` config or `--exclude` flag:
+
+```json
+{
+  "exclude": ["*.generated.ts", "vendor/*", "**/*.test.ts"]
+}
+```
+
+### Does Candid work offline?
+
+Candid requires Claude Code, which requires an internet connection.
+
+## Known Issues
+
+### Large diffs may be truncated
+
+Very large diffs may exceed Claude's context window. If this happens:
+- Review smaller chunks of changes
+- Use `--exclude` to skip generated files
+- Commit intermediate changes
+
+### Some file types not supported
+
+Candid focuses on code files. Binary files, images, and some configuration formats may not be reviewed.
+
+### Review state can become stale
+
+The `.candid/last-review.json` file can become stale if:
+- You switch branches
+- Another developer makes changes
+- Time passes between reviews
+
+Delete it to reset: `rm .candid/last-review.json`
+
+## Report an Issue
+
+Found a bug or have a feature request?
+
+[Open a GitHub issue →](https://github.com/ron-myers/candid/issues/new)

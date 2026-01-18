@@ -1,0 +1,79 @@
+# Issue Categories
+
+How Candid categorizes issues.
+
+## Categories
+
+| Icon | Category | Priority | Description |
+|------|----------|----------|-------------|
+| 🔥 | Critical | 1 | Production killers |
+| ⚠️ | Major | 2 | Serious problems |
+| 📜 | Standards | 3 | Technical.md violations |
+| 📋 | Code Smell | 4 | Maintainability issues |
+| 🤔 | Edge Case | 5 | Unhandled scenarios |
+| 💭 | Architectural | 6 | Design concerns |
+
+## Critical (🔥)
+
+Issues that could cause production failures:
+
+- Security vulnerabilities
+- Data corruption risks
+- Crashes/exceptions
+- Resource leaks
+
+**Action**: Fix immediately before merging.
+
+## Major (⚠️)
+
+Serious issues that need attention:
+
+- Performance problems
+- Missing error handling
+- Incorrect logic
+- API misuse
+
+**Action**: Should fix before merging.
+
+## Standards (📜)
+
+Violations of your Technical.md:
+
+- Architecture violations
+- Coding standard violations
+- Pattern misuse
+
+**Action**: Fix to maintain consistency.
+
+## Code Smell (📋)
+
+Maintainability concerns:
+
+- Complex functions
+- Duplication
+- Magic numbers
+- Poor naming
+
+**Action**: Consider fixing or create tech debt ticket.
+
+## Edge Case (🤔)
+
+Unhandled scenarios:
+
+- Null/undefined
+- Empty collections
+- Boundary conditions
+- Error states
+
+**Action**: Evaluate risk and handle if needed.
+
+## Architectural (💭)
+
+Design-level concerns:
+
+- Coupling issues
+- SRP violations
+- Dependency direction
+- Layer violations
+
+**Action**: Discuss with team before changing.

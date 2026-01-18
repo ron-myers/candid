@@ -1,0 +1,55 @@
+# Merge Targets
+
+Configure which branches Candid compares against.
+
+## CLI Usage
+
+```
+/candid-review --merge-target develop
+/candid-review --merge-target develop --merge-target main
+```
+
+## Config File
+
+```json
+{
+  "mergeTargetBranches": ["develop", "main"]
+}
+```
+
+## How It Works
+
+Candid tries each branch in order and uses the first one that exists.
+
+You'll see which branch was selected in the output:
+
+```
+Comparing against: develop
+```
+
+## Common Configurations
+
+| Workflow | Config |
+|----------|--------|
+| GitHub Flow | `["main"]` |
+| Git Flow | `["develop", "main"]` |
+| Trunk-based | `["trunk"]` |
+| CI (remote branches) | `["origin/main", "main"]` |
+
+## Default Behavior
+
+If not specified, Candid uses:
+
+```json
+["main", "stable", "master"]
+```
+
+## Fallback Chain
+
+The array order matters. If `develop` doesn't exist, Candid falls back to `main`:
+
+```json
+{
+  "mergeTargetBranches": ["develop", "main"]
+}
+```

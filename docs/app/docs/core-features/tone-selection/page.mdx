@@ -1,0 +1,47 @@
+# Tone Selection
+
+Choose how Candid delivers feedback.
+
+## Available Tones
+
+### Harsh
+
+Brutal honesty. No sugar-coating. Best for:
+- Personal projects where you want maximum feedback
+- Thick-skinned developers
+- Finding every possible issue
+
+### Constructive
+
+Direct but caring. Based on Radical Candor principles. Best for:
+- Team environments
+- Code you'll share with others
+- Balanced feedback
+
+## Setting a Default
+
+### Via CLI
+
+```
+/candid-review --harsh
+/candid-review --constructive
+```
+
+### Via Config File
+
+Create `.candid/config.json`:
+
+```json
+{
+  "tone": "harsh"
+}
+```
+
+Or for user-wide default at `~/.candid/config.json`.
+
+## Config Precedence
+
+1. CLI flags (highest priority)
+2. Project config (`.candid/config.json`)
+3. User config (`~/.candid/config.json`)
+4. Interactive prompt (fallback)

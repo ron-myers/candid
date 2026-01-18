@@ -1,0 +1,106 @@
+# Example Reviews
+
+See what Candid reviews look like.
+
+## Security Review
+
+**Issue**: 🔥 SQL Injection Vulnerability
+
+**File**: `src/api/users.ts:42`
+
+**Problem**: User input is directly interpolated into SQL query
+
+**Impact**: Attackers could extract or modify database contents
+
+**Fix**:
+
+```typescript
+// Before
+const query = `SELECT * FROM users WHERE id = ${userId}`;
+
+// After
+const query = 'SELECT * FROM users WHERE id = $1';
+const result = await db.query(query, [userId]);
+```
+
+**Confidence**: Safe ✓
+
+---
+
+## Performance Review
+
+**Issue**: ⚠️ N+1 Query in OrderRepository
+
+**File**: `src/repositories/order.ts:28`
+
+**Problem**: Fetching related items inside a loop
+
+**Impact**: 100 orders = 101 database queries
+
+**Fix**:
+
+```typescript
+// Before
+for (const order of orders) {
+  order.items = await this.getItemsForOrder(order.id);
+}
+
+// After
+const orderIds = orders.map(o => o.id);
+const allItems = await this.getItemsForOrders(orderIds);
+orders.forEach(o => {
+  o.items = allItems.filter(i => i.orderId === o.id);
+});
+```
+
+**Confidence**: Verify ⚡
+
+---
+
+## Standards Review
+
+**Issue**: 📜 Magic number in retry logic
+
+**File**: `src/api/client.ts:42`
+
+**Problem**: Uses `3` directly instead of a named constant
+
+**Impact**: Violates standard: "No magic numbers - use named constants"
+
+**Fix**:
+
+```typescript
+// Before
+for (let i = 0; i < 3; i++) { /* ... */ }
+
+// After
+const MAX_RETRIES = 3;
+for (let i = 0; i < MAX_RETRIES; i++) { /* ... */ }
+```
+
+**Confidence**: Safe ✓
+
+---
+
+## Edge Case Review
+
+**Issue**: 🤔 Unhandled empty array
+
+**File**: `src/utils/average.ts:5`
+
+**Problem**: Division by zero when array is empty
+
+**Impact**: Returns NaN, could cause downstream errors
+
+**Fix**:
+
+```typescript
+// Before
+return arr.reduce((a, b) => a + b) / arr.length;
+
+// After
+if (arr.length === 0) return 0;
+return arr.reduce((a, b) => a + b) / arr.length;
+```
+
+**Confidence**: Verify ⚡

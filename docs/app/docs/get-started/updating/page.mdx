@@ -1,0 +1,52 @@
+# Updating Candid
+
+Keep Candid up to date to get the latest features and fixes.
+
+We have not found a way to autoupdate Claude Code plugins, if you know of one please [let us know in an issue](https://github.com/ron-myers/candid/issues/new).
+
+## Update Command
+
+From a terminal, run:
+
+```bash
+claude plugin update candid@candid
+```
+
+Then restart Claude Code to activate the new version.
+
+## Check Current Version
+
+To see what version you have installed:
+
+```bash
+claude plugin list
+```
+
+Look for `candid@candid` in the output.
+
+## What's New
+
+See the [Changelog](/docs/resources/changelog) for what's included in each release.
+
+## Troubleshooting
+
+### Update Not Working
+
+If the update command fails:
+
+1. Check your internet connection
+2. Try uninstalling and reinstalling:
+
+```bash
+claude plugin uninstall candid@candid
+claude plugin marketplace add ron-myers/candid
+claude plugin install candid@candid
+```
+
+### Changes Not Appearing
+
+After updating, you must restart Claude Code for changes to take effect.
+
+## Need Help?
+
+If you're having trouble updating or encounter issues with a new version, [open a GitHub issue](https://github.com/ron-myers/candid/issues/new).

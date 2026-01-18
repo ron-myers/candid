@@ -1,0 +1,72 @@
+# Candid for React
+
+Get Candid running with your React project.
+
+## Install Candid
+
+```bash
+claude plugin marketplace add ron-myers/candid
+claude plugin install candid@candid
+```
+
+## Initialize Standards
+
+```
+/candid-init --template react
+```
+
+This generates a Technical.md with React-specific rules.
+
+## Recommended Rules for React
+
+Add these to your Technical.md:
+
+```markdown
+## React Components
+
+- Components under 200 lines (split if larger)
+- No business logic in components (use hooks or services)
+- Props validated with TypeScript or PropTypes
+- Event handlers prefixed with "handle" (handleClick, handleSubmit)
+
+## State Management
+
+- No direct state mutation (use setState or reducers)
+- Expensive computations wrapped in useMemo
+- Event handlers wrapped in useCallback when passed to children
+- Global state only for truly global data
+
+## Performance
+
+- Lists use stable keys (not index unless static)
+- Heavy components wrapped in React.memo when props rarely change
+- No inline function definitions in render (except simple handlers)
+```
+
+## Focus Modes for React
+
+### Performance optimization
+
+```
+/candid-review --focus performance
+```
+
+Check for unnecessary re-renders, missing memoization, and bundle size issues.
+
+### After refactoring
+
+```
+/candid-review --focus architecture
+```
+
+Ensure component structure and state management follow best practices.
+
+## Run Your First Review
+
+Make some changes and run:
+
+```
+/candid-review
+```
+
+Candid will analyze your React code against your Technical.md standards.

@@ -1,0 +1,62 @@
+# File Exclusions
+
+Skip generated code, vendor files, and other noise.
+
+## CLI Usage
+
+```
+/candid-review --exclude "*.generated.ts"
+/candid-review --exclude "vendor/*" --exclude "*.min.js"
+```
+
+## Config File
+
+```json
+{
+  "exclude": [
+    "*.generated.ts",
+    "*.g.ts",
+    "vendor/*",
+    "node_modules/*",
+    "*.min.js",
+    "*.bundle.js"
+  ]
+}
+```
+
+## Pattern Syntax
+
+Uses glob patterns:
+
+| Pattern | Matches |
+|---------|---------|
+| `*.ts` | All .ts files |
+| `**/*.test.ts` | All test files |
+| `vendor/*` | Anything in vendor/ |
+| `!src/*` | Exclude src/ from exclusion |
+
+## Common Exclusions
+
+### Generated Code
+
+```json
+["*.generated.ts", "*.g.ts", "*.pb.go"]
+```
+
+### Build Artifacts
+
+```json
+["dist/*", "build/*", "*.min.js"]
+```
+
+### Dependencies
+
+```json
+["vendor/*", "node_modules/*", "third_party/*"]
+```
+
+### Test Files
+
+```json
+["**/*.test.ts", "**/*.spec.ts", "__tests__/*"]
+```

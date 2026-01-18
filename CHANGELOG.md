@@ -5,21 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+
+- **Auto-commit flag renamed**: `--auto-commit` is now `--commit` for brevity
+
 ## [1.3.0] - 2026-01-17
 
 ### Added
 
-- **Automatic commit mode** (`--commit` flag): candid-review can now automatically create git commits after applying fixes
+- **Automatic commit mode** (`--auto-commit` flag): candid-review can now automatically create git commits after applying fixes
   - Commit message includes detailed list of all applied fixes with file locations and line numbers
   - Only stages files modified by candid-review (preserves other unstaged changes)
   - Includes co-author tag following repository convention
   - Graceful error handling - commit failures preserve applied fixes and continue review
-  - Usage: `/candid-review --commit` or combined with other flags like `/candid-review --harsh --commit`
-
-### Changed
-
-### Fixed
-
+  - Usage: `/candid-review --auto-commit` or combined with other flags like `/candid-review --harsh --auto-commit`
 
 ## [1.2.0] - 2026-01-17
 

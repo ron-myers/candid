@@ -1,0 +1,60 @@
+# Fix Confidence Levels
+
+Understanding how confident Candid is in each fix.
+
+## Levels
+
+| Level | Icon | Meaning |
+|-------|------|---------|
+| Safe | ✓ | Apply confidently |
+| Verify | ⚡ | Test after applying |
+| Careful | ⚠️ | Review thoroughly |
+
+## Safe (✓)
+
+Mechanical fixes with low risk:
+
+- Adding null checks
+- Fixing typos
+- Adding missing imports
+- Simple refactors
+
+**Guidance**: Apply these confidently. Low risk of side effects.
+
+## Verify (⚡)
+
+Logic changes that need testing:
+
+- Changing conditions
+- Modifying loops
+- Updating data transformations
+- Adding error handling
+
+**Guidance**: Apply and run tests. Check behavior matches expectations.
+
+## Careful (⚠️)
+
+Architectural changes with potential side effects:
+
+- Changing interfaces
+- Modifying data structures
+- Updating shared code
+- Changing async behavior
+
+**Guidance**: Review thoroughly. Test extensively. Consider impacts on other code.
+
+## Using Confidence Levels
+
+When selecting fixes to apply:
+
+1. **Safe fixes**: Apply all without worry
+2. **Verify fixes**: Apply, then run relevant tests
+3. **Careful fixes**: Review the change, understand impacts, then apply and test thoroughly
+
+## In Todo Selection
+
+Confidence level helps prioritize:
+
+- Start with Safe fixes to build momentum
+- Apply Verify fixes with test coverage
+- Schedule Careful fixes for focused sessions
