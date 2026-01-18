@@ -36,7 +36,7 @@ export default function HomePage() {
             Learn how it works <span className="btn-arrow">→</span>
           </Link>
         </div>
-        <Pre className="install-command">
+        <Pre className="install-command" trackingId="hero_install">
           <code>{`claude plugin marketplace add ron-myers/candid
 claude plugin install candid@candid`}</code>
         </Pre>
@@ -91,7 +91,7 @@ claude plugin install candid@candid`}</code>
             <div className="step-content">
               <strong>Install Candid.</strong>
               <span>Add Candid to Claude Code with two commands from your terminal.</span>
-              <Pre className="step-code">
+              <Pre className="step-code" trackingId="step_install">
                 <code>{`claude plugin marketplace add ron-myers/candid
 claude plugin install candid@candid`}</code>
               </Pre>
@@ -101,7 +101,7 @@ claude plugin install candid@candid`}</code>
             <div className="step-content">
               <strong>Initialize your Project.</strong>
               <span>Generate a Technical.md for your codebase.</span>
-              <Pre className="step-code">
+              <Pre className="step-code" trackingId="step_init">
                 <code>/candid-init</code>
               </Pre>
             </div>
@@ -110,7 +110,7 @@ claude plugin install candid@candid`}</code>
             <div className="step-content">
               <strong>Review.</strong>
               <span>Run the command to analyze your changes.</span>
-              <Pre className="step-code">
+              <Pre className="step-code" trackingId="step_review">
                 <code>/candid-review</code>
               </Pre>
             </div>
@@ -177,7 +177,7 @@ claude plugin install candid@candid`}</code>
 
       <section className="cta-section">
         <h2>Get started in 5 minutes</h2>
-        <Pre className="code-block">
+        <Pre className="code-block" trackingId="cta_full_install">
           <code>{`# From a terminal
 claude plugin marketplace add ron-myers/candid
 claude plugin install candid@candid

@@ -25,6 +25,6 @@ export const EVENTS = {
   LINKEDIN_CLICK: 'linkedin_click',
   FRITTER_FACTORY_CLICK: 'fritter_factory_click',
 
-  // Install commands
-  INSTALL_COMMAND_COPY: 'install_command_copy',
+  // Code interactions
+  CODE_COPY: 'code_copy',
 }

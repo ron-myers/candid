@@ -1,8 +1,9 @@
 'use client'
 
 import { useState, useRef } from 'react'
+import { trackEvent } from './trackEvent'
 
-export default function Pre({ children, ...props }) {
+export default function Pre({ children, trackingId, ...props }) {
   const [copied, setCopied] = useState(false)
   const preRef = useRef(null)
 
@@ -10,6 +11,9 @@ export default function Pre({ children, ...props }) {
     const code = preRef.current?.textContent || ''
     await navigator.clipboard.writeText(code)
     setCopied(true)
+    // Use trackingId if provided, otherwise use first 30 chars of code
+    const identifier = trackingId || code.slice(0, 30).replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_]/g, '')
+    trackEvent(`code_copy_${identifier}`)
     setTimeout(() => setCopied(false), 2000)
   }
 
