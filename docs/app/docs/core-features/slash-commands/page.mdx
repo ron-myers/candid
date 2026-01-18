@@ -1,0 +1,72 @@
+# Slash Commands
+
+All available Candid commands.
+
+## /candid-review
+
+Run a code review on your changes.
+
+```
+/candid-review
+```
+
+### Options
+
+| Flag | Description |
+|------|-------------|
+| `--harsh` | Use brutal honesty tone |
+| `--constructive` | Use caring directness tone |
+| `--focus <mode>` | Focus on security, performance, architecture, or edge-case |
+| `--auto-commit` | Auto-commit applied fixes |
+| `--re-review` | Compare against previous review |
+| `--merge-target <branch>` | Specify the branch to diff against |
+| `--exclude <pattern>` | Exclude files matching pattern |
+
+### Examples
+
+```
+/candid-review --harsh --focus security
+/candid-review --constructive --auto-commit
+/candid-review --re-review
+```
+
+## /candid-init
+
+Generate a Technical.md file by analyzing your codebase.
+
+```
+/candid-init
+```
+
+### Options
+
+| Flag | Description |
+|------|-------------|
+| `--template <name>` | Use a specific template (minimal, react, node, python) |
+
+### Examples
+
+```
+/candid-init
+/candid-init --template react
+```
+
+## /candid-validate-standards
+
+Check your Technical.md for issues.
+
+```
+/candid-validate-standards
+```
+
+### Options
+
+| Flag | Description |
+|------|-------------|
+| `--fix` | Auto-fix issues where possible |
+
+### What It Checks
+
+- 🌫️ Vague rules without clear criteria
+- 📏 Missing thresholds or limits
+- 🔧 Rules that overlap with linters

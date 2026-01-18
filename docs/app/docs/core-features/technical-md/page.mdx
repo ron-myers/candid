@@ -1,0 +1,45 @@
+# Technical.md
+
+Define your team's coding standards.
+
+## What is Technical.md?
+
+Technical.md is a markdown file that defines your project's coding standards. Candid reads it during reviews and flags violations.
+
+## Quick Start
+
+### Auto-Generate
+
+```
+/candid-init
+```
+
+Analyzes your codebase and generates a Technical.md based on detected patterns.
+
+### Use a Template
+
+Copy a template from the Candid repo:
+
+- `Technical-minimal.md` - Starter with 15 rules
+- `Technical-react.md` - React projects
+- `Technical-node.md` - Node.js backend
+- `Technical-python.md` - Python projects
+
+## File Location
+
+Place Technical.md in either:
+- Project root: `./Technical.md`
+- Claude directory: `./.claude/Technical.md`
+
+## Keep It Light
+
+The most important rule: **a short Technical.md beats a comprehensive one.**
+
+- Under 200 lines of actual rules
+- Only rules you'd block a PR for
+- Skip what your linter already handles
+- Prune rules that aren't violated
+
+## Learn More
+
+- [Creating custom standards](/docs/how-to-guides/custom-standards) — Write effective rules

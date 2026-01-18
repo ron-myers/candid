@@ -1,0 +1,106 @@
+# Creating Custom Standards
+
+Write effective rules for your Technical.md.
+
+## Good Rules vs Bad Rules
+
+### Bad: Vague
+
+```markdown
+- Write clean code
+- Keep functions small
+- Use meaningful names
+```
+
+### Good: Specific
+
+```markdown
+- Functions must be under 50 lines
+- No magic numbers - use named constants
+- Database queries must use parameterized statements
+```
+
+## Rule Characteristics
+
+Effective rules are:
+
+- **Verifiable** - Clear pass/fail criteria
+- **Actionable** - Developer knows exactly what to do
+- **Important** - You'd actually block a PR for it
+
+## Structure
+
+```markdown
+## Section Name
+
+- Rule 1: Specific, verifiable statement
+- Rule 2: Another specific statement
+```
+
+## Examples by Category
+
+### Security
+
+```markdown
+- All user input validated at API boundary
+- No secrets in code (use environment variables)
+- SQL queries use parameterized statements
+```
+
+### Architecture
+
+```markdown
+- Controllers delegate to services (no business logic)
+- Services never import from controllers
+- No circular dependencies between modules
+```
+
+### Testing
+
+```markdown
+- New features require unit tests
+- Critical paths require integration tests
+- Test files live next to source files
+```
+
+## Using Templates
+
+Pre-built templates are available:
+
+- `Technical-minimal.md` - 15 essential rules for most projects
+- `Technical-react.md` - Frontend-focused for React apps
+- `Technical-node.md` - Backend-focused for Node.js apps
+- `Technical-python.md` - Rules for Python projects
+
+After copying a template:
+
+1. Remove rules that don't apply
+2. Add project-specific rules
+3. Validate with `/candid-validate-standards`
+
+## Validating Your Standards
+
+```
+/candid-validate-standards
+```
+
+### What Gets Flagged
+
+- 🌫️ **Vague Rules** - Rules that can't be objectively verified
+- 📏 **Missing Thresholds** - Rules without specific criteria
+- 🔧 **Linter Overlap** - Rules your linter already handles
+
+### With Auto-Fix Suggestions
+
+```
+/candid-validate-standards --fix
+```
+
+Includes suggested rewrites for problematic rules.
+
+### After Validation
+
+1. Remove or rewrite vague rules
+2. Add thresholds to rules missing them
+3. Remove rules your linter handles
+4. Re-run validation until clean

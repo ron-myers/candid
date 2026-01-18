@@ -1,0 +1,69 @@
+# Focus Modes
+
+Review specific aspects of your code.
+
+## Available Focus Modes
+
+### Security
+
+```
+/candid-review --focus security
+```
+
+Reviews for:
+- SQL injection
+- XSS vulnerabilities
+- Authentication issues
+- Secret exposure
+- Input validation
+
+### Performance
+
+```
+/candid-review --focus performance
+```
+
+Reviews for:
+- N+1 queries
+- Unnecessary re-renders
+- Memory leaks
+- Blocking operations
+- Inefficient algorithms
+
+### Architecture
+
+```
+/candid-review --focus architecture
+```
+
+Reviews for:
+- Design pattern violations
+- Coupling issues
+- Single Responsibility violations
+- Dependency direction
+- Layer violations
+
+### Edge Cases
+
+```
+/candid-review --focus edge-case
+```
+
+Reviews for:
+- Null/undefined handling
+- Empty collections
+- Boundary conditions
+- Error states
+- Timeout scenarios
+
+## When to Use Focus Modes
+
+- **Before security audits**: Run security focus
+- **After performance complaints**: Run performance focus
+- **During refactoring**: Run architecture focus
+- **Before release**: Run edge-case focus
+- **Every change**: Make specific types of checks part of every system change.
+
+## We are looking to grow our Focus Modes that are built in
+
+If you have something to add, [Create an Issue](https://github.com/ron-myers/candid/issues/new) or reach out on our Slack.

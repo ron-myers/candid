@@ -1,0 +1,76 @@
+# Workflow Examples
+
+Ready-to-use configurations for common workflows.
+
+## GitHub Flow
+
+Single main branch, feature branches merge directly.
+
+```json
+{
+  "tone": "constructive",
+  "mergeTargetBranches": ["main"]
+}
+```
+
+## Git Flow
+
+Development branch with release flow.
+
+```json
+{
+  "tone": "constructive",
+  "mergeTargetBranches": ["develop", "main"]
+}
+```
+
+## Trunk-Based Development
+
+Continuous integration to trunk/main.
+
+```json
+{
+  "tone": "harsh",
+  "mergeTargetBranches": ["trunk"],
+  "commit": true
+}
+```
+
+## Solo Developer
+
+Maximum feedback, harsh tone.
+
+```json
+{
+  "tone": "harsh",
+  "focus": "edge-case",
+  "commit": true
+}
+```
+
+## Security-Focused
+
+Always check security issues.
+
+```json
+{
+  "tone": "constructive",
+  "focus": "security"
+}
+```
+
+## Enterprise
+
+Constructive tone with exclusions for generated code.
+
+```json
+{
+  "tone": "constructive",
+  "mergeTargetBranches": ["develop", "main"],
+  "exclude": [
+    "*.generated.ts",
+    "*.pb.go",
+    "vendor/*"
+  ]
+}
+```

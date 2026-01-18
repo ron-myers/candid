@@ -1,0 +1,52 @@
+# Auto-Commit Mode
+
+Automatically commit applied fixes.
+
+## Usage
+
+```
+/candid-review --auto-commit
+```
+
+After you select fixes to apply, Candid creates a commit with a detailed message.
+
+> **Note:** Auto-commit is disabled by default. You must explicitly pass `--auto-commit` to enable it.
+
+## Commit Message Format
+
+```
+fix: Apply Candid code review fixes
+
+Fixes applied:
+- Fixed SQL injection vulnerability in src/api/users.ts:45
+- Added error handling to payment flow in src/services/payment.ts:120
+- Removed hardcoded API key from src/config.ts:15
+
+Review summary:
+- Critical: 1 fixed
+- Major: 2 fixed
+- Code Smell: 0 fixed
+
+Co-Authored-By: Claude <noreply@anthropic.com>
+```
+
+## Why Use Auto-Commit?
+
+### Clear History
+
+Each commit explicitly states what issues were fixed and where.
+
+### Traceability
+
+Easy to trace back why a change was made.
+
+### Atomic Changes
+
+Fixes are committed together, making it easy to revert if needed.
+
+## Combining with Other Options
+
+```
+/candid-review --focus security --auto-commit
+/candid-review --harsh --auto-commit
+```

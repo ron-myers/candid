@@ -1,0 +1,111 @@
+# Setting Up for Your Team
+
+Roll out Candid to your team effectively.
+
+## Why Team Adoption?
+
+When everyone uses Candid with shared standards:
+
+- Consistent code quality across the team
+- Better DX code reviews (issues caught early)
+- Shared understanding of standards
+- Reduced back-and-forth in PRs
+
+## Quick Start for Teams
+
+### 1. Install for Everyone
+
+Each team member installs Candid:
+
+```bash
+claude plugin marketplace add ron-myers/candid
+claude plugin install candid@candid
+```
+
+### 2. Create Shared Technical.md
+
+```
+/candid-init
+```
+
+Generate or write a Technical.md that reflects your team's standards.
+
+### 3. Commit to Repository
+
+Commit Technical.md so everyone uses the same standards.
+
+Review it as a team. Everyone should be aligned with what's outlined in Technical.md.
+
+### 4. Set Team Defaults
+
+Create `.candid/config.json` in the repo:
+
+```json
+{
+  "tone": "constructive",
+  "mergeTargetBranches": ["develop", "main"],
+  "exclude": ["*.generated.ts", "vendor/*"]
+}
+```
+
+## Config Options
+
+| Option | Type | Description |
+|--------|------|-------------|
+| `tone` | string | Default tone: "harsh" or "constructive" |
+| `mergeTargetBranches` | array | Branches to compare against |
+| `exclude` | array | File patterns to skip |
+| `focus` | string | Default focus mode |
+
+## User Overrides
+
+Team members can override with personal config at `~/.candid/config.json`.
+
+CLI flags always take precedence over any config.
+
+## Workflow Recommendations
+
+| Workflow | mergeTargetBranches |
+|----------|---------------------|
+| GitHub Flow | `["main"]` |
+| Git Flow | `["develop", "main"]` |
+| Trunk-based | `["trunk"]` |
+
+## Best Practices
+
+### Start Small
+
+Don't enforce everything at once:
+
+1. Start with a minimal Technical.md
+2. Add rules as you identify recurring issues
+3. Remove rules that aren't providing value
+
+### Use Constructive Tone
+
+Harsh tone is great for personal projects, but constructive tone works better for team environments.
+
+### Don't Over-Enforce
+
+Not every issue needs to be fixed:
+
+- Focus on Critical and Major issues
+- Code smells can be tech debt tickets
+- Architectural issues need discussion
+
+### Iterate on Technical.md
+
+Your standards should evolve:
+
+- Review Technical.md monthly
+- Remove rules no one violates
+- Add rules for recurring issues
+- Validate with `/candid-validate-standards`
+
+### Share Learnings
+
+When Candid catches something interesting:
+
+- Share in team chat
+- Add to Technical.md if it should be a standard
+- Discuss patterns that keep appearing

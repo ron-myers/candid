@@ -1,0 +1,62 @@
+# Config Options
+
+Complete reference for Candid configuration.
+
+## Schema
+
+```json
+{
+  "tone": "harsh" | "constructive",
+  "focus": "security" | "performance" | "architecture" | "edge-case",
+  "mergeTargetBranches": ["branch1", "branch2"],
+  "exclude": ["pattern1", "pattern2"],
+  "commit": boolean
+}
+```
+
+## Options
+
+### tone
+
+Review tone.
+
+| Value | Description |
+|-------|-------------|
+| `"harsh"` | Brutal honesty, no sugar-coating |
+| `"constructive"` | Direct but caring feedback |
+
+### focus
+
+Review focus mode.
+
+| Value | Description |
+|-------|-------------|
+| `"security"` | Security vulnerabilities |
+| `"performance"` | Performance issues |
+| `"architecture"` | Design patterns |
+| `"edge-case"` | Unhandled scenarios |
+
+### mergeTargetBranches
+
+Array of branches to compare against. First existing branch is used.
+
+Default: `["main", "stable", "master"]`
+
+### exclude
+
+Array of glob patterns for files to skip.
+
+Example: `["*.generated.ts", "vendor/*"]`
+
+### commit
+
+Whether to auto-commit applied fixes.
+
+Default: `false`
+
+## Config Precedence
+
+1. CLI flags
+2. Project config (`.candid/config.json`)
+3. User config (`~/.candid/config.json`)
+4. Interactive prompt

@@ -1,0 +1,42 @@
+# Re-Review Mode
+
+Compare your current code against a previous review.
+
+## Usage
+
+```
+/candid-review --re-review
+```
+
+## How It Works
+
+Candid saves review state to `.candid/last-review.json` after each review.
+
+Re-review mode compares current issues against the saved state.
+
+## Result Categories
+
+### ✅ Fixed
+
+Issues from the previous review that are now resolved.
+
+### 🔄 Still Present
+
+Issues that remain from the previous review.
+
+### 🆕 New
+
+Issues introduced since the last review.
+
+## Use Cases
+
+- Track progress on fixing issues
+- Ensure fixes didn't introduce new problems
+- Iterative improvement workflow
+
+## State File
+
+The review state is saved at `.candid/last-review.json`. You can:
+- Commit it to track review history
+- Delete it to reset the baseline
+- Ignore it in `.gitignore` for personal tracking

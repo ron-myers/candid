@@ -1,0 +1,43 @@
+# Tips & Troubleshooting
+
+Common issues and how to solve them.
+
+## Quick Fixes
+
+### Candid not responding
+
+1. Restart Claude Code
+2. Check plugin is installed: `claude plugin list`
+3. Reinstall if needed:
+   ```bash
+   claude plugin uninstall candid@candid
+   claude plugin marketplace add ron-myers/candid
+   claude plugin install candid@candid
+   ```
+
+### No issues found
+
+Candid only reviews uncommitted changes. Make sure you have:
+- Modified files that aren't committed
+- Files that aren't excluded in your config
+
+### Wrong branch comparison
+
+Candid compares against `main`, `stable`, or `master` by default. To change:
+
+```
+/candid-review --merge-target develop
+```
+
+Or set in `.candid/config.json`:
+```json
+{
+  "mergeTargetBranches": ["develop", "main"]
+}
+```
+
+## More Help
+
+- [FAQ & Known Issues](/docs/tips-troubleshooting/faq)
+- [Open a GitHub issue](https://github.com/ron-myers/candid/issues/new)
+- [Join our Slack](https://join.slack.com/t/candid-knc4230/shared_invite/zt-3norwiria-gvg9iQ0Dkg8x43diCcKLrw)
