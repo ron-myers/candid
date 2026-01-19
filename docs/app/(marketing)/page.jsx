@@ -172,6 +172,10 @@ claude plugin install candid@candid`}</code>
             <dt>What's the difference between Harsh and Constructive tone?</dt>
             <dd>Harsh mode is brutally honest—great for finding issues you might miss. Constructive mode is caring but direct, based on Radical Candor principles.</dd>
           </div>
+          <div className="faq-item">
+            <dt>What is Radical Candour?</dt>
+            <dd>Radical Candour is a management philosophy that combines caring personally with challenging directly. It's about giving honest, direct feedback while genuinely caring about the person receiving it. Candid's Constructive tone is based on these principles.</dd>
+          </div>
         </dl>
       </section>
 
