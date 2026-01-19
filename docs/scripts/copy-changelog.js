@@ -7,6 +7,9 @@ const dest = path.join(__dirname, '..', 'app', 'docs', 'resources', 'changelog',
 // Read the source changelog
 const content = fs.readFileSync(source, 'utf-8')
 
+// Create the destination directory if it doesn't exist
+fs.mkdirSync(path.dirname(dest), { recursive: true })
+
 // Write to the destination
 fs.writeFileSync(dest, content)
 
