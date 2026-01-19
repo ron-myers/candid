@@ -281,7 +281,7 @@ Your standards doc should be:
 
 Skip rules your linter already handles. Skip "nice to haves." Include only what you'd actually block a PR for.
 
-See [Technical.md Best Practices](docs/Technical-md-best-practices.md) for detailed guidance.
+See the [Custom Standards guide](https://www.candid.tools/docs/how-to-guides/custom-standards) for detailed guidance.
 
 ### Example Technical.md
 
@@ -388,19 +388,7 @@ candid/
 │   ├── Technical-python.md   # Python template
 │   └── Technical-nextjs-vercel-supabase-clerk-loop.md  # Next.js full-stack + Loop.so
 ├── docs/
-│   ├── getting-started.md    # 5-minute quickstart
-│   ├── review-scope.md       # Controlling what gets reviewed
-│   ├── troubleshooting.md    # FAQ and common issues
-│   ├── team-adoption.md      # Rolling out to teams
-│   ├── Technical-md-best-practices.md
-│   ├── technical-md-writing-guide.md  # How to write effective rules
-│   ├── integration/
-│   │   ├── ci-cd.md          # CI/CD integration guide
-│   │   └── pre-commit.md     # Pre-commit hook setup
-│   └── example-reviews/
-│       ├── security-review.md
-│       ├── performance-review.md
-│       └── clean-code-review.md
+│   └── app/                   # Nextra documentation site (www.candid.tools)
 ├── examples/
 │   ├── harsh/config.json
 │   └── constructive/config.json
@@ -442,15 +430,14 @@ Ron Myers
 
 ## Documentation
 
-- [Getting Started](docs/getting-started.md) - 5-minute quickstart
-- [Review Scope](docs/review-scope.md) - Controlling what gets reviewed
-- [Troubleshooting](docs/troubleshooting.md) - FAQ and common issues
-- [Team Adoption](docs/team-adoption.md) - Rolling out to your team
-- [Technical.md Best Practices](docs/Technical-md-best-practices.md) - Writing effective standards
-- [Technical.md Writing Guide](docs/technical-md-writing-guide.md) - Good rules vs bad rules
-- [CI/CD Integration](docs/integration/ci-cd.md) - Automate reviews in pipelines
-- [Pre-Commit Hooks](docs/integration/pre-commit.md) - Review before every commit
-- [Example Reviews](docs/example-reviews/) - See what reviews look like
+Full documentation is available at [www.candid.tools](https://www.candid.tools)
+
+Key guides:
+- [Getting Started](https://www.candid.tools/docs/get-started) - Installation and first review
+- [Team Setup](https://www.candid.tools/docs/how-to-guides/team-setup) - Rolling out to your team
+- [Custom Standards](https://www.candid.tools/docs/how-to-guides/custom-standards) - Writing effective Technical.md rules
+- [FAQ & Troubleshooting](https://www.candid.tools/docs/tips-troubleshooting/faq) - Common issues and solutions
+- [Example Reviews](https://www.candid.tools/docs/resources/examples) - See what reviews look like
 
 ## Links
 
