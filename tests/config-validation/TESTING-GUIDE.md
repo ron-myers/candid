@@ -138,7 +138,7 @@ Run `/candid-review` in each scenario and verify behavior:
     - Verify: Shows "⚠️  Invalid config: invalid type for autoCommit field (must be boolean)"
 
 24. **CLI override of config**
-    - Config: `{"autoCommit": false}`, run with `--commit`
+    - Config: `{"autoCommit": false}`, run with `--auto-commit`
     - Expected: Uses CLI flag (auto-commit enabled)
     - Verify: Shows "Commit enabled: will create git commit after applying fixes (from CLI flag)"
 

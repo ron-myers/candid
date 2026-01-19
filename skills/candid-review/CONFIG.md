@@ -34,7 +34,7 @@ Valid config file format:
   - `["develop", "main"]` - Git Flow
   - `["trunk"]` - Trunk-based development
   - `["origin/main", "main"]` - CI environments
-- `autoCommit` (optional): Default auto-commit behavior. If `true`, automatically creates git commits after applying fixes (equivalent to always using `--commit` flag). If `false` or omitted, commits only when `--commit` flag is provided. Defaults to `false`.
+- `autoCommit` (optional): Default auto-commit behavior. If `true`, automatically creates git commits after applying fixes (equivalent to always using `--auto-commit` flag). If `false` or omitted, commits only when `--auto-commit` flag is provided. Defaults to `false`.
 
 ## Validation Rules
 
