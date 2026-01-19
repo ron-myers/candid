@@ -10,7 +10,7 @@ export default function HomePage() {
       <section className="hero">
         <div className="version-badge">
           <span className="version-dot"></span>
-          v1.4.1 Now Available for Claude Code
+          v1.4.2 Now Available for Claude Code
         </div>
         <h1>Code Review for the AI Era</h1>
         <p className="hero-subtitle">

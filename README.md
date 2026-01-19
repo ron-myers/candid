@@ -100,16 +100,26 @@ Review state is automatically saved to `.candid/last-review.json` after each rev
 
 ### Commit Applied Fixes Automatically
 
+**Via CLI flag:**
 ```
 /candid-review --auto-commit
 ```
 
-Automatically create a git commit after successfully applying fixes.
+**Via config file:**
+```json
+{
+  "autoCommit": true
+}
+```
+
+Automatically creates a git commit after successfully applying fixes.
 
 - Only commits files modified by candid-review (not other unstaged changes)
 - Commit message includes detailed list of all fixes with file locations
 - Includes co-author tag
 - Commit failures preserve applied fixes
+
+The CLI flag always overrides config files.
 
 Example combining with other flags:
 ```
@@ -149,10 +159,13 @@ This means you can set a user-wide default and override it per-project, while CL
 ### Config Format
 
 ```json
-{"tone": "harsh"}
+{
+  "tone": "harsh",
+  "autoCommit": true
+}
 ```
 
-All fields are optional. See [CONFIG.md](skills/candid-review/CONFIG.md) for the full schema specification including `exclude` patterns and `focus` areas.
+All fields are optional. See [CONFIG.md](skills/candid-review/CONFIG.md) for the full schema specification including `exclude` patterns, `focus` areas, and `autoCommit` behavior.
 
 ### Example Setup
 

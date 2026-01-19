@@ -1,4 +1,5 @@
 {
   "version": 1,
-  "tone": "harsh"
+  "tone": "harsh",
+  "autoCommit": true
 }
