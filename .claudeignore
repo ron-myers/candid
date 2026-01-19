@@ -1,0 +1,15 @@
+# Documentation site (hosted separately at www.candid.tools)
+docs/
+
+# Test fixtures
+tests/
+
+# Build scripts
+scripts/
+
+# Development files
+.git/
+.context/
+node_modules/
+.DS_Store
+*.log
