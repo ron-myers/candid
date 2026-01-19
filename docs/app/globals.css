@@ -925,10 +925,222 @@ html.dark .faq-item dd::before {
   color: var(--text-secondary-dark);
 }
 
+/* ===== Demo Section ===== */
+.demo-section {
+  padding: 4rem 0;
+  text-align: center;
+}
+
+.demo-section h2 {
+  font-size: 2rem;
+  margin: 0 0 2.5rem 0;
+  color: var(--text-primary);
+}
+
+.screenshot-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+.screenshot-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.screenshot-wrapper {
+  position: relative;
+  overflow: hidden;
+  border-radius: 0.75rem;
+  border: 1px solid var(--border-light);
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.screenshot-wrapper:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+}
+
+.screenshot-wrapper:focus {
+  outline: 2px solid var(--accent-main);
+  outline-offset: 2px;
+}
+
+.screenshot-image {
+  width: 100%;
+  height: auto;
+  display: block;
+  transition: transform 0.2s ease;
+}
+
+.screenshot-wrapper:hover .screenshot-image {
+  transform: scale(1.02);
+}
+
+.screenshot-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.2s ease, background 0.2s ease;
+  pointer-events: none;
+}
+
+.screenshot-wrapper:hover .screenshot-overlay {
+  opacity: 1;
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.zoom-icon {
+  color: white;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+}
+
+.screenshot-caption {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin: 0;
+  text-align: center;
+  padding: 0 0.5rem;
+}
+
+/* ===== Lightbox Modal ===== */
+.lightbox-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.9);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  animation: fadeIn 0.2s ease;
+  cursor: pointer;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.lightbox-content {
+  max-width: 90vw;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  cursor: default;
+}
+
+.lightbox-image {
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: calc(90vh - 4rem);
+  object-fit: contain;
+  border-radius: 0.5rem;
+}
+
+.lightbox-caption {
+  color: white;
+  text-align: center;
+  font-size: 1rem;
+  margin: 0;
+}
+
+.lightbox-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+  color: white;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lightbox-close:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.lightbox-close:focus {
+  outline: 2px solid white;
+  outline-offset: 2px;
+}
+
+.lightbox-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  color: white;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lightbox-nav:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.lightbox-nav:focus {
+  outline: 2px solid white;
+  outline-offset: 2px;
+}
+
+.lightbox-prev {
+  left: 1rem;
+}
+
+.lightbox-next {
+  right: 1rem;
+}
+
+/* Dark mode for demo section */
+html.dark .demo-section h2 {
+  color: var(--text-primary-dark);
+}
+
+html.dark .screenshot-wrapper {
+  border-color: var(--border-dark);
+}
+
+html.dark .screenshot-wrapper:hover {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+html.dark .screenshot-caption {
+  color: var(--text-secondary-dark);
+}
+
 /* ===== Responsive ===== */
 @media (max-width: 1024px) {
   .card-grid {
     grid-template-columns: repeat(2, 1fr);
+  }
+
+  .screenshot-grid {
+    grid-template-columns: 1fr;
+    gap: 2rem;
   }
 }
 
@@ -951,5 +1163,33 @@ html.dark .faq-item dd::before {
 
   .marketing-nav-links {
     gap: 1rem;
+  }
+
+  .demo-section {
+    padding: 3rem 0;
+  }
+
+  .demo-section h2 {
+    font-size: 1.5rem;
+  }
+
+  .screenshot-grid {
+    gap: 1.5rem;
+  }
+
+  .lightbox-content {
+    padding: 0 1rem;
+  }
+
+  .lightbox-nav {
+    padding: 0.75rem;
+  }
+
+  .lightbox-prev {
+    left: 0.5rem;
+  }
+
+  .lightbox-next {
+    right: 0.5rem;
   }
 }
