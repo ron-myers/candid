@@ -263,7 +263,7 @@ cp templates/Technical-minimal.md ./Technical.md    # Start small
 cp templates/Technical-react.md ./Technical.md      # React projects
 cp templates/Technical-node.md ./Technical.md       # Node.js backend
 cp templates/Technical-python.md ./Technical.md     # Python projects
-cp templates/Technical-nextjs-vercel-supabase-clerk-loop.md ./Technical.md  # Next.js full-stack
+cp templates/nextjs-stack.md ./Technical.md         # Next.js full-stack
 cp templates/Technical.md ./Technical.md            # Comprehensive template
 ```
 
@@ -386,7 +386,7 @@ candid/
 │   ├── Technical-react.md    # React/frontend template
 │   ├── Technical-node.md     # Node.js/backend template
 │   ├── Technical-python.md   # Python template
-│   └── Technical-nextjs-vercel-supabase-clerk-loop.md  # Next.js full-stack + Loop.so
+│   └── nextjs-stack.md       # Next.js full-stack
 ├── docs/
 │   └── app/                   # Nextra documentation site (www.candid.tools)
 ├── examples/

@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.4.1] - 2026-01-18
+
+### Fixed
+
+- **Plugin update compatibility**: Renamed `templates/Technical-nextjs-vercel-supabase-clerk-loop.md` to `templates/nextjs-stack.md` to fix `ENAMETOOLONG` error during plugin updates. The long path was causing filesystem errors when Claude Code's plugin update process created temporary cache directories.
+
+### Changed
+
+- **Update troubleshooting documentation**: Enhanced the updating guide with step-by-step workaround for `ENAMETOOLONG` errors. Users can now run `claude plugin marketplace update candid` before updating, or follow a force reinstall procedure if needed.
+
 ## [1.4.0] - 2026-01-18
 
 ### Added

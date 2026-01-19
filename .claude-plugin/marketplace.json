@@ -1,7 +1,8 @@
 {
   "name": "candid",
   "owner": {
-    "name": "Ron Myers"
+    "name": "Ron Myers",
+    "email": "ron@fritterfactory.com"
   },
   "plugins": [
     {
@@ -11,9 +12,10 @@
         "url": "https://github.com/ron-myers/candid.git"
       },
       "description": "Configurable code reviews with radical candor - choose between harsh or constructive tone. Features Technical.md for project standards, architectural context analysis, actionable fixes, and seamless todo integration.",
-      "version": "1.4.0",
+      "version": "1.4.1",
       "author": {
-        "name": "Ron Myers"
+        "name": "Ron Myers",
+        "email": "ron@fritterfactory.com"
       },
       "homepage": "https://github.com/ron-myers/candid",
       "repository": "https://github.com/ron-myers/candid",

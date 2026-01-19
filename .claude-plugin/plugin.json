@@ -1,9 +1,10 @@
 {
   "name": "candid",
   "description": "Configurable code review with radical candor - choose between harsh direct feedback or constructive caring criticism. Features Technical.md for project standards, architectural context analysis, actionable fixes, and seamless todo integration.",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "author": {
-    "name": "Ron Myers"
+    "name": "Ron Myers",
+    "email": "ron@fritterfactory.com"
   },
   "homepage": "https://github.com/ron-myers/candid",
   "repository": "https://github.com/ron-myers/candid",
