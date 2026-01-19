@@ -1,11 +1,42 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { trackEvent, EVENTS } from '../components/trackEvent'
 import Logo from '../components/Logo'
 import GitHubStars from '../components/GitHubStars'
 
 export default function MarketingLayout({ children }) {
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
+
+  const toggleMenu = () => setIsMenuOpen(!isMenuOpen)
+  const closeMenu = () => setIsMenuOpen(false)
+
+  // Prevent body scroll when menu is open
+  useEffect(() => {
+    if (isMenuOpen) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
+
+    return () => {
+      document.body.style.overflow = ''
+    }
+  }, [isMenuOpen])
+
+  // Close menu on window resize to desktop
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth > 768 && isMenuOpen) {
+        setIsMenuOpen(false)
+      }
+    }
+
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [isMenuOpen])
+
   return (
     <div className="marketing-layout">
       <header className="marketing-header">
@@ -13,18 +44,52 @@ export default function MarketingLayout({ children }) {
           <Link href="/">
             <Logo />
           </Link>
-          <div className="marketing-nav-links">
-            <Link href="/docs">Documentation</Link>
+
+          <button
+            className="hamburger-button"
+            onClick={toggleMenu}
+            aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
+            aria-expanded={isMenuOpen}
+          >
+            <svg className="hamburger-icon" viewBox="0 0 24 24" fill="none">
+              {isMenuOpen ? (
+                <>
+                  <line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                  <line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                </>
+              ) : (
+                <>
+                  <line x1="3" y1="6" x2="21" y2="6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                  <line x1="3" y1="12" x2="21" y2="12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                  <line x1="3" y1="18" x2="21" y2="18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                </>
+              )}
+            </svg>
+          </button>
+
+          <div className={`marketing-nav-links ${isMenuOpen ? 'mobile-menu-open' : ''}`}>
+            <Link href="/docs" onClick={closeMenu}>Documentation</Link>
             <GitHubStars />
             <a
               href="https://join.slack.com/t/candid-knc4230/shared_invite/zt-3norwiria-gvg9iQ0Dkg8x43diCcKLrw"
               target="_blank"
               rel="noopener noreferrer"
-              onClick={() => trackEvent(EVENTS.SLACK_CLICK)}
+              onClick={() => {
+                trackEvent(EVENTS.SLACK_CLICK)
+                closeMenu()
+              }}
             >
               Slack
             </a>
           </div>
+
+          {isMenuOpen && (
+            <div
+              className="mobile-menu-backdrop"
+              onClick={closeMenu}
+              aria-hidden="true"
+            />
+          )}
         </nav>
       </header>
       <main className="marketing-main">
