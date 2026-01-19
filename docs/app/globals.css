@@ -149,6 +149,92 @@ header a:has(.logo):hover {
   color: var(--text-primary);
 }
 
+/* ===== Mobile Menu ===== */
+
+/* Hamburger button - hidden by default, shown on mobile */
+.hamburger-button {
+  display: none;
+  background: none;
+  border: none;
+  padding: 0.5rem;
+  cursor: pointer;
+  color: var(--text-secondary);
+  transition: color 0.15s ease;
+  z-index: 1001;
+}
+
+.hamburger-button:hover {
+  color: var(--text-primary);
+}
+
+.hamburger-icon {
+  width: 24px;
+  height: 24px;
+  display: block;
+}
+
+/* Mobile menu backdrop */
+.mobile-menu-backdrop {
+  display: none;
+}
+
+/* Mobile-specific styles */
+@media (max-width: 768px) {
+  .hamburger-button {
+    display: block;
+  }
+
+  .mobile-menu-backdrop {
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+    animation: fadeIn 0.3s ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  .marketing-nav-links {
+    position: fixed;
+    top: 0;
+    right: -100%;
+    height: 100vh;
+    width: 280px;
+    max-width: 80vw;
+    background: var(--bg-light);
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0;
+    padding: 5rem 2rem 2rem;
+    box-shadow: -2px 0 8px rgba(0, 0, 0, 0.1);
+    transition: right 0.3s ease;
+    z-index: 1000;
+    overflow-y: auto;
+  }
+
+  .marketing-nav-links.mobile-menu-open {
+    right: 0;
+  }
+
+  .marketing-nav-links a {
+    width: 100%;
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--border-light);
+    font-size: 1.1rem;
+  }
+
+  .marketing-nav-links a:last-child {
+    border-bottom: none;
+  }
+}
+
 .marketing-main {
   flex: 1;
   max-width: 1200px;
@@ -706,6 +792,30 @@ html.dark .marketing-nav-links a {
 
 html.dark .marketing-nav-links a:hover {
   color: var(--text-primary-dark);
+}
+
+/* Dark mode mobile menu */
+html.dark .hamburger-button {
+  color: var(--text-secondary-dark);
+}
+
+html.dark .hamburger-button:hover {
+  color: var(--text-primary-dark);
+}
+
+html.dark .mobile-menu-backdrop {
+  background: rgba(0, 0, 0, 0.7);
+}
+
+@media (max-width: 768px) {
+  html.dark .marketing-nav-links {
+    background: var(--bg-dark);
+    box-shadow: -2px 0 8px rgba(0, 0, 0, 0.5);
+  }
+
+  html.dark .marketing-nav-links a {
+    border-color: var(--border-dark);
+  }
 }
 
 html.dark .marketing-footer {
