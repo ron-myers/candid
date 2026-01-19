@@ -1,10 +1,55 @@
 'use client'
 
+import { useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { trackEvent, EVENTS } from '../components/trackEvent'
 import Pre from '../components/Pre'
 
 export default function HomePage() {
+  const [lightboxOpen, setLightboxOpen] = useState(false)
+  const [currentImage, setCurrentImage] = useState(null)
+
+  const screenshots = [
+    {
+      src: '/screenshots/candid-review-activation.png',
+      alt: 'Candid review command activation showing the review process steps',
+      caption: 'Run /candid-review to start a comprehensive code review',
+      width: 1200,
+      height: 400
+    },
+    {
+      src: '/screenshots/apply-fix-dialog.png',
+      alt: 'Apply fix dialog showing individual fix application options',
+      caption: 'Review and apply fixes individually with one click',
+      width: 1200,
+      height: 400
+    },
+    {
+      src: '/screenshots/handle-fixes-options.png',
+      alt: 'Fix handling options showing batch operation choices',
+      caption: 'Choose how to handle multiple fixes at once',
+      width: 1200,
+      height: 400
+    }
+  ]
+
+  const openLightbox = (index) => {
+    setCurrentImage(index)
+    setLightboxOpen(true)
+  }
+
+  const closeLightbox = () => {
+    setLightboxOpen(false)
+    setCurrentImage(null)
+  }
+
+  const navigateImage = (direction) => {
+    if (currentImage === null) return
+    const newIndex = (currentImage + direction + screenshots.length) % screenshots.length
+    setCurrentImage(newIndex)
+  }
+
   return (
     <>
       <section className="hero">
@@ -41,6 +86,105 @@ export default function HomePage() {
 claude plugin install candid@candid`}</code>
         </Pre>
       </section>
+
+      <section className="demo-section">
+        <span className="section-badge">SEE IT IN ACTION</span>
+        <h2>Candid Code Review Workflow</h2>
+        <div className="screenshot-grid">
+          {screenshots.map((screenshot, index) => (
+            <div key={index} className="screenshot-item">
+              <div
+                className="screenshot-wrapper"
+                onClick={() => openLightbox(index)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault()
+                    openLightbox(index)
+                  }
+                }}
+              >
+                <Image
+                  src={screenshot.src}
+                  alt={screenshot.alt}
+                  width={screenshot.width}
+                  height={screenshot.height}
+                  className="screenshot-image"
+                />
+                <div className="screenshot-overlay">
+                  <svg className="zoom-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="11" cy="11" r="6" stroke="currentColor" strokeWidth="2"/>
+                    <path d="M15 15L20 20" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                    <path d="M11 8V14M8 11H14" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                  </svg>
+                </div>
+              </div>
+              <p className="screenshot-caption">{screenshot.caption}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {lightboxOpen && currentImage !== null && (
+        <div
+          className="lightbox-overlay"
+          onClick={closeLightbox}
+          onKeyDown={(e) => {
+            if (e.key === 'Escape') closeLightbox()
+            if (e.key === 'ArrowLeft') navigateImage(-1)
+            if (e.key === 'ArrowRight') navigateImage(1)
+          }}
+          tabIndex={0}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Image lightbox"
+        >
+          <button
+            className="lightbox-close"
+            onClick={closeLightbox}
+            aria-label="Close lightbox"
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+            </svg>
+          </button>
+          <button
+            className="lightbox-nav lightbox-prev"
+            onClick={(e) => {
+              e.stopPropagation()
+              navigateImage(-1)
+            }}
+            aria-label="Previous image"
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </button>
+          <div className="lightbox-content" onClick={(e) => e.stopPropagation()}>
+            <Image
+              src={screenshots[currentImage].src}
+              alt={screenshots[currentImage].alt}
+              width={1600}
+              height={900}
+              className="lightbox-image"
+            />
+            <p className="lightbox-caption">{screenshots[currentImage].caption}</p>
+          </div>
+          <button
+            className="lightbox-nav lightbox-next"
+            onClick={(e) => {
+              e.stopPropagation()
+              navigateImage(1)
+            }}
+            aria-label="Next image"
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M9 18L15 12L9 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </button>
+        </div>
+      )}
 
       <section className="features-section">
         <h2>Features</h2>
