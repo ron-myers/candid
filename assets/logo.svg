@@ -1,0 +1,20 @@
+<svg viewBox="0 0 150 32" width="150" height="32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Comment Bubble Icon -->
+  <path
+    d="M6 4H22C25.3137 4 28 6.68629 28 10V18C28 21.3137 25.3137 24 22 24H14L8 28V24H6C2.68629 24 0 21.3137 0 18V10C0 6.68629 2.68629 4 6 4Z"
+    fill="white"
+    stroke="#d4a27f"
+    stroke-width="2.5"
+  />
+
+  <!-- "candid" Text -->
+  <text
+    x="38"
+    y="20"
+    font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif"
+    font-size="18"
+    font-weight="600"
+    fill="#2c2c2c"
+    letter-spacing="0.5"
+  >candid</text>
+</svg>

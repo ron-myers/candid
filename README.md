@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/logo.svg" alt="Candid Logo" width="250"/>
+</p>
+
 # Candid
 
 A Claude Code plugin for configurable code reviews that combine thoroughness with actionable feedback. Based on Kim Scott's Radical Candor framework: **Care Personally + Challenge Directly**.
