@@ -10,7 +10,35 @@ Automatically commit applied fixes.
 
 After you select fixes to apply, Candid creates a commit with a detailed message.
 
-> **Note:** Auto-commit is disabled by default. You must explicitly pass `--auto-commit` to enable it.
+> **Note:** Auto-commit is disabled by default. You can enable it via CLI flag (`--auto-commit`) or config file (`autoCommit: true`).
+
+## Configuration
+
+### Via CLI Flag
+
+```
+/candid-review --auto-commit
+```
+
+### Via Config File
+
+Set `autoCommit` in your config file to enable by default:
+
+**Project config** (`.candid/config.json`):
+```json
+{
+  "autoCommit": true
+}
+```
+
+**User config** (`~/.candid/config.json`):
+```json
+{
+  "autoCommit": true
+}
+```
+
+The CLI flag always overrides config files.
 
 ## Commit Message Format
 

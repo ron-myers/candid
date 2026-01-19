@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.4.2] - 2026-01-18
+
+### Added
+
+- **Auto-commit config option** (#12): `autoCommit` field in config files allows defaulting auto-commit behavior
+  - Set `"autoCommit": true` in `.candid/config.json` or `~/.candid/config.json` to enable auto-commit by default
+  - CLI flag `--auto-commit` still overrides config files
+  - Defaults to `false` for backward compatibility
+  - Follows same precedence rules as other config options: CLI flag → project config → user config → default
+
 ## [1.4.1] - 2026-01-18
 
 ### Fixed

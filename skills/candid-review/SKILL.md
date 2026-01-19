@@ -201,7 +201,7 @@ If `--auto-commit` flag is provided, automatically create git commit after succe
 
 **Output when enabled:** `Commit enabled: will create git commit after applying fixes (from CLI flag)`
 
-### Step 4: Load Tone Preference
+### Step 4: Load Tone Preference and Commit Mode
 
 #### Check for --auto-commit flag
 
@@ -210,9 +210,41 @@ Parse CLI arguments to determine if automatic commit is requested.
 If `--auto-commit` flag is provided:
 - Set `commitEnabled = true`
 - Output: `Commit enabled: will create git commit after applying fixes (from CLI flag)`
-- Note: Commit will only be created if fixes are successfully applied
+- Skip to tone preference loading
 
-If `--auto-commit` flag is NOT provided:
+If `--auto-commit` flag is NOT provided, check config files:
+
+#### Check Project Config for Commit
+
+Read `.candid/config.json`:
+1. Check file existence → if missing, continue to user config
+2. Validate JSON (use `jq empty .candid/config.json 2>&1`) → if invalid, skip to user config
+3. Extract field: `jq -r '.autoCommit // null' .candid/config.json`
+4. Validate:
+   - If null or missing → continue to user config
+   - If not boolean → warn "⚠️  Invalid config at .candid/config.json: invalid type for autoCommit field (must be boolean). Falling back to user config." and continue to user config
+5. Success:
+   - Set `commitEnabled` to config value (true or false)
+   - If true: Output `Commit enabled: will create git commit after applying fixes (from project config)`
+   - Continue to tone preference loading
+
+#### Check User Config for Commit
+
+Read `~/.candid/config.json`:
+1. Check file existence → if missing, continue to default
+2. Validate JSON (use `jq empty ~/.candid/config.json 2>&1`) → if invalid, use default
+3. Extract field: `jq -r '.autoCommit // null' ~/.candid/config.json`
+4. Validate:
+   - If null or missing → use default
+   - If not boolean → warn "⚠️  Invalid config at ~/.candid/config.json: invalid type for autoCommit field (must be boolean). Using default." and use default
+5. Success:
+   - Set `commitEnabled` to config value (true or false)
+   - If true: Output `Commit enabled: will create git commit after applying fixes (from user config)`
+   - Continue to tone preference loading
+
+#### Default Commit Behavior
+
+If no CLI flag and no config specifies commit:
 - Set `commitEnabled = false`
 - (No output - default behavior)
 
@@ -625,7 +657,7 @@ After creating todos, confirm to user how many were added and remind them they c
 ### Step 9.5: Create Git Commit (Optional)
 
 **Pre-condition:** Only execute this step if ALL of the following are true:
-1. `commitEnabled = true` (--auto-commit flag was provided in Step 4)
+1. `commitEnabled = true` (--auto-commit flag was provided or config enabled in Step 4)
 2. `selectedFixes` is not empty (fixes were applied in Step 9)
 3. Git repository is available (detected in Step 2)
 

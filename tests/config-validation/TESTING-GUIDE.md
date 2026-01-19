@@ -120,6 +120,34 @@ Run `/candid-review` in each scenario and verify behavior:
     - Expected: Uses `["develop"]` from CLI
     - Verify: Shows "(from CLI flags)"
 
+### Commit Config Tests
+
+21. **Valid autoCommit true**
+    - Config: `{"autoCommit": true}`
+    - Expected: Auto-commit enabled
+    - Verify: Shows "Commit enabled: will create git commit after applying fixes (from project config)"
+
+22. **Valid autoCommit false**
+    - Config: `{"autoCommit": false}`
+    - Expected: Auto-commit disabled (explicit)
+    - Verify: No commit message shown, no auto-commit occurs
+
+23. **Invalid autoCommit type (string)**
+    - Config: `{"autoCommit": "yes"}`
+    - Expected: Warning shown, falls back to next source
+    - Verify: Shows "⚠️  Invalid config: invalid type for autoCommit field (must be boolean)"
+
+24. **CLI override of config**
+    - Config: `{"autoCommit": false}`, run with `--auto-commit`
+    - Expected: Uses CLI flag (auto-commit enabled)
+    - Verify: Shows "Commit enabled: will create git commit after applying fixes (from CLI flag)"
+
+25. **Project overrides user**
+    - User config: `{"autoCommit": true}`
+    - Project config: `{"autoCommit": false}`
+    - Expected: Uses project config (no auto-commit)
+    - Verify: No commit occurs
+
 ## Quick Test Commands
 
 ```bash

@@ -15,7 +15,8 @@ Valid config file format:
   "tone": "harsh" | "constructive",
   "exclude": ["*.generated.ts", "vendor/*"],
   "focus": "security" | "performance" | "architecture",
-  "mergeTargetBranches": ["main", "develop", "master"]
+  "mergeTargetBranches": ["main", "develop", "master"],
+  "autoCommit": true | false
 }
 ```
 
@@ -33,6 +34,7 @@ Valid config file format:
   - `["develop", "main"]` - Git Flow
   - `["trunk"]` - Trunk-based development
   - `["origin/main", "main"]` - CI environments
+- `autoCommit` (optional): Default auto-commit behavior. If `true`, automatically creates git commits after applying fixes (equivalent to always using `--auto-commit` flag). If `false` or omitted, commits only when `--auto-commit` flag is provided. Defaults to `false`.
 
 ## Validation Rules
 
@@ -41,8 +43,9 @@ Valid config file format:
 3. **Tone field validation** - If `tone` is a string, value must be exactly `"harsh"` or `"constructive"` (case-sensitive)
 4. **Focus field validation** - If `focus` field is present, must be exactly `"security"`, `"performance"`, `"architecture"`, or `"edge-case"` (case-sensitive). Invalid values show warning and are ignored.
 5. **mergeTargetBranches field validation** - If present, must be an array of non-empty strings. Empty arrays or invalid values show warning and are ignored.
-6. **Unknown fields ignored** - Any fields other than `tone`, `exclude`, `focus`, and `mergeTargetBranches` are ignored for forward compatibility
-7. **Empty object is valid** - `{}` is a valid config with no preferences set, system continues to next source
+6. **AutoCommit field validation** - If `autoCommit` field is present, must be a boolean (`true` or `false`). Invalid values show warning and are ignored.
+7. **Unknown fields ignored** - Any fields other than `tone`, `exclude`, `focus`, `mergeTargetBranches`, and `autoCommit` are ignored for forward compatibility
+8. **Empty object is valid** - `{}` is a valid config with no preferences set, system continues to next source
 
 ## Config Validation Procedure
 
@@ -203,7 +206,8 @@ Using constructive tone (from interactive prompt)
   "version": 1,
   "tone": "harsh",
   "exclude": ["*.generated.ts", "vendor/*"],
-  "focus": "performance"
+  "focus": "performance",
+  "autoCommit": true
 }
 ```
 
