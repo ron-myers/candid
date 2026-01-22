@@ -43,12 +43,22 @@ Generate a Technical.md file by analyzing your codebase.
 | Flag | Description |
 |------|-------------|
 | `--template <name>` | Use a specific template (minimal, react, node, python) |
+| `--effort <level>` | Analysis depth: quick (~30s), medium (~1-2min), thorough (~5-10min, default) |
+| `--output <path>` | Custom output path (default: .candid/Technical.md) |
+
+### Effort Levels
+
+- **quick**: Fast analysis - framework detection, directory structure, file suffixes
+- **medium**: Balanced - adds naming conventions, error patterns, reads 5-8 key files
+- **thorough**: Comprehensive - launches sub-agents to read ALL files in parallel (default)
 
 ### Examples
 
 ```
 /candid-init
 /candid-init --template react
+/candid-init --effort quick
+/candid-init --effort thorough
 ```
 
 ## /candid-validate-standards

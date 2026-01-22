@@ -82,9 +82,11 @@ Define project-specific standards that Candid enforces during reviews. Violation
 
 **Quick setup:**
 ```
-/candid-init              # Auto-generate from codebase
-/candid-init react        # React-specific standards
-/candid-init minimal      # Minimal starter
+/candid-init                    # Auto-generate from codebase (thorough analysis)
+/candid-init react              # React-specific standards
+/candid-init minimal            # Minimal starter
+/candid-init --effort quick     # Fast analysis (~30 sec)
+/candid-init --effort thorough  # Deep analysis (~3-5 min, default)
 ```
 
 **Or copy a template:**
@@ -94,7 +96,7 @@ cp templates/Technical-react.md ./Technical.md
 cp templates/Technical-node.md ./Technical.md
 ```
 
-Keep it focused: under 200 lines, verifiable rules only. Skip what your linter handles. See the [Custom Standards guide](https://www.candid.tools/docs/how-to-guides/custom-standards) for detailed guidance.
+Keep it focused: under 500 lines, verifiable rules only. Skip what your linter handles. See the [Custom Standards guide](https://www.candid.tools/docs/how-to-guides/custom-standards) for detailed guidance.
 
 ## Configuration
 

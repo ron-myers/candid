@@ -7,6 +7,47 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Analysis effort levels for candid-init** (`--effort quick|medium|thorough`): Control how deeply candid-init analyzes your codebase
+  - `quick` (~30 sec): Framework detection, directory structure, file suffixes, top imports
+  - `medium` (~1-2 min): Adds naming conventions, error patterns, test organization, reads 5-8 key files
+  - `thorough` (~5-10 min, default): Launches 3-5 sub-agents to read ALL files in parallel
+  - Generated rules now reference specific file paths from your project
+  - Pattern-to-rule transformation creates project-specific standards, not generic templates
+
+- **Sub-agent comprehensive analysis in thorough mode**: Parallel agents analyze entire codebase
+  - **Architecture Agent**: Reads all controllers/services/repositories, maps dependency graph, finds violations
+  - **Naming Agent**: Reads 20-30 files across layers, extracts naming conventions with consistency metrics
+  - **Error/Security Agent**: Reads all error handling and auth code, identifies patterns and gaps
+  - **Testing Agent**: Reads all test files, documents organization and coverage gaps
+  - **Framework Agent**: Reads all React components or API routes (framework-specific)
+  - Each agent proposes rules with specific file:line evidence
+
+- **Two-phase sub-agent architecture for 500-line Technical.md**: Thorough mode now generates comprehensive documentation
+  - **Phase 1 - Analysis**: 5 parallel agents read ALL files, extract patterns with file:line evidence
+  - **Phase 2 - Generation**: 5 parallel agents write sections (~80-120 lines each)
+    - Architecture Section Agent: Layer rules, module boundaries, dependency graph
+    - Naming Section Agent: File naming, class naming, function naming, variable naming
+    - Error Handling Section Agent: Error patterns, logging standards, response formats
+    - Testing Section Agent: Test organization, naming conventions, coverage requirements
+    - Security & Framework Section Agent: Auth patterns, framework conventions, gaps table
+  - Output scales by effort: quick (~50 lines), medium (~150 lines), thorough (~500 lines)
+  - Each section includes specific file paths and code examples from the analyzed codebase
+
+- **Architecture analysis in candid-init**: Thorough mode now generates architecture rules with enforcement
+  - Detects layer boundaries (controllers/services/repositories) and generates dependency rules
+  - Detects module boundaries (feature-based structure) and generates isolation rules
+  - Identifies actual violations in the codebase and notes them in Technical.md
+  - Rules reference specific paths: "Controllers in `src/controllers/` must not import from `src/repositories/`"
+
+- **Gap analysis in candid-init**: Compares detected patterns to best practices
+  - Security gaps: Input validation, parameterized queries, auth middleware
+  - Error handling gaps: Custom error classes, consistent response format
+  - Testing gaps: Missing test coverage, inconsistent naming
+  - TypeScript gaps: Strict mode, any usage count
+  - Generates "Gaps vs Best Practices" table in Technical.md
+
 ### Changed
 
 - **candid-init generates both Technical.md and config.json**: The init command now creates a complete project setup in the `.candid/` directory
