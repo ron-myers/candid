@@ -16,6 +16,16 @@ Technical.md is a markdown file that defines your project's coding standards. Ca
 
 Analyzes your codebase and generates a Technical.md based on detected patterns.
 
+**Control analysis depth with `--effort`:**
+
+```
+/candid-init --effort quick     # Fast (~30 sec)
+/candid-init --effort medium    # Balanced (~1-2 min)
+/candid-init --effort thorough  # Comprehensive (~5-10 min, default)
+```
+
+The `thorough` setting launches sub-agents that read ALL files in your codebase in parallel, generating rules with specific file evidence.
+
 ### Use a Template
 
 Copy a template from the Candid repo:
@@ -31,11 +41,11 @@ Place Technical.md in either:
 - Project root: `./Technical.md`
 - Claude directory: `./.claude/Technical.md`
 
-## Keep It Light
+## Keep It Focused
 
-The most important rule: **a short Technical.md beats a comprehensive one.**
+The most important rule: **every rule should be actionable and verifiable.**
 
-- Under 200 lines of actual rules
+- Under 500 lines (thorough mode generates ~500, quick ~50)
 - Only rules you'd block a PR for
 - Skip what your linter already handles
 - Prune rules that aren't violated
