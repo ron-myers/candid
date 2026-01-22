@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **candid-init generates both Technical.md and config.json**: The init command now creates a complete project setup in the `.candid/` directory
+  - Technical.md moved from project root to `.candid/Technical.md`
+  - New `.candid/config.json` file generated with auto-detected settings
+  - Auto-detects configuration values:
+    - `tone`: defaults to "constructive" (safer for teams)
+    - `exclude`: parses .gitignore and adds framework-specific patterns
+    - `focus`: infers from project structure (auth/ → security, WebSocket → performance)
+    - `mergeTargetBranches`: detects from existing git branches (stable, main, master, develop, trunk)
+    - `autoCommit`: defaults to false
+  - Interactive confirmation flow: "Accept all", "Customize settings", or "Skip config generation"
+  - Both files created in `.candid/` directory with proper error handling
+  - 9-step workflow (expanded from 7 steps) with enhanced project analysis
+  - Prompts for overwrite if existing files found
+
 ## [1.4.2] - 2026-01-18
 
 ### Added
