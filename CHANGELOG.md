@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+### Changed
+
+### Fixed
+
+## [1.5.0] - 2026-01-22
+
+### Added
+
 - **Analysis effort levels for candid-init** (`--effort quick|medium|thorough`): Control how deeply candid-init analyzes your codebase
   - `quick` (~30 sec): Framework detection, directory structure, file suffixes, top imports
   - `medium` (~1-2 min): Adds naming conventions, error patterns, test organization, reads 5-8 key files
