@@ -35,8 +35,7 @@ The review process follows these steps:
 ## Installation
 
 ```bash
-claude plugin marketplace add ron-myers/candid
-claude plugin install candid@candid
+npx skills add https://github.com/ron-myers/candid
 ```
 
 Then restart Claude Code.

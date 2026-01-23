@@ -181,8 +181,7 @@ export default function HomePage() {
             transition: 'opacity 600ms ease-out 400ms, transform 600ms ease-out 400ms'
           }}
         >
-          <code>{`claude plugin marketplace add ron-myers/candid
-claude plugin install candid@candid`}</code>
+          <code>{`npx skills add https://github.com/ron-myers/candid`}</code>
         </Pre>
       </section>
 
@@ -335,8 +334,7 @@ claude plugin install candid@candid`}</code>
               <strong>Install Candid.</strong>
               <span>Add Candid to Claude Code with two commands from your terminal.</span>
               <Pre className="step-code" trackingId="step_install">
-                <code>{`claude plugin marketplace add ron-myers/candid
-claude plugin install candid@candid`}</code>
+                <code>{`npx skills add https://github.com/ron-myers/candid`}</code>
               </Pre>
             </div>
           </li>
@@ -426,8 +424,7 @@ claude plugin install candid@candid`}</code>
         <h2>Get started in 5 minutes</h2>
         <Pre className="code-block" trackingId="cta_full_install">
           <code>{`# From a terminal
-claude plugin marketplace add ron-myers/candid
-claude plugin install candid@candid
+npx skills add https://github.com/ron-myers/candid
 
 # start claude (pass any args you normally would)
 claude
