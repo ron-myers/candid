@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { trackEvent, EVENTS } from '../components/trackEvent'
@@ -9,6 +9,59 @@ import Pre from '../components/Pre'
 export default function HomePage() {
   const [lightboxOpen, setLightboxOpen] = useState(false)
   const [currentImage, setCurrentImage] = useState(null)
+  const [heroLoaded, setHeroLoaded] = useState(false)
+
+  // Refs for scroll-triggered animations
+  const featuresRef = useRef(null)
+  const howItWorksRef = useRef(null)
+  const commandsRef = useRef(null)
+  const communityRef = useRef(null)
+  const faqRef = useRef(null)
+  const ctaRef = useRef(null)
+
+  // Hero load animation
+  useEffect(() => {
+    setHeroLoaded(true)
+  }, [])
+
+  // Scroll-triggered animations
+  useEffect(() => {
+    const observerOptions = {
+      root: null,
+      rootMargin: '0px',
+      threshold: 0.1
+    }
+
+    const observerCallback = (entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('animate-in')
+          // Also add animate-in to child elements that need it
+          const cardGrid = entry.target.querySelector('.card-grid')
+          const stepsList = entry.target.querySelector('.steps-list')
+          if (cardGrid) cardGrid.classList.add('animate-in')
+          if (stepsList) stepsList.classList.add('animate-in')
+        }
+      })
+    }
+
+    const observer = new IntersectionObserver(observerCallback, observerOptions)
+
+    const refs = [featuresRef, howItWorksRef, commandsRef, communityRef, faqRef, ctaRef]
+    refs.forEach(ref => {
+      if (ref.current) {
+        observer.observe(ref.current)
+      }
+    })
+
+    return () => {
+      refs.forEach(ref => {
+        if (ref.current) {
+          observer.unobserve(ref.current)
+        }
+      })
+    }
+  }, [])
 
   const screenshots = [
     {
@@ -53,16 +106,54 @@ export default function HomePage() {
   return (
     <>
       <section className="hero">
-        <div className="version-badge">
+        <div
+          className="version-badge"
+          style={{
+            opacity: heroLoaded ? 1 : 0,
+            transform: heroLoaded ? 'translateY(0)' : 'translateY(20px)',
+            transition: 'opacity 600ms ease-out, transform 600ms ease-out'
+          }}
+        >
           <span className="version-dot"></span>
           v1.4.2 Now Available for Claude Code
         </div>
-        <h1>Code Review for the AI Era</h1>
-        <p className="hero-subtitle">
+        <h1
+          style={{
+            opacity: heroLoaded ? 1 : 0,
+            transform: heroLoaded ? 'translateY(0)' : 'translateY(20px)',
+            transition: 'opacity 600ms ease-out 100ms, transform 600ms ease-out 100ms'
+          }}
+        >
+          Code Review for the AI Era
+        </h1>
+        <p
+          className="hero-subtitle"
+          style={{
+            opacity: heroLoaded ? 1 : 0,
+            transform: heroLoaded ? 'translateY(0)' : 'translateY(20px)',
+            transition: 'opacity 600ms ease-out 200ms, transform 600ms ease-out 200ms'
+          }}
+        >
           Claude Code writes fast. Now you review faster.
         </p>
-        <p className="hero-tagline">And with more confidence.</p>
-        <div className="hero-cta">
+        <p
+          className="hero-tagline"
+          style={{
+            opacity: heroLoaded ? 1 : 0,
+            transform: heroLoaded ? 'translateY(0)' : 'translateY(20px)',
+            transition: 'opacity 600ms ease-out 200ms, transform 600ms ease-out 200ms'
+          }}
+        >
+          And with more confidence.
+        </p>
+        <div
+          className="hero-cta"
+          style={{
+            opacity: heroLoaded ? 1 : 0,
+            transform: heroLoaded ? 'translateY(0)' : 'translateY(20px)',
+            transition: 'opacity 600ms ease-out 300ms, transform 600ms ease-out 300ms'
+          }}
+        >
           <Link
             href="/docs"
             className="btn-primary"
@@ -81,7 +172,15 @@ export default function HomePage() {
             Learn how it works <span className="btn-arrow">→</span>
           </Link>
         </div>
-        <Pre className="install-command" trackingId="hero_install">
+        <Pre
+          className="install-command"
+          trackingId="hero_install"
+          style={{
+            opacity: heroLoaded ? 1 : 0,
+            transform: heroLoaded ? 'translateY(0)' : 'translateY(20px)',
+            transition: 'opacity 600ms ease-out 400ms, transform 600ms ease-out 400ms'
+          }}
+        >
           <code>{`claude plugin marketplace add ron-myers/candid
 claude plugin install candid@candid`}</code>
         </Pre>
@@ -186,7 +285,7 @@ claude plugin install candid@candid`}</code>
         </div>
       )}
 
-      <section className="features-section">
+      <section className="features-section scroll-animate" ref={featuresRef}>
         <h2>Features</h2>
         <div className="card-grid">
           <Link href="/docs/core-features/technical-md" className="card-link">
@@ -228,7 +327,7 @@ claude plugin install candid@candid`}</code>
         </div>
       </section>
 
-      <section className="how-it-works">
+      <section className="how-it-works scroll-animate" ref={howItWorksRef}>
         <span className="section-badge">HOW IT WORKS</span>
         <ol className="steps-list">
           <li>
@@ -262,7 +361,7 @@ claude plugin install candid@candid`}</code>
         </ol>
       </section>
 
-      <section className="commands-section">
+      <section className="commands-section scroll-animate" ref={commandsRef}>
         <span className="section-badge">SLASH COMMANDS</span>
         <ul className="commands-list">
           <li>
@@ -280,7 +379,7 @@ claude plugin install candid@candid`}</code>
         </ul>
       </section>
 
-      <section className="community-section">
+      <section className="community-section scroll-animate" ref={communityRef}>
         <span className="section-badge">COMMUNITY</span>
         <h2>Join the Conversation</h2>
         <p>
@@ -297,7 +396,7 @@ claude plugin install candid@candid`}</code>
         </a>
       </section>
 
-      <section className="faq-section">
+      <section className="faq-section scroll-animate" ref={faqRef}>
         <span className="section-badge">FREQUENTLY ASKED QUESTIONS</span>
         <dl className="faq-list">
           <div className="faq-item">
@@ -323,7 +422,7 @@ claude plugin install candid@candid`}</code>
         </dl>
       </section>
 
-      <section className="cta-section">
+      <section className="cta-section scroll-animate" ref={ctaRef}>
         <h2>Get started in 5 minutes</h2>
         <Pre className="code-block" trackingId="cta_full_install">
           <code>{`# From a terminal
