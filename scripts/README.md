@@ -17,6 +17,7 @@ The script performs the following operations in sequence:
    - `.claude-plugin/plugin.json`
    - `.claude-plugin/marketplace.json`
    - `CHANGELOG.md` (adds new version header with today's date)
+   - `docs/app/(marketing)/page.jsx` (updates homepage version badge)
 5. **Creates** a git commit with the message: `"Bump plugin version to X.Y.Z"`
 6. **Tags** the commit with `vX.Y.Z`
 7. **Pushes** the commit and tag to `origin/stable`
@@ -82,6 +83,7 @@ Before running the script:
 - `.claude-plugin/plugin.json` - Plugin manifest
 - `.claude-plugin/marketplace.json` - Marketplace metadata
 - `CHANGELOG.md` - Adds new version header with today's date
+- `docs/app/(marketing)/page.jsx` - Homepage version badge
 
 **Git operations:**
 - Commit created with message: `Bump plugin version to X.Y.Z`
