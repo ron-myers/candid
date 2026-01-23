@@ -967,7 +967,7 @@ header a:has(.logo):hover {
 
 .copy-button:hover {
   background: rgba(255, 255, 255, 0.2);
-  color: #fff;
+  color: #1a1612;
 }
 
 .copy-button:active {
