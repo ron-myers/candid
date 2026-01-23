@@ -974,6 +974,11 @@ header a:has(.logo):hover {
   background: rgba(255, 255, 255, 0.15);
 }
 
+html.dark .copy-button:hover {
+  background: rgba(255, 255, 255, 0.25);
+  color: var(--text-primary-dark);
+}
+
 /* ===== Card Grid (shared) ===== */
 .card-grid {
   display: grid;
@@ -1070,6 +1075,52 @@ html.dark {
   color: var(--text-primary-dark);
 }
 
+html.dark body {
+  background: var(--bg-dark);
+  color: var(--text-primary-dark);
+}
+
+/* Dark mode documentation article content */
+html.dark article {
+  color: var(--text-primary-dark);
+}
+
+html.dark article p {
+  color: var(--text-primary-dark);
+}
+
+html.dark article h1,
+html.dark article h2,
+html.dark article h3,
+html.dark article h4,
+html.dark article h5,
+html.dark article h6 {
+  color: var(--text-primary-dark);
+}
+
+html.dark article li {
+  color: var(--text-primary-dark);
+}
+
+html.dark article code {
+  color: var(--text-primary-dark);
+}
+
+html.dark article a {
+  color: var(--accent-main-dark);
+}
+
+html.dark article a:hover {
+  color: var(--accent-hover-dark);
+}
+
+/* Ensure proper contrast for inline code in dark mode */
+html.dark article p code,
+html.dark article li code {
+  background: rgba(212, 162, 127, 0.15);
+  color: var(--accent-hover-dark);
+}
+
 html.dark .marketing-header {
   border-color: var(--border-light-dark);
 }
@@ -1106,12 +1157,12 @@ html.dark .mobile-menu-backdrop {
   }
 
   html.dark .marketing-nav-links a {
-    border-color: var(--border-dark);
+    border-color: var(--border-light-dark);
   }
 }
 
 html.dark .marketing-footer {
-  border-color: var(--border-dark);
+  border-color: var(--border-light-dark);
   color: var(--text-secondary-dark);
 }
 
@@ -1185,7 +1236,7 @@ html.dark .btn-secondary:hover {
 
 html.dark .section-badge {
   background: #222;
-  border-color: var(--border-dark);
+  border-color: var(--border-light-dark);
   color: var(--text-secondary-dark);
 }
 
@@ -1212,7 +1263,7 @@ html.dark .steps-list li span code {
 
 html.dark .step-code {
   background: #0a0a0a;
-  border: 1px solid var(--border-dark);
+  border: 1px solid var(--border-light-dark);
 }
 
 html.dark .card {
@@ -1455,7 +1506,7 @@ html.dark .demo-section h2 {
 }
 
 html.dark .screenshot-wrapper {
-  border-color: var(--border-dark);
+  border-color: var(--border-light-dark);
 }
 
 html.dark .screenshot-wrapper:hover {
