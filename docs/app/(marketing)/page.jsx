@@ -115,7 +115,7 @@ export default function HomePage() {
           }}
         >
           <span className="version-dot"></span>
-          v1.4.2 Now Available for Claude Code
+          v1.5.0 Now Available for Claude Code
         </div>
         <h1
           style={{

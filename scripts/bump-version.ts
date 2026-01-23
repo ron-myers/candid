@@ -9,6 +9,7 @@ type BumpType = 'major' | 'minor' | 'patch';
 const PLUGIN_JSON_PATH = '../.claude-plugin/plugin.json';
 const MARKETPLACE_JSON_PATH = '../.claude-plugin/marketplace.json';
 const CHANGELOG_PATH = '../CHANGELOG.md';
+const HOMEPAGE_PATH = '../docs/app/(marketing)/page.jsx';
 const TARGET_BRANCH = 'stable';
 
 /**
@@ -173,12 +174,37 @@ async function updateChangelog(newVersion: string): Promise<void> {
 }
 
 /**
+ * Update version badge in homepage
+ */
+async function updateHomepage(newVersion: string): Promise<void> {
+  try {
+    const content = await readFile(HOMEPAGE_PATH, 'utf-8');
+
+    // Match the version badge pattern: v1.2.3 Now Available for Claude Code
+    const versionBadgePattern = /v\d+\.\d+\.\d+ Now Available for Claude Code/;
+    const newVersionBadge = `v${newVersion} Now Available for Claude Code`;
+
+    if (!versionBadgePattern.test(content)) {
+      throw new Error(`Could not find version badge pattern in ${HOMEPAGE_PATH}`);
+    }
+
+    const updatedContent = content.replace(versionBadgePattern, newVersionBadge);
+
+    await writeFile(HOMEPAGE_PATH, updatedContent);
+    console.log(`✅ Updated ${HOMEPAGE_PATH}`);
+  } catch (error) {
+    console.error(`❌ Failed to update ${HOMEPAGE_PATH}`);
+    throw error;
+  }
+}
+
+/**
  * Create git commit and tag
  */
 function gitCommitAndTag(version: string): void {
   try {
     // Stage the updated files
-    exec(`git add ${PLUGIN_JSON_PATH} ${MARKETPLACE_JSON_PATH} ${CHANGELOG_PATH}`);
+    exec(`git add ${PLUGIN_JSON_PATH} ${MARKETPLACE_JSON_PATH} ${CHANGELOG_PATH} ${HOMEPAGE_PATH}`);
 
     // Create commit with co-author
     const commitMessage = `Bump plugin version to ${version}\n\nCo-authored-by: Claude Sonnet 4.5 <noreply@anthropic.com>`;
@@ -248,6 +274,7 @@ async function main(): Promise<void> {
   await updatePluginJson(newVersion);
   await updateMarketplaceJson(newVersion);
   await updateChangelog(newVersion);
+  await updateHomepage(newVersion);
   console.log('');
 
   // Git operations
