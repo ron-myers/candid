@@ -7,7 +7,7 @@
     "copy-changelog": "node scripts/copy-changelog.js",
     "dev": "npm run copy-changelog && next dev",
     "build": "npm run copy-changelog && next build",
-    "postbuild": "pagefind --site .next/server/app --output-path public/_pagefind",
+    "postbuild": "node scripts/generate-search-index.js",
     "start": "next start",
     "lint": "next lint"
   },
