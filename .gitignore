@@ -1,2 +1,5 @@
 # Conductor workspace files
 .context/
+
+# Candid review state (user-specific)
+.candid/
