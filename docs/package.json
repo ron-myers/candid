@@ -7,6 +7,7 @@
     "copy-changelog": "node scripts/copy-changelog.js",
     "dev": "npm run copy-changelog && next dev",
     "build": "npm run copy-changelog && next build",
+    "postbuild": "node scripts/generate-search-index.js",
     "start": "next start",
     "lint": "next lint"
   },
@@ -19,5 +20,8 @@
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
     "react-github-btn": "^1.4.0"
+  },
+  "devDependencies": {
+    "pagefind": "^1.4.0"
   }
 }
