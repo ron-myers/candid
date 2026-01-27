@@ -12,6 +12,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 ### Fixed
+
+## [1.6.1] - 2026-01-27
+
+### Added
+
+### Changed
+
+### Fixed
 - Update Technical.md path references from `.claude/Technical.md` to `.candid/Technical.md` in documentation, templates, and skill files
 
 ## [1.6.0] - 2026-01-27
