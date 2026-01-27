@@ -17,7 +17,7 @@ export default function SoftwareApplicationSchema() {
       price: '0',
       priceCurrency: 'USD',
     },
-    softwareVersion: '1.5.0',
+    softwareVersion: '1.6.0',
     author: {
       '@type': 'Organization',
       name: 'Fritter Factory',
