@@ -2492,3 +2492,424 @@ html.dark .brand-toast {
     font-size: 1.25rem;
   }
 }
+
+/* ===== 404 Not Found Page ===== */
+
+/* Layout */
+.not-found-layout {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-light);
+  color: var(--text-primary);
+}
+
+.not-found-header {
+  padding: 2rem;
+}
+
+.not-found-header a {
+  display: inline-block;
+  text-decoration: none;
+  transition: transform 200ms ease-out;
+}
+
+.not-found-header a:hover {
+  transform: translateY(-2px);
+}
+
+.not-found-main {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.not-found-content {
+  max-width: 600px;
+  width: 100%;
+  text-align: center;
+  animation: fadeInUp 600ms ease-out;
+}
+
+/* Badge */
+.not-found-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: rgba(204, 102, 102, 0.1);
+  border: 1px solid rgba(204, 102, 102, 0.3);
+  border-radius: 2rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #b55;
+  margin-bottom: 2rem;
+}
+
+.badge-icon {
+  font-size: 1rem;
+}
+
+/* 404 Number */
+.not-found-number {
+  font-family: var(--font-display);
+  font-size: 12rem;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--accent-main);
+  margin: 0 0 1rem 0;
+  transition: transform 250ms ease-out;
+  cursor: default;
+  user-select: none;
+}
+
+.not-found-number:hover {
+  transform: scale(1.02) rotate(-1deg);
+}
+
+/* Tagline & Subtitle */
+.not-found-tagline {
+  font-family: var(--font-display);
+  font-size: 2rem;
+  font-style: italic;
+  font-weight: 500;
+  color: var(--text-primary);
+  margin: 0 0 0.5rem 0;
+}
+
+.not-found-subtitle {
+  font-size: 1.125rem;
+  color: var(--text-secondary);
+  margin: 0 0 3rem 0;
+}
+
+/* Review Card */
+.not-found-review-card {
+  background: var(--surface-light);
+  border: 1px solid var(--border-light);
+  border-radius: 0.75rem;
+  padding: 2rem;
+  margin: 0 0 3rem 0;
+  box-shadow: var(--shadow-elevated);
+  text-align: left;
+  transition: transform 200ms ease-out, box-shadow 200ms ease-out;
+}
+
+.not-found-review-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-hover);
+}
+
+.review-card-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.severity-badge {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #b55;
+  background: rgba(204, 102, 102, 0.15);
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+}
+
+.severity-title {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.review-card-content p {
+  margin: 0 0 1rem 0;
+  line-height: 1.7;
+  color: var(--text-primary);
+}
+
+.review-card-content p:last-child {
+  margin-bottom: 0;
+}
+
+.review-card-location {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1rem;
+  background: rgba(212, 162, 127, 0.1);
+  border-left: 3px solid var(--accent-main);
+  border-radius: 0.25rem;
+  margin: 1rem 0;
+}
+
+.location-label {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.location-path {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  color: var(--accent-main);
+  word-break: break-all;
+}
+
+.review-card-assessment {
+  color: var(--text-secondary);
+}
+
+.review-card-assessment strong {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+/* Actions */
+.not-found-actions {
+  text-align: center;
+}
+
+.actions-title {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 1.5rem 0;
+}
+
+.actions-buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 2rem;
+}
+
+.actions-buttons .btn-primary,
+.actions-buttons .btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 500;
+  border-radius: 0.5rem;
+  text-decoration: none;
+  transition: transform 200ms ease-out, box-shadow 200ms ease-out;
+}
+
+.actions-buttons .btn-primary {
+  background: var(--accent-main);
+  color: white;
+  border: none;
+  box-shadow: var(--shadow-subtle);
+}
+
+.actions-buttons .btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-elevated);
+}
+
+.actions-buttons .btn-secondary {
+  background: var(--surface-light);
+  color: var(--text-primary);
+  border: 1px solid var(--border-light);
+}
+
+.actions-buttons .btn-secondary:hover {
+  transform: translateY(-2px);
+  border-color: var(--accent-main);
+}
+
+.actions-footer {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin: 0;
+  line-height: 1.7;
+}
+
+.footer-link {
+  color: var(--accent-main);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 200ms ease-out;
+}
+
+.footer-link:hover {
+  color: var(--accent-hover);
+  text-decoration: underline;
+}
+
+/* Dark Mode */
+html.dark .not-found-layout {
+  background: var(--bg-dark);
+  color: var(--text-primary-dark);
+}
+
+html.dark .not-found-badge {
+  background: rgba(204, 102, 102, 0.15);
+  border-color: rgba(204, 102, 102, 0.4);
+}
+
+html.dark .not-found-number {
+  color: var(--accent-main-dark);
+}
+
+html.dark .not-found-tagline {
+  color: var(--text-primary-dark);
+}
+
+html.dark .not-found-subtitle {
+  color: var(--text-secondary-dark);
+}
+
+html.dark .not-found-review-card {
+  background: var(--surface-dark);
+  border-color: var(--border-light-dark);
+}
+
+html.dark .severity-title {
+  color: var(--text-primary-dark);
+}
+
+html.dark .review-card-content p {
+  color: var(--text-primary-dark);
+}
+
+html.dark .review-card-location {
+  background: rgba(212, 162, 127, 0.1);
+  border-left-color: var(--accent-main-dark);
+}
+
+html.dark .location-label {
+  color: var(--text-secondary-dark);
+}
+
+html.dark .location-path {
+  color: var(--accent-main-dark);
+}
+
+html.dark .review-card-assessment {
+  color: var(--text-secondary-dark);
+}
+
+html.dark .review-card-assessment strong {
+  color: var(--text-primary-dark);
+}
+
+html.dark .actions-title {
+  color: var(--text-primary-dark);
+}
+
+html.dark .actions-buttons .btn-primary {
+  background: var(--accent-main-dark);
+}
+
+html.dark .actions-buttons .btn-secondary {
+  background: var(--surface-dark);
+  color: var(--text-primary-dark);
+  border-color: var(--border-light-dark);
+}
+
+html.dark .actions-buttons .btn-secondary:hover {
+  border-color: var(--accent-main-dark);
+}
+
+html.dark .actions-footer {
+  color: var(--text-secondary-dark);
+}
+
+html.dark .footer-link {
+  color: var(--accent-main-dark);
+}
+
+html.dark .footer-link:hover {
+  color: var(--accent-hover-dark);
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .not-found-header {
+    padding: 1.5rem;
+  }
+
+  .not-found-main {
+    padding: 1.5rem;
+  }
+
+  .not-found-number {
+    font-size: 6rem;
+  }
+
+  .not-found-tagline {
+    font-size: 1.5rem;
+  }
+
+  .not-found-subtitle {
+    font-size: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .not-found-review-card {
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .review-card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .severity-title {
+    font-size: 1.125rem;
+  }
+
+  .actions-title {
+    font-size: 1.25rem;
+  }
+
+  .actions-buttons {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .actions-buttons .btn-primary,
+  .actions-buttons .btn-secondary {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .not-found-content {
+    animation: none;
+  }
+
+  .not-found-number:hover {
+    transform: none;
+  }
+
+  .not-found-review-card:hover {
+    transform: none;
+  }
+
+  .not-found-header a:hover {
+    transform: none;
+  }
+
+  .actions-buttons .btn-primary:hover,
+  .actions-buttons .btn-secondary:hover {
+    transform: none;
+  }
+}
