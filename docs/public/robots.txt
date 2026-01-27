@@ -1,0 +1,13 @@
+# robots.txt for Candid Documentation
+# https://www.candid.tools
+
+User-agent: *
+Allow: /
+
+# Block build artifacts and system files
+Disallow: /_next/static/
+Disallow: /api/
+Disallow: /_pagefind/
+
+# Reference sitemap
+Sitemap: https://www.candid.tools/sitemap.xml
