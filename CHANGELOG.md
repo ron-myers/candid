@@ -13,13 +13,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-## [1.5.0] - 2026-01-22
+## [1.6.0] - 2026-01-27
 
 ### Added
 
-### Changed
-
-### Fixed
+- **Candid Loop** (`/candid-loop`): New skill that runs candid-review in a loop until all issues are resolved
+  - **Three execution modes**:
+    - `auto` (default): Automatically applies all fixes without prompting
+    - `review-each`: Go through each fix one by one with simple Yes/No prompts
+    - `interactive`: Full control with skip, ignore list, and batch options
+  - **Configurable max iterations**: Prevent infinite loops with `--max-iterations N` (default: 5)
+  - **Category filtering**: Only enforce specific categories with `--categories critical,major`
+  - **Ignored issues**: Permanently skip false positives via `.candid/config.json`:
+    - `loop.ignored.categories`: Skip entire categories (e.g., `["edge_case"]`)
+    - `loop.ignored.patterns`: Skip by title regex (e.g., `["Unicode", "timezone"]`)
+    - `loop.ignored.ids`: Skip specific issue IDs from `last-review.json`
+  - **Add-to-ignore workflow**: In interactive mode, choose "Add to ignore list" to persist skips
+  - **Progress tracking**: Shows iteration count, issues fixed, and detailed summary
+  - **Documentation**: New feature page, how-to guide for automated review loops, updated slash commands reference
 
 ## [1.5.0] - 2026-01-22
 

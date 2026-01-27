@@ -5,5 +5,6 @@ export default {
   'technical-md': 'Technical.md',
   'auto-commit': 'Auto-Commit',
   're-review': 'Re-Review',
+  'candid-loop': 'Candid Loop',
   'slash-commands': 'Slash Commands',
 }

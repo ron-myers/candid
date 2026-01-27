@@ -4,4 +4,5 @@ export default {
   conductor: 'Using with Conductor',
   'custom-standards': 'Creating Custom Standards',
   'reviewing-before-prs': 'Reviewing Before PRs',
+  'automated-review-loops': 'Automated Review Loops',
 }
