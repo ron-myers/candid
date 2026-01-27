@@ -4,6 +4,9 @@ import { execSync } from 'child_process'
 
 const SITE_URL = 'https://www.candid.tools'
 
+// Paths to exclude from sitemap
+const EXCLUDED_PATHS = ['/brand']
+
 /**
  * Get the last git modification date for a file
  */
@@ -114,13 +117,19 @@ export default async function sitemap() {
   const docRoutes = await discoverDocRoutes(docsDir)
   routes.push(...docRoutes)
 
+  // Filter out excluded paths
+  const filteredRoutes = routes.filter(route => {
+    const urlPath = route.url.replace(SITE_URL, '')
+    return !EXCLUDED_PATHS.some(excluded => urlPath === excluded || urlPath.startsWith(excluded + '/'))
+  })
+
   // Sort by priority (highest first) then by URL
-  routes.sort((a, b) => {
+  filteredRoutes.sort((a, b) => {
     if (b.priority !== a.priority) {
       return b.priority - a.priority
     }
     return a.url.localeCompare(b.url)
   })
 
-  return routes
+  return filteredRoutes
 }
