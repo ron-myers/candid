@@ -4,7 +4,7 @@ description: Validate your Technical.md for vague rules and linter overlaps
 skill: candid-validate-standards
 args:
   - name: path
-    description: Path to Technical.md (default: ./Technical.md or .claude/Technical.md)
+    description: Path to Technical.md (default: ./Technical.md or .candid/Technical.md)
     required: false
   - name: fix
     description: Suggest specific rewrites for vague rules

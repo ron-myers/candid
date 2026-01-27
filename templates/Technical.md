@@ -2,7 +2,7 @@
 
 This file defines your project's technical standards. The candid-review skill reads this file and flags violations as 📜 Standards Violation during code reviews.
 
-**Setup:** Copy this file to your project root as `Technical.md` or place it in `.claude/Technical.md`.
+**Setup:** Copy this file to your project root as `Technical.md` or place it in `.candid/Technical.md`.
 
 ---
 

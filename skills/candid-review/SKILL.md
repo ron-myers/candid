@@ -17,7 +17,7 @@ Check for Technical.md (project-specific standards):
 
 ```
 1. Read ./Technical.md (project root)
-2. If not found, read ./.claude/Technical.md
+2. If not found, read ./.candid/Technical.md
 3. If found, use these standards to inform your review
 4. If not found, proceed without project-specific standards
 ```

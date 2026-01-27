@@ -2,7 +2,7 @@
 
 Standards for React applications. Violations appear as 📜 Standards Violation in candid reviews.
 
-**Setup:** Copy to `./Technical.md` or `.claude/Technical.md`
+**Setup:** Copy to `./Technical.md` or `.candid/Technical.md`
 
 ---
 

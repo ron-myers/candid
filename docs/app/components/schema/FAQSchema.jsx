@@ -32,7 +32,7 @@ export default function FAQSchema() {
     {
       question: 'Where does Candid save its state?',
       answer:
-        'Config is saved in .candid/config.json (project) or ~/.candid/config.json (user). Review state is saved in .candid/last-review.json for re-review mode. Standards are saved in Technical.md or .claude/Technical.md.',
+        'Config is saved in .candid/config.json (project) or ~/.candid/config.json (user). Review state is saved in .candid/last-review.json for re-review mode. Standards are saved in Technical.md or .candid/Technical.md.',
     },
     {
       question: 'Can I ignore certain files?',

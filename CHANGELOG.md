@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 ### Fixed
+- Update Technical.md path references from `.claude/Technical.md` to `.candid/Technical.md` in documentation, templates, and skill files
 
 ## [1.6.0] - 2026-01-27
 
@@ -270,7 +271,7 @@ Initial release of Candid, a rebrand of [radical-candor-code-review](https://git
 
 - **Technical.md Support**
   - Project-specific standards that inform every review
-  - Lookup order: project root, then .claude/Technical.md
+  - Lookup order: project root, then .candid/Technical.md
   - Issue category: 📜 Standards Violation
   - Template provided in templates/Technical.md
   - Best practices guide in docs/Technical-md-best-practices.md

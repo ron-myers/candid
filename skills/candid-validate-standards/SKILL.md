@@ -15,7 +15,7 @@ Find the Technical.md file to validate:
 
 1. If path argument provided → use that path
 2. Check `./Technical.md`
-3. Check `./.claude/Technical.md`
+3. Check `./.candid/Technical.md`
 
 If no file found:
 ```
@@ -23,7 +23,7 @@ If no file found:
 
 Looked in:
 - ./Technical.md
-- ./.claude/Technical.md
+- ./.candid/Technical.md
 
 Create one with: /candid-init
 ```

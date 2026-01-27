@@ -2,7 +2,7 @@
 
 Standards for Next.js applications deployed to Vercel with Supabase, Clerk auth, and Loop.so email. Violations appear as 📜 Standards Violation in candid reviews.
 
-**Setup:** Copy to `./Technical.md` or `.claude/Technical.md`
+**Setup:** Copy to `./Technical.md` or `.candid/Technical.md`
 
 ---
 
