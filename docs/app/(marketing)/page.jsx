@@ -5,6 +5,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { trackEvent, EVENTS } from '../components/trackEvent'
 import Pre from '../components/Pre'
+import SoftwareApplicationSchema from '../components/schema/SoftwareApplicationSchema'
 
 export default function HomePage() {
   const [lightboxOpen, setLightboxOpen] = useState(false)
@@ -105,6 +106,7 @@ export default function HomePage() {
 
   return (
     <>
+      <SoftwareApplicationSchema />
       <section className="hero">
         <div
           className="version-badge"
@@ -209,6 +211,8 @@ export default function HomePage() {
                   width={screenshot.width}
                   height={screenshot.height}
                   className="screenshot-image"
+                  priority={index === 0}
+                  loading={index === 0 ? undefined : 'lazy'}
                 />
                 <div className="screenshot-overlay">
                   <svg className="zoom-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
