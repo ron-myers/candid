@@ -96,11 +96,11 @@ Update the version badge on the homepage:
 ```jsx
 // BEFORE
 <span className="version-dot"></span>
-v1.4.2 Now Available for Claude Code
-
-// AFTER (example for 1.5.0)
-<span className="version-dot"></span>
 v1.5.0 Now Available for Claude Code
+
+// AFTER (example for 1.6.0)
+<span className="version-dot"></span>
+v1.6.0 Now Available for Claude Code
 ```
 
 **Why this matters**: The homepage is the first thing users see. An outdated version number creates confusion and makes the site look unmaintained.
@@ -111,7 +111,7 @@ After updating the homepage version:
 
 ```bash
 git add docs/app/(marketing)/page.jsx
-git commit -m "Update homepage version badge to v1.5.0
+git commit -m "Update homepage version badge to v1.6.0
 
 Co-authored-by: Claude Sonnet 4.5 <noreply@anthropic.com>"
 git push origin HEAD:stable
@@ -128,11 +128,11 @@ Check that everything was created correctly:
 git log -1
 
 # Check the tag was created
-git tag -l | grep v1.5.0
+git tag -l | grep v1.6.0
 
 # Check everything was pushed to remote
 git log origin/stable -1
-git ls-remote --tags origin | grep v1.5.0
+git ls-remote --tags origin | grep v1.6.0
 ```
 
 ### 3.2 Verify Plugin Installation
@@ -164,7 +164,7 @@ Create a GitHub release for better visibility:
 1. Go to https://github.com/ron-myers/candid/releases
 2. Click "Draft a new release"
 3. Select the tag `vX.Y.Z` you just created
-4. Title: `v1.5.0` (or whatever version)
+4. Title: `v1.6.0` (or whatever version)
 5. Copy the relevant CHANGELOG section into the description
 6. Publish release
 
@@ -272,5 +272,5 @@ Consider automating the website version badge update:
 
 ---
 
-**Last Updated**: 2026-01-23
-**Current Version**: 1.5.0
+**Last Updated**: 2026-01-27
+**Current Version**: 1.6.0
