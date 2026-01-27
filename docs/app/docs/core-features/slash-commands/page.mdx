@@ -30,6 +30,38 @@ Run a code review on your changes.
 /candid-review --re-review
 ```
 
+## /candid-loop
+
+Run code review in a loop until all issues are resolved.
+
+```
+/candid-loop
+```
+
+### Options
+
+| Flag | Description |
+|------|-------------|
+| `--mode <auto\|review-each\|interactive>` | Execution mode (default: auto) |
+| `--max-iterations <N>` | Maximum loop iterations (default: 5) |
+| `--categories <list>` | Categories to enforce: critical, major, standards, smell, edge_case, architectural, or all (default: all) |
+
+### Modes
+
+- **auto** (default): Automatically applies all fixes until clean
+- **review-each**: Go through each fix one by one (Yes/No for each)
+- **interactive**: Full control with skip, ignore, and batch options
+
+### Examples
+
+```
+/candid-loop
+/candid-loop --mode review-each
+/candid-loop --mode interactive
+/candid-loop --max-iterations 3
+/candid-loop --categories critical,major
+```
+
 ## /candid-init
 
 Generate a Technical.md file by analyzing your codebase.

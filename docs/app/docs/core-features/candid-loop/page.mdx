@@ -1,0 +1,221 @@
+# Candid Loop
+
+Run code review repeatedly until all issues are resolved.
+
+## Usage
+
+```
+/candid-loop
+```
+
+Candid Loop automates the fix-review-fix cycle. It runs `candid-review`, applies fixes, and repeats until your code is clean (or max iterations is reached).
+
+## Modes
+
+### Auto Mode (Default)
+
+```
+/candid-loop
+```
+
+Automatically applies all fixes without prompting. Best for:
+- Fast iteration during development
+- CI/CD pipelines
+- Pre-commit hooks
+
+### Review-Each Mode
+
+```
+/candid-loop --mode review-each
+```
+
+Go through each fix one by one with simple Yes/No prompts. Best for:
+- Understanding what issues exist
+- Learning the codebase
+- Quick selective fixing
+
+### Interactive Mode
+
+```
+/candid-loop --mode interactive
+```
+
+Full control with skip, ignore, and batch options. Best for:
+- Building an ignore list for false positives
+- Complex review sessions
+- When you need to skip entire batches
+
+## How It Works
+
+```
+[1/5] Run candid-review → Found 3 issues → Apply fixes
+[2/5] Run candid-review → Found 1 issue → Apply fix
+[3/5] Run candid-review → No issues found → Done!
+```
+
+The loop continues until:
+- No issues remain (success)
+- Max iterations reached (stops with warning)
+- User cancels (interactive mode only)
+
+## Configuration
+
+### CLI Flags
+
+| Flag | Description | Default |
+|------|-------------|---------|
+| `--mode <auto\|review-each\|interactive>` | Execution mode | `auto` |
+| `--max-iterations <N>` | Maximum loop iterations | `5` |
+| `--categories <list>` | Categories to enforce | `all` |
+
+### Config File
+
+Add to `.candid/config.json`:
+
+```json
+{
+  "loop": {
+    "mode": "auto",
+    "maxIterations": 5,
+    "enforceCategories": ["all"],
+    "ignored": {
+      "categories": [],
+      "patterns": [],
+      "ids": []
+    }
+  }
+}
+```
+
+## Ignoring Issues
+
+Prevent specific issues from blocking your loop.
+
+### Ignore by Category
+
+Skip entire categories of issues:
+
+```json
+{
+  "loop": {
+    "ignored": {
+      "categories": ["edge_case", "architectural"]
+    }
+  }
+}
+```
+
+### Ignore by Pattern
+
+Skip issues matching title patterns (regex):
+
+```json
+{
+  "loop": {
+    "ignored": {
+      "patterns": ["Unicode", "timezone", "DST"]
+    }
+  }
+}
+```
+
+### Ignore by ID
+
+Skip specific issues by their unique ID (found in `.candid/last-review.json`):
+
+```json
+{
+  "loop": {
+    "ignored": {
+      "ids": ["a1b2c3d4e5f6"]
+    }
+  }
+}
+```
+
+> **Tip:** In interactive mode, you can choose "Add to ignore list" for any issue to automatically add its ID to the config.
+
+## Enforcing Specific Categories
+
+Only fix certain types of issues:
+
+```
+/candid-loop --categories critical
+/candid-loop --categories critical,major
+```
+
+Valid categories: `critical`, `major`, `standards`, `smell`, `edge_case`, `architectural`, `all`
+
+## Examples
+
+```bash
+# Default: auto-fix all issues, max 5 iterations
+/candid-loop
+
+# Review-each: go through fixes one by one
+/candid-loop --mode review-each
+
+# Interactive: full control with skip/ignore options
+/candid-loop --mode interactive
+
+# Quick pass: only fix critical issues, max 3 tries
+/candid-loop --categories critical --max-iterations 3
+
+# Thorough: fix critical and major, up to 10 iterations
+/candid-loop --categories critical,major --max-iterations 10
+```
+
+## Output Examples
+
+### Success
+
+```
+[Auto Mode] Running candid-loop with max 5 iterations...
+
+[1/5] Found 3 issues. Applying fixes...
+      ✓ Fixed: Null check missing in user.ts:42
+      ✓ Fixed: SQL injection in db.ts:15
+      ✓ Fixed: N+1 query in orders.ts:88
+
+[2/5] Found 1 issue. Applying fix...
+      ✓ Fixed: Missing error handling in auth.ts:20
+
+[3/5] No issues found!
+
+Summary:
+- Iterations: 3
+- Issues fixed: 4
+- Status: PASS
+```
+
+### Max Iterations Reached
+
+```
+[Auto Mode] Running candid-loop with max 5 iterations...
+
+[5/5] Found 2 issues. Applying fixes...
+      ✓ Fixed: Issue A
+      ✓ Fixed: Issue B
+
+Max iterations (5) reached. 1 issue remains.
+
+Remaining issues:
+  💭 Complex architectural concern in core.ts:100
+
+Consider:
+- Increasing --max-iterations
+- Adding to ignore list for false positives
+- Manually reviewing complex issues
+```
+
+## Combining with Other Features
+
+Candid Loop respects your other settings:
+
+```
+# Use harsh tone in the underlying reviews
+/candid-loop  # (with "tone": "harsh" in config)
+
+# Focus reviews on security issues only
+/candid-loop --categories critical
+```

@@ -1,0 +1,171 @@
+# Automated Review Loops
+
+Set up Candid to automatically fix issues until your code is clean.
+
+## Quick Start
+
+Run the loop with default settings:
+
+```
+/candid-loop
+```
+
+This will:
+1. Run `candid-review` to find issues
+2. Automatically apply all fixes
+3. Re-run the review
+4. Repeat until no issues remain (or max 5 iterations)
+
+## Setting Up for CI/CD
+
+### GitHub Actions
+
+Add to your workflow:
+
+```yaml
+- name: Run Candid Loop
+  run: |
+    claude /candid-loop --max-iterations 3
+```
+
+### Pre-commit Hook
+
+Add to `.pre-commit-config.yaml`:
+
+```yaml
+- repo: local
+  hooks:
+    - id: candid-loop
+      name: Candid Loop
+      entry: claude /candid-loop --categories critical,major
+      language: system
+      pass_filenames: false
+```
+
+## Managing Ignored Issues
+
+When the loop keeps finding the same issue that you've decided is acceptable:
+
+### Option 1: Ignore During Review (Interactive Mode)
+
+```
+/candid-loop --mode interactive
+```
+
+When prompted, select "Add to ignore list" for false positives.
+
+### Option 2: Pre-configure Ignores
+
+Add to `.candid/config.json`:
+
+```json
+{
+  "loop": {
+    "ignored": {
+      "patterns": ["Unicode handling", "timezone"],
+      "categories": ["edge_case"]
+    }
+  }
+}
+```
+
+### Option 3: Ignore Specific Issues
+
+Find the issue ID in `.candid/last-review.json`, then add:
+
+```json
+{
+  "loop": {
+    "ignored": {
+      "ids": ["a1b2c3d4e5f6"]
+    }
+  }
+}
+```
+
+## Team Consistency
+
+Share ignore patterns across your team by committing `.candid/config.json`:
+
+```json
+{
+  "tone": "harsh",
+  "loop": {
+    "mode": "auto",
+    "maxIterations": 5,
+    "enforceCategories": ["critical", "major"],
+    "ignored": {
+      "patterns": ["legacy API compatibility"],
+      "categories": []
+    }
+  }
+}
+```
+
+## Best Practices
+
+### Choose the Right Max Iterations
+
+- **3 iterations**: Quick pass, catches most issues
+- **5 iterations** (default): Good balance
+- **10 iterations**: Thorough, for complex codebases
+
+### Start with Critical Issues Only
+
+For large codebases, start narrow:
+
+```
+/candid-loop --categories critical
+```
+
+Then expand:
+
+```
+/candid-loop --categories critical,major
+```
+
+### Use Review-Each Mode for Learning
+
+When working with an unfamiliar codebase:
+
+```
+/candid-loop --mode review-each
+```
+
+This shows you each fix one by one with simple Yes/No prompts, helping you understand what issues exist.
+
+### Use Interactive Mode for Full Control
+
+When you need to skip batches or build an ignore list:
+
+```
+/candid-loop --mode interactive
+```
+
+This gives you full control with skip, ignore, and batch options.
+
+## Troubleshooting
+
+### Loop Never Completes
+
+If the loop keeps finding issues:
+
+1. Check if the same issue keeps reappearing (fix might not be persisting)
+2. Add persistent false positives to the ignore list
+3. Increase `--max-iterations` if legitimate issues remain
+
+### Loop Exits Too Early
+
+If the loop stops before you expect:
+
+1. Check the summary for "Max iterations reached"
+2. Increase `--max-iterations`
+3. Ensure fixes are being applied correctly
+
+### Issues Keep Coming Back
+
+If fixed issues reappear in subsequent iterations:
+
+1. The fix might introduce a new issue in a different category
+2. Check if your linter/formatter is reverting changes
+3. Review the fix logic in the skill output
