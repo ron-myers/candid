@@ -1,11 +1,42 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { trackEvent, EVENTS } from '../components/trackEvent'
 import Pre from '../components/Pre'
 import SoftwareApplicationSchema from '../components/schema/SoftwareApplicationSchema'
+
+const SCREENSHOTS = [
+  {
+    src: '/screenshots/candid-review-activation.png',
+    alt: 'Candid review command activation showing the review process steps',
+    caption: 'Run /candid-review to start a comprehensive code review',
+    width: 1200,
+    height: 400
+  },
+  {
+    src: '/screenshots/apply-fix-dialog.png',
+    alt: 'Apply fix dialog showing individual fix application options',
+    caption: 'Review and apply fixes individually with one click',
+    width: 1200,
+    height: 400
+  },
+  {
+    src: '/screenshots/handle-fixes-options.png',
+    alt: 'Fix handling options showing batch operation choices',
+    caption: 'Choose how to handle multiple fixes at once',
+    width: 1200,
+    height: 400
+  }
+]
+
+// Animation styles - extracted to prevent recreation on every render
+const getHeroAnimationStyle = (loaded, delay = 0) => ({
+  opacity: loaded ? 1 : 0,
+  transform: loaded ? 'translateY(0)' : 'translateY(20px)',
+  transition: `opacity 600ms ease-out ${delay}ms, transform 600ms ease-out ${delay}ms`
+})
 
 export default function HomePage() {
   const [lightboxOpen, setLightboxOpen] = useState(false)
@@ -64,45 +95,21 @@ export default function HomePage() {
     }
   }, [])
 
-  const screenshots = [
-    {
-      src: '/screenshots/candid-review-activation.png',
-      alt: 'Candid review command activation showing the review process steps',
-      caption: 'Run /candid-review to start a comprehensive code review',
-      width: 1200,
-      height: 400
-    },
-    {
-      src: '/screenshots/apply-fix-dialog.png',
-      alt: 'Apply fix dialog showing individual fix application options',
-      caption: 'Review and apply fixes individually with one click',
-      width: 1200,
-      height: 400
-    },
-    {
-      src: '/screenshots/handle-fixes-options.png',
-      alt: 'Fix handling options showing batch operation choices',
-      caption: 'Choose how to handle multiple fixes at once',
-      width: 1200,
-      height: 400
-    }
-  ]
-
-  const openLightbox = (index) => {
+  const openLightbox = useCallback((index) => {
     setCurrentImage(index)
     setLightboxOpen(true)
-  }
+  }, [])
 
-  const closeLightbox = () => {
+  const closeLightbox = useCallback(() => {
     setLightboxOpen(false)
     setCurrentImage(null)
-  }
+  }, [])
 
-  const navigateImage = (direction) => {
+  const navigateImage = useCallback((direction) => {
     if (currentImage === null) return
-    const newIndex = (currentImage + direction + screenshots.length) % screenshots.length
+    const newIndex = (currentImage + direction + SCREENSHOTS.length) % SCREENSHOTS.length
     setCurrentImage(newIndex)
-  }
+  }, [currentImage])
 
   return (
     <>
@@ -110,51 +117,31 @@ export default function HomePage() {
       <section className="hero">
         <div
           className="version-badge"
-          style={{
-            opacity: heroLoaded ? 1 : 0,
-            transform: heroLoaded ? 'translateY(0)' : 'translateY(20px)',
-            transition: 'opacity 600ms ease-out, transform 600ms ease-out'
-          }}
+          style={getHeroAnimationStyle(heroLoaded, 0)}
         >
           <span className="version-dot"></span>
           v1.6.1 Now Available for Claude Code
         </div>
         <h1
-          style={{
-            opacity: heroLoaded ? 1 : 0,
-            transform: heroLoaded ? 'translateY(0)' : 'translateY(20px)',
-            transition: 'opacity 600ms ease-out 100ms, transform 600ms ease-out 100ms'
-          }}
+          style={getHeroAnimationStyle(heroLoaded, 100)}
         >
           Code Review for the AI Era
         </h1>
         <p
           className="hero-subtitle"
-          style={{
-            opacity: heroLoaded ? 1 : 0,
-            transform: heroLoaded ? 'translateY(0)' : 'translateY(20px)',
-            transition: 'opacity 600ms ease-out 200ms, transform 600ms ease-out 200ms'
-          }}
+          style={getHeroAnimationStyle(heroLoaded, 200)}
         >
           Claude Code writes fast. Now you review faster.
         </p>
         <p
           className="hero-tagline"
-          style={{
-            opacity: heroLoaded ? 1 : 0,
-            transform: heroLoaded ? 'translateY(0)' : 'translateY(20px)',
-            transition: 'opacity 600ms ease-out 200ms, transform 600ms ease-out 200ms'
-          }}
+          style={getHeroAnimationStyle(heroLoaded, 200)}
         >
           And with more confidence.
         </p>
         <div
           className="hero-cta"
-          style={{
-            opacity: heroLoaded ? 1 : 0,
-            transform: heroLoaded ? 'translateY(0)' : 'translateY(20px)',
-            transition: 'opacity 600ms ease-out 300ms, transform 600ms ease-out 300ms'
-          }}
+          style={getHeroAnimationStyle(heroLoaded, 300)}
         >
           <Link
             href="/docs"
@@ -177,11 +164,7 @@ export default function HomePage() {
         <Pre
           className="install-command"
           trackingId="hero_install"
-          style={{
-            opacity: heroLoaded ? 1 : 0,
-            transform: heroLoaded ? 'translateY(0)' : 'translateY(20px)',
-            transition: 'opacity 600ms ease-out 400ms, transform 600ms ease-out 400ms'
-          }}
+          style={getHeroAnimationStyle(heroLoaded, 400)}
         >
           <code>{`npx skills add https://github.com/ron-myers/candid`}</code>
         </Pre>
@@ -191,7 +174,7 @@ export default function HomePage() {
         <span className="section-badge">SEE IT IN ACTION</span>
         <h2>Candid Code Review Workflow</h2>
         <div className="screenshot-grid">
-          {screenshots.map((screenshot, index) => (
+          {SCREENSHOTS.map((screenshot, index) => (
             <div key={index} className="screenshot-item">
               <div
                 className="screenshot-wrapper"
@@ -228,7 +211,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {lightboxOpen && currentImage !== null && (
+      {lightboxOpen && currentImage !== null ? (
         <div
           className="lightbox-overlay"
           onClick={closeLightbox}
@@ -265,13 +248,13 @@ export default function HomePage() {
           </button>
           <div className="lightbox-content" onClick={(e) => e.stopPropagation()}>
             <Image
-              src={screenshots[currentImage].src}
-              alt={screenshots[currentImage].alt}
+              src={SCREENSHOTS[currentImage].src}
+              alt={SCREENSHOTS[currentImage].alt}
               width={1600}
               height={900}
               className="lightbox-image"
             />
-            <p className="lightbox-caption">{screenshots[currentImage].caption}</p>
+            <p className="lightbox-caption">{SCREENSHOTS[currentImage].caption}</p>
           </div>
           <button
             className="lightbox-nav lightbox-next"
@@ -286,7 +269,7 @@ export default function HomePage() {
             </svg>
           </button>
         </div>
-      )}
+      ) : null}
 
       <section className="features-section scroll-animate" ref={featuresRef}>
         <h2>Features</h2>
