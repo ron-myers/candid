@@ -1,9 +1,9 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 
 // Brand colors data
-const brandColors = [
+const BRAND_COLORS = [
   {
     name: 'Warm Tan',
     variable: '--accent-main',
@@ -43,7 +43,7 @@ const brandColors = [
 ]
 
 // Type scale data
-const typeScale = [
+const TYPE_SCALE = [
   { name: 'Hero', size: '4.5rem', px: '72px', variable: '--text-hero', sample: 'Page Headlines' },
   { name: 'Section', size: '3rem', px: '48px', variable: '--text-section', sample: 'Section Titles' },
   { name: 'Card Title', size: '1.5rem', px: '24px', variable: '--text-card-title', sample: 'Card Headers' },
@@ -55,11 +55,23 @@ const typeScale = [
 // Constants
 const TOAST_DURATION_MS = 2000
 
+// Animation styles - extracted to prevent recreation on every render
+const getHeroAnimationStyle = (loaded, delay = 0) => ({
+  opacity: loaded ? 1 : 0,
+  transform: loaded ? 'translateY(0)' : 'translateY(20px)',
+  transition: `opacity 600ms ease-out ${delay}ms, transform 600ms ease-out ${delay}ms`
+})
+
 export default function BrandPageClient() {
   const [showToast, setShowToast] = useState(false)
   const [toastMessage, setToastMessage] = useState('')
   const [heroLoaded, setHeroLoaded] = useState(false)
-  const [isDark, setIsDark] = useState(false)
+  const [isDark, setIsDark] = useState(() => {
+    if (typeof document !== 'undefined') {
+      return document.documentElement.classList.contains('dark')
+    }
+    return false
+  })
 
   // Refs for scroll animations
   const logoRef = useRef(null)
@@ -69,8 +81,6 @@ export default function BrandPageClient() {
 
   useEffect(() => {
     setHeroLoaded(true)
-    // Check for dark mode
-    setIsDark(document.documentElement.classList.contains('dark'))
 
     // Watch for dark mode changes
     const observer = new MutationObserver(() => {
@@ -111,7 +121,7 @@ export default function BrandPageClient() {
     }
   }, [])
 
-  const handleCopy = async (value, label) => {
+  const handleCopy = useCallback(async (value, label) => {
     try {
       await navigator.clipboard.writeText(value)
       setToastMessage(`Copied ${label}`)
@@ -121,9 +131,9 @@ export default function BrandPageClient() {
     }
     setShowToast(true)
     setTimeout(() => setShowToast(false), TOAST_DURATION_MS)
-  }
+  }, [])
 
-  const downloadSVG = (type) => {
+  const downloadSVG = useCallback((type) => {
     let svgContent = ''
     let filename = ''
 
@@ -162,7 +172,7 @@ export default function BrandPageClient() {
     }
     setShowToast(true)
     setTimeout(() => setShowToast(false), TOAST_DURATION_MS)
-  }
+  }, [])
 
   return (
     <>
@@ -170,41 +180,25 @@ export default function BrandPageClient() {
       <section className="brand-hero">
         <div
           className="brand-hero-badge"
-          style={{
-            opacity: heroLoaded ? 1 : 0,
-            transform: heroLoaded ? 'translateY(0)' : 'translateY(20px)',
-            transition: 'opacity 600ms ease-out, transform 600ms ease-out'
-          }}
+          style={getHeroAnimationStyle(heroLoaded, 0)}
         >
           Brand Guidelines
         </div>
         <h1
           className="brand-hero-wordmark"
-          style={{
-            opacity: heroLoaded ? 1 : 0,
-            transform: heroLoaded ? 'translateY(0)' : 'translateY(20px)',
-            transition: 'opacity 600ms ease-out 100ms, transform 600ms ease-out 100ms'
-          }}
+          style={getHeroAnimationStyle(heroLoaded, 100)}
         >
           candid
         </h1>
         <p
           className="brand-hero-tagline"
-          style={{
-            opacity: heroLoaded ? 1 : 0,
-            transform: heroLoaded ? 'translateY(0)' : 'translateY(20px)',
-            transition: 'opacity 600ms ease-out 200ms, transform 600ms ease-out 200ms'
-          }}
+          style={getHeroAnimationStyle(heroLoaded, 200)}
         >
           Code Review for the AI Era
         </p>
         <p
           className="brand-hero-intro"
-          style={{
-            opacity: heroLoaded ? 1 : 0,
-            transform: heroLoaded ? 'translateY(0)' : 'translateY(20px)',
-            transition: 'opacity 600ms ease-out 300ms, transform 600ms ease-out 300ms'
-          }}
+          style={getHeroAnimationStyle(heroLoaded, 300)}
         >
           Our brand embodies radical honesty in code review. These guidelines ensure
           Candid is represented consistently across all touchpoints.
@@ -389,7 +383,7 @@ export default function BrandPageClient() {
         </div>
 
         <div className="brand-color-grid">
-          {brandColors.map((color, index) => (
+          {BRAND_COLORS.map((color, index) => (
             <div
               key={index}
               className="brand-color-swatch"
@@ -518,7 +512,7 @@ export default function BrandPageClient() {
         {/* Type Scale */}
         <h3 className="brand-subsection-title">Type Scale</h3>
         <div className="brand-type-scale">
-          {typeScale.map((item, index) => (
+          {TYPE_SCALE.map((item, index) => (
             <div
               key={index}
               className="brand-type-scale-item"

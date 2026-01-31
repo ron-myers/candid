@@ -9,9 +9,17 @@ export default function FathomAnalytics() {
   const searchParams = useSearchParams()
 
   useEffect(() => {
-    Fathom.load('YCXMQDZB', {
-      includedDomains: ['candid.tools'],
-    })
+    const loadAnalytics = () => {
+      Fathom.load('YCXMQDZB', {
+        includedDomains: ['candid.tools'],
+      })
+    }
+
+    if ('requestIdleCallback' in window) {
+      requestIdleCallback(loadAnalytics)
+    } else {
+      setTimeout(loadAnalytics, 2000)
+    }
   }, [])
 
   useEffect(() => {

@@ -33,7 +33,7 @@ export default function MarketingLayout({ children }) {
       }
     }
 
-    window.addEventListener('resize', handleResize)
+    window.addEventListener('resize', handleResize, { passive: true })
     return () => window.removeEventListener('resize', handleResize)
   }, [isMenuOpen])
 
@@ -83,13 +83,13 @@ export default function MarketingLayout({ children }) {
             </a>
           </div>
 
-          {isMenuOpen && (
+          {isMenuOpen ? (
             <div
               className="mobile-menu-backdrop"
               onClick={closeMenu}
               aria-hidden="true"
             />
-          )}
+          ) : null}
         </nav>
       </header>
       <main className="marketing-main">
