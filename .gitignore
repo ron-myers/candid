@@ -3,3 +3,6 @@
 
 # Candid review state (user-specific)
 .candid/
+
+# macOS metadata
+.DS_Store
