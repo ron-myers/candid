@@ -120,7 +120,7 @@ export default function HomePage() {
           style={getHeroAnimationStyle(heroLoaded, 0)}
         >
           <span className="version-dot"></span>
-          v1.6.1 Now Available for Claude Code
+          v1.7.0 Now Available for Claude Code
         </div>
         <h1
           style={getHeroAnimationStyle(heroLoaded, 100)}
@@ -308,6 +308,12 @@ export default function HomePage() {
             <div className="card">
               <h3>Config Hierarchy</h3>
               <p>CLI flags override project config (<code>.candid/config.json</code>), which overrides user config (<code>~/.candid/config.json</code>).</p>
+            </div>
+          </Link>
+          <Link href="/docs/core-features/decision-register" className="card-link">
+            <div className="card">
+              <h3>Decision Register</h3>
+              <p>Track questions raised during reviews and their resolutions. Prior answers are reused automatically so the same question is never asked twice.</p>
             </div>
           </Link>
         </div>

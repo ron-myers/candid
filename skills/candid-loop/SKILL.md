@@ -81,6 +81,9 @@ Set up tracking variables:
 iteration = 0
 totalFixesApplied = 0
 allFixedIssues = []
+registerQuestionsRaised = 0
+registerQuestionsResolved = 0
+registerPriorDecisionsApplied = 0
 ```
 
 Display mode banner:
@@ -134,6 +137,12 @@ Invoke the candid-review skill to analyze current code:
 - Wait for review to complete and save state to `.candid/last-review.json`
 
 **Note:** candid-review will present its own fix selection prompt. In auto mode, we need to handle this by selecting "Apply all fixes". In interactive mode, we defer to the user's choices within candid-review.
+
+**Decision Register:** If the decision register is enabled in config, each candid-review iteration reads and updates the register file independently. This means:
+- Questions raised in iteration 1 are recorded in the register
+- In iteration 2+, candid-review checks the register before raising the same question again
+- If a question was answered in a previous iteration, the answer is reused automatically
+- In auto mode, Clarification Needed issues with prior answers from the register are applied without prompting
 
 #### Step 3.2: Read Review Results
 
@@ -240,6 +249,23 @@ Track fixes:
 totalFixesApplied += appliedCount
 allFixedIssues.push(...appliedIssues)
 ```
+
+**Decision Register in auto mode:**
+
+If the decision register is enabled, candid-review handles register consultation during its Step 6 (before raising Clarification Needed questions). In auto mode:
+- Prior decisions from the register are applied automatically by candid-review — log: `Applied prior decision (#N) for [file]`
+- New Clarification Needed issues (no prior answer) are NOT auto-applied — they require human input and are recorded as `open` in the register
+- These are treated as "skipped" in the loop — they do not count as remaining issues that block loop completion
+- Output: `Applied [N] prior decisions, skipped [M] new questions requiring clarification`
+
+Track register activity:
+```
+registerPriorDecisionsApplied += priorDecisionsCount
+registerQuestionsRaised += newQuestionsCount
+registerQuestionsResolved += resolvedCount
+```
+
+Where `resolvedCount` comes from candid-review's Step 10.5 output — it includes questions answered by the user during Phase 8b and auto-resolutions from re-review. Read the register file after each iteration to count newly resolved entries compared to the previous read.
 
 Continue to next iteration.
 
@@ -371,6 +397,23 @@ Summary:
 Skipped issues:
   [icon] [title] in [file]:[line]
   ...
+```
+
+**Decision Register section (add to all summary variants when register is enabled):**
+
+If `decisionRegister.enabled == true` in config, append this section to whichever summary is displayed:
+
+```
+Decision Register:
+- Prior decisions applied: [N]
+- New questions raised: [M]
+- Questions resolved: [P]
+- Open questions: [Q]
+```
+
+If open questions remain:
+```
+Open questions can be reviewed at: [registerPath]/review-decision-register.md
 ```
 
 ## Configuration

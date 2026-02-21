@@ -10,7 +10,12 @@ Complete reference for Candid configuration.
   "focus": "security" | "performance" | "architecture" | "edge-case",
   "mergeTargetBranches": ["branch1", "branch2"],
   "exclude": ["pattern1", "pattern2"],
-  "commit": boolean
+  "commit": boolean,
+  "decisionRegister": {
+    "enabled": boolean,
+    "path": "string",
+    "mode": "lookup" | "load"
+  }
 }
 ```
 
@@ -53,6 +58,30 @@ Example: `["*.generated.ts", "vendor/*"]`
 Whether to auto-commit applied fixes.
 
 Default: `false`
+
+### decisionRegister
+
+Configuration for tracking questions and decisions during reviews.
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `enabled` | boolean | `false` | Whether to track questions during reviews |
+| `path` | string | `".candid/register"` | Directory for the register file |
+| `mode` | string | `"lookup"` | How the register is consulted: `"lookup"` (per-question check) or `"load"` (full register in context) |
+
+Example:
+
+```json
+{
+  "decisionRegister": {
+    "enabled": true,
+    "path": ".candid/register",
+    "mode": "lookup"
+  }
+}
+```
+
+See [Decision Register](/docs/core-features/decision-register) for full documentation.
 
 ## Config Precedence
 

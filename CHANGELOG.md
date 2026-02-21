@@ -7,11 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.7.0] - 2026-02-21
+
 ### Added
+
+- **Decision Register** (`decisionRegister` config): Track questions and decisions during code reviews
+  - **Active knowledge base**: Before asking a question, checks the register for prior answers and reuses them automatically — the same question is never asked twice
+  - **Two consultation modes**: `"lookup"` (per-question check, default) or `"load"` (full register in context)
+  - **Automatic question capture**: Issues marked "Clarification Needed ?" are recorded in the register
+  - **User-initiated questions**: Choose "I have a question about this" during individual fix review
+  - **Resolution tracking**: Via answers, re-review detection, or explicit decline
+  - **Four statuses**: `open`, `answered`, `superseded`, `declined`
+  - **Deduplication**: Avoids duplicate entries for the same logical question
+  - **Configurable path**: Default `.candid/register/review-decision-register.md`, customizable via `decisionRegister.path`
+  - **Loop mode support**: Prior decisions auto-applied in auto mode; interactive in review-each/interactive modes
+  - **Git-friendly**: Register designed to be committed (unlike ephemeral `last-review.json`)
+  - **Documentation**: New core feature page, config reference update, homepage feature card
 
 ### Changed
 
-### Fixed
+- **Fix Confidence Levels**: Added "Clarification Needed ?" level for issues requiring author input
+- **Phase 8b (Individual Fix Review)**: New "I have a question about this" option when register is enabled
+- **candid-loop auto mode**: Prior decisions from register applied automatically across iterations
+- **candid-loop summary**: Shows decision register statistics when enabled
+- **candid-init**: Offers option to enable decision register during project initialization
 
 ## [1.6.1] - 2026-01-27
 

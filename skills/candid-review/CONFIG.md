@@ -14,9 +14,14 @@ Valid config file format:
   "version": 1,
   "tone": "harsh" | "constructive",
   "exclude": ["*.generated.ts", "vendor/*"],
-  "focus": "security" | "performance" | "architecture",
+  "focus": "security" | "performance" | "architecture" | "edge-case",
   "mergeTargetBranches": ["main", "develop", "master"],
-  "autoCommit": true | false
+  "autoCommit": true | false,
+  "decisionRegister": {
+    "enabled": true | false,
+    "path": ".candid/register",
+    "mode": "lookup" | "load"
+  }
 }
 ```
 
@@ -35,6 +40,12 @@ Valid config file format:
   - `["trunk"]` - Trunk-based development
   - `["origin/main", "main"]` - CI environments
 - `autoCommit` (optional): Default auto-commit behavior. If `true`, automatically creates git commits after applying fixes (equivalent to always using `--auto-commit` flag). If `false` or omitted, commits only when `--auto-commit` flag is provided. Defaults to `false`.
+- `decisionRegister` (optional): Configuration for the decision register feature. Tracks questions and decisions raised during reviews. If not present, defaults to disabled.
+  - `decisionRegister.enabled` (optional): Whether to track questions and decisions during reviews. When enabled, the reviewer checks the register for prior answers before asking new questions, and records new questions/answers for future sessions. Defaults to `false`.
+  - `decisionRegister.path` (optional): Directory path where the register file is stored. The file will be named `review-decision-register.md` inside this directory. Defaults to `".candid/register"`.
+  - `decisionRegister.mode` (optional): How the register is consulted during reviews. Must be exactly `"lookup"` or `"load"`. Defaults to `"lookup"`.
+    - `"lookup"` — Before raising each Clarification Needed question, check the register for a matching resolved answer. If found, reuse the prior answer instead of re-asking. Efficient for large registers.
+    - `"load"` — Load the entire register into context at the start of the review. The reviewer has full awareness of all prior decisions throughout. Better for small-to-medium registers where broad context helps.
 
 ## Validation Rules
 
@@ -44,8 +55,9 @@ Valid config file format:
 4. **Focus field validation** - If `focus` field is present, must be exactly `"security"`, `"performance"`, `"architecture"`, or `"edge-case"` (case-sensitive). Invalid values show warning and are ignored.
 5. **mergeTargetBranches field validation** - If present, must be an array of non-empty strings. Empty arrays or invalid values show warning and are ignored.
 6. **AutoCommit field validation** - If `autoCommit` field is present, must be a boolean (`true` or `false`). Invalid values show warning and are ignored.
-7. **Unknown fields ignored** - Any fields other than `tone`, `exclude`, `focus`, `mergeTargetBranches`, and `autoCommit` are ignored for forward compatibility
-8. **Empty object is valid** - `{}` is a valid config with no preferences set, system continues to next source
+7. **DecisionRegister field validation** - If `decisionRegister` field is present, must be an object. If `decisionRegister.enabled` is present, must be a boolean. If `decisionRegister.path` is present, must be a non-empty string. If `decisionRegister.mode` is present, must be exactly `"lookup"` or `"load"` (case-sensitive). Invalid values show warning and are ignored (feature defaults to disabled).
+8. **Unknown fields ignored** - Any fields other than `tone`, `exclude`, `focus`, `mergeTargetBranches`, `autoCommit`, and `decisionRegister` are ignored for forward compatibility
+9. **Empty object is valid** - `{}` is a valid config with no preferences set, system continues to next source
 
 ## Config Validation Procedure
 
@@ -208,6 +220,44 @@ Using constructive tone (from interactive prompt)
   "exclude": ["*.generated.ts", "vendor/*"],
   "focus": "performance",
   "autoCommit": true
+}
+```
+
+**With decision register (default lookup mode):**
+```json
+{
+  "tone": "constructive",
+  "decisionRegister": {
+    "enabled": true
+  }
+}
+```
+
+**With decision register (load mode, custom path):**
+```json
+{
+  "tone": "harsh",
+  "decisionRegister": {
+    "enabled": true,
+    "path": "docs/decisions",
+    "mode": "load"
+  }
+}
+```
+
+**Full config with decision register:**
+```json
+{
+  "version": 1,
+  "tone": "harsh",
+  "exclude": ["*.generated.ts", "vendor/*"],
+  "focus": "performance",
+  "autoCommit": true,
+  "decisionRegister": {
+    "enabled": true,
+    "path": ".candid/register",
+    "mode": "lookup"
+  }
 }
 ```
 

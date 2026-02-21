@@ -870,6 +870,20 @@ For quick mode: Generate ~50 lines (essential rules only)
 
 Same as before - auto-detect settings from codebase analysis.
 
+#### Decision Register Option
+
+During the interactive confirmation flow for config.json, include the decision register as a configurable option:
+
+Use AskUserQuestion:
+
+**Question:** "Enable the decision register to track questions and decisions during reviews?"
+
+**Options:**
+1. "Yes, enable decision register" → Add `"decisionRegister": { "enabled": true }` to the generated config
+2. "No, skip" → Omit the `decisionRegister` field from the generated config (disabled by default)
+
+If the user enables it, the default path (`.candid/register`) and default mode (`"lookup"`) are used. The user can customize these later in the config file.
+
 ---
 
 ## Step 11: Write Files and Show Summary

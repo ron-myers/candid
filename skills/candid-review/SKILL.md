@@ -24,6 +24,59 @@ Check for Technical.md (project-specific standards):
 
 When Technical.md exists, you will flag violations as 📜 Standards Violation.
 
+### Step 1.5: Load Decision Register Config
+
+Check if the decision register feature is enabled. The decision register tracks questions and decisions from reviews, and — when a question has been answered before — automatically reuses the prior answer instead of re-asking.
+
+**Precedence (highest to lowest):**
+1. Project config (`.candid/config.json` → `decisionRegister`)
+2. User config (`~/.candid/config.json` → `decisionRegister`)
+3. Default (disabled)
+
+#### Check Project Config
+
+Read `.candid/config.json`:
+1. Check file existence → if missing, continue to user config
+2. Extract field: `jq -r '.decisionRegister // null'`
+3. Validate:
+   - If null → continue to user config
+   - If not object → warn "⚠️  Invalid config: decisionRegister must be an object. Ignoring." and continue
+   - Extract `enabled` (must be boolean, default `false`)
+   - Extract `path` (must be non-empty string, default `".candid/register"`)
+   - Extract `mode` (must be `"lookup"` or `"load"`, default `"lookup"`)
+4. Success: Store `registerEnabled`, `registerPath`, and `registerMode`
+
+#### Check User Config
+
+Same procedure for `~/.candid/config.json`.
+
+#### Apply Defaults
+
+If no config found:
+```
+registerEnabled = false
+registerPath = ".candid/register"
+registerMode = "lookup"
+```
+
+#### Load Existing Register (if enabled)
+
+If `registerEnabled == true`:
+
+1. Construct register file path: `${registerPath}/review-decision-register.md`
+2. Read file if it exists
+3. Parse existing entries into `existingRegisterEntries` array by reading the markdown tables:
+   - Parse Open Questions table rows into entries with status `open`
+   - Parse Resolved Questions table rows into entries with their stored status
+   - Each entry has: `id` (the `#` column), `file`, `question`, `askedBy`, `askedAt`, `resolution`, `resolvedBy`, `status`, `resolvedAt`
+4. Track `nextEntryId` = highest existing `#` + 1 (or 1 if no entries)
+
+If file does not exist, initialize `existingRegisterEntries = []` and `nextEntryId = 1`.
+
+**Output based on mode:**
+- If mode == `"load"`: `Decision register loaded ([N] entries, [M] resolved) — using loaded context`
+- If mode == `"lookup"`: `Decision register enabled (lookup mode, path: [registerPath])`
+
 ### Step 2: Detect Changes
 
 Get the code to review:
@@ -362,6 +415,39 @@ Analyze every change with the chosen tone. Categorize issues by severity:
 | 4 | Code Smell | 📋 | Maintainability: complexity, duplication, unclear code |
 | 5 | Edge Case | 🤔 | Unhandled scenarios: null, empty, concurrent, timeout |
 | 6 | Architectural | 💭 | Design concerns: coupling, SRP violations, patterns |
+| 7 | Clarification Needed | ? | Question for the author — cannot determine correct action from code alone |
+
+### Clarification Needed ? (Decision Register)
+
+When `registerEnabled == true` (from Step 1.5), you may mark issues as **Clarification Needed ?** when the correct fix depends on information you cannot determine from the code, tests, or Technical.md alone.
+
+**Use this when:**
+- Business intent is ambiguous (e.g., "Is this permission check intentionally absent?")
+- Design tradeoffs need author input (e.g., "Was performance or readability prioritized here?")
+- Code appears to contradict Technical.md but might be an intentional exception
+- A configuration value seems arbitrary and may have a business reason
+
+**Do NOT use this for:**
+- Issues where the fix is clear from the code
+- Style preferences or subjective opinions
+- Issues covered by existing focus mode checklists
+- When `registerEnabled == false` — never use this confidence level if the register is disabled
+
+**Register consultation before raising a question:**
+
+Before marking an issue as Clarification Needed, check `existingRegisterEntries` for an existing resolved answer:
+
+1. Search for entries matching the same file/component AND a similar question topic
+2. Match by: file path (exact or same file) + normalized question text (case-insensitive, ignore punctuation)
+
+**When a matching resolved answer is found:**
+- Do NOT mark the issue as Clarification Needed
+- Instead, apply the previous decision and present it as a "Previously Decided" item in the review output (see the "Previously Decided example" after Step 7)
+- This prevents the same question from being asked across review sessions
+
+**When NO matching answer is found:**
+- Mark as Clarification Needed ? as normal
+- The question will be recorded in the register at Step 10.5
 
 ### What to Look For
 
@@ -547,6 +633,21 @@ Include confidence in every issue. Users can use this to decide whether to apply
 > const email = user.email;
 > ```
 
+*Clarification Needed example (when register is enabled and no prior answer found):*
+> ### ? Rate limiting absent on public endpoint
+> **File:** src/api/public.ts:23
+> **Confidence:** Clarification Needed ?
+> **Question:** This endpoint has no rate limiting. Was this intentional (e.g., health check) or should rate limiting be added?
+> **Impact:** If this should be rate-limited, it could be vulnerable to abuse. If intentional, please confirm so we can document the decision.
+
+*Previously Decided example (when register has a matching resolved answer):*
+> ### ✓ Previously decided: Rate limiting on public endpoint
+> **File:** src/api/public.ts:23
+> **Prior Decision (#4):** "Yes, add rate limiting at 100 req/min" — answered by Author on 2026-02-20
+> **Action:** Applied consistent with prior decision.
+
+**Note:** Previously Decided items are informational — they show the user that a prior decision was reused. They are NOT included in the fix selection prompt (Step 8) since they have already been resolved.
+
 ### Step 8: Fix Selection (MANDATORY)
 
 **⚠️ CRITICAL: This step is MANDATORY. If ANY issues were identified in Steps 6-7, you MUST present the fix selection prompt. Never skip this step when issues exist.**
@@ -584,6 +685,8 @@ Loop through each issue identified in Steps 6-7. For each issue:
    - Show icon, title, file location, and brief problem summary
 
 2. **Call AskUserQuestion:**
+
+   **For standard issues (Safe ✓ / Verify ⚡ / Careful ⚠️):**
    - **Question:** "Apply this fix?"
    - **Context to display before options:**
      ```
@@ -594,10 +697,30 @@ Loop through each issue identified in Steps 6-7. For each issue:
    - **Options:**
      - "Yes, apply this fix"
      - "No, skip this fix"
+     - "I have a question about this" (only if `registerEnabled == true`)
+
+   **For Clarification Needed ? issues (only when register is enabled):**
+   - **Question:** "This issue needs your input:"
+   - **Context to display before options:**
+     ```
+     ? [Title]
+     File: [path/to/file.ts:line]
+     Question: [The question from the issue]
+     ```
+   - **Options:**
+     - "Here's my answer" — Use a follow-up AskUserQuestion to get the answer text. Record the answer in the register entry as `answered` with the user's response.
+     - "Skip for now" — Leave the register entry as `open`. Continue to next issue.
+     - "No longer relevant / Superseded" — Mark the register entry as `superseded` (the question was made irrelevant by other changes). Continue to next issue.
+     - "Not applicable / Decline" — Mark the register entry as `declined`. Continue to next issue.
 
 3. **Track selection:**
    - If "Yes" → Add this issue to selectedFixes array
    - If "No" → Continue to next issue without adding
+   - If "I have a question about this" → Use a follow-up AskUserQuestion: "What is your question about this issue?" Record the user's question as a new register entry (`status: open`, `Asked By: Author`, file/component from the issue). Continue to next issue without adding to selectedFixes.
+   - If "Here's my answer" → Mark the Clarification Needed entry as `answered`. If the answer implies a fix should be applied, add to selectedFixes. If the answer is informational only, continue without adding.
+   - If "Skip for now" → Continue to next issue
+   - If "No longer relevant / Superseded" → Mark as `superseded`, continue to next issue
+   - If "Not applicable / Decline" → Mark as `declined`, continue to next issue
 
 Repeat for all issues. After completing the loop, proceed to Phase 8c.
 
@@ -776,6 +899,86 @@ Run /candid-review --re-review to compare against this review later.
 
 **Note:** The `.candid/last-review.json` should typically be added to `.gitignore` as it's user-specific state.
 
+### Step 10.5: Update Decision Register
+
+**Pre-condition:** Only execute this step if `registerEnabled == true` (loaded in Step 1.5).
+
+If `registerEnabled == false`, skip this step entirely and proceed to Output Structure.
+
+#### 1. Collect new entries from this review
+
+Gather all register entries accumulated during Steps 6-8:
+- Issues marked with **Clarification Needed ?** confidence → new entries with `status: open`, `Asked By: Reviewer`
+- User questions from Phase 8b "I have a question about this" → new entries with `status: open`, `Asked By: Author`
+- Resolved entries from Phase 8b "Here's my answer" → update entry to `status: answered` with user's response
+- Superseded entries from Phase 8b "No longer relevant / Superseded" → update entry to `status: superseded`
+- Declined entries from Phase 8b "Not applicable / Decline" → update entry to `status: declined`
+
+#### 2. Check for auto-resolutions
+
+If `--re-review` mode was used and previous review state exists:
+- For each `open` entry in `existingRegisterEntries` where the corresponding issue is now in the ✅ Fixed category of the re-review comparison → mark as `answered` with resolution: "Issue resolved in code (detected by re-review)", `Resolved By: Author`
+
+#### 3. Deduplicate
+
+Before adding new entries, check against `existingRegisterEntries`:
+- Compare by file path (exact match) + normalized question text (case-insensitive, strip trailing punctuation)
+- If a matching entry exists with status `open` → do NOT add duplicate. Note in output: "Matches existing question #[N]"
+- If a matching entry exists with status `answered`/`superseded`/`declined` → allow new entry (the question has resurfaced)
+
+#### 4. Create register directory if needed
+
+```bash
+mkdir -p [registerPath]
+```
+
+#### 5. Generate register markdown
+
+Write the complete register file with this structure:
+
+```markdown
+# Decision Register
+
+Tracks questions raised during Candid code reviews and their resolutions.
+
+Last updated: [ISO timestamp]
+
+## Open Questions
+
+| # | File/Component | Question | Asked By | Asked At | Status |
+|---|----------------|----------|----------|----------|--------|
+[rows for entries with status open, sorted by # ascending]
+
+## Resolved Questions
+
+| # | File/Component | Question | Asked By | Asked At | Resolution | Resolved By | Status | Resolved At |
+|---|----------------|----------|----------|----------|------------|-------------|--------|-------------|
+[rows for entries with status answered/superseded/declined, sorted by # ascending]
+```
+
+If no open questions exist, show: `_No open questions._` after the Open Questions table header.
+If no resolved questions exist, show: `_No resolved questions yet._` after the Resolved Questions table header.
+
+**Scalability:** If the Resolved Questions section exceeds 100 entries, keep only the most recent 100. Add a note: `_Showing most recent 100 resolved questions. [N] older entries removed._`
+
+#### 6. Write file
+
+Write to `${registerPath}/review-decision-register.md` using the Write tool.
+
+#### 7. Output
+
+```
+Decision register updated: [N] open, [M] resolved ([P] new this review)
+Register saved to [registerPath]/review-decision-register.md
+```
+
+If new entries were added or entries were resolved this review:
+```
+Consider committing [registerPath]/review-decision-register.md to preserve decision history.
+```
+
+**Note:** Unlike `.candid/last-review.json`, the decision register should be committed to the repository — it captures architectural decisions and rationale that benefit the whole team.
+
 ## Output Structure
 
 Present your review in this order:
@@ -787,9 +990,12 @@ Present your review in this order:
 5. **📋 Code Smells** - Consider fixing (if any)
 6. **🤔 Missing Edge Cases** - Scenarios to handle (if any)
 7. **💭 Architectural Concerns** - Design issues (if any)
-8. **✅ What's Good** - Acknowledge good practices (keep brief)
-9. **Fix Selection** - Multi-select prompt for which fixes to apply (remind user to scroll up for context)
-10. **Commit Summary** - If --auto-commit was used and successful, confirmation message
+8. **? Clarification Needed** - Questions for the author (if any, only when register enabled)
+9. **✓ Previously Decided** - Prior decisions reused from register (if any, only when register enabled)
+10. **✅ What's Good** - Acknowledge good practices (keep brief)
+11. **Fix Selection** - Multi-select prompt for which fixes to apply (remind user to scroll up for context)
+12. **Commit Summary** - If --auto-commit was used and successful, confirmation message
+13. **Decision Register Summary** - If register enabled, show update summary (new questions, resolved, open count)
 
 ### Re-Review Output Structure
 
