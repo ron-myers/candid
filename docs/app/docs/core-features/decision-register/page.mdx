@@ -1,0 +1,166 @@
+# Decision Register
+
+Track questions and decisions from code reviews. Build a searchable history of architectural decisions.
+
+## Usage
+
+Enable the decision register in your config:
+
+```json
+{
+  "decisionRegister": {
+    "enabled": true
+  }
+}
+```
+
+When enabled, Candid checks for prior answers before asking questions — and records new questions and resolutions for future sessions.
+
+## How It Works
+
+### Questions Are Raised
+
+During a review, questions appear in two ways:
+
+1. **Reviewer flags uncertainty** — When Candid can't determine the correct fix from code alone, it marks the issue as "Clarification Needed ?" and records it in the register.
+2. **You ask a question** — During individual fix review, choose "I have a question about this" to record your own question.
+
+### Prior Answers Are Reused
+
+Before raising a Clarification Needed question, Candid checks the register for a matching resolved answer. If a prior decision exists:
+
+- The question is **not re-asked**
+- The prior decision is applied automatically
+- The review shows a "Previously Decided" note referencing the original answer
+
+This prevents the same questions from being asked across review sessions and loop iterations.
+
+### Questions Are Resolved
+
+New questions (not in the register) get resolved when:
+
+- You answer during the same review session ("Here's my answer")
+- A subsequent review detects the issue was fixed (via `--re-review`)
+- You mark them as declined or not applicable
+
+## Consultation Modes
+
+### Lookup Mode (Default)
+
+```json
+{
+  "decisionRegister": {
+    "enabled": true,
+    "mode": "lookup"
+  }
+}
+```
+
+Before each Clarification Needed question, checks the register for a matching resolved answer. Efficient for large registers — only relevant entries are consulted.
+
+### Load Mode
+
+```json
+{
+  "decisionRegister": {
+    "enabled": true,
+    "mode": "load"
+  }
+}
+```
+
+Loads the entire register into context at the start of the review. The reviewer has full awareness of all prior decisions throughout. Better for small-to-medium registers where broad context helps inform the review.
+
+## Register Format
+
+The register is a markdown file at `.candid/register/review-decision-register.md`:
+
+```markdown
+# Decision Register
+
+Tracks questions raised during Candid code reviews and their resolutions.
+
+Last updated: 2026-02-21T14:30:00Z
+
+## Open Questions
+
+| # | File/Component | Question | Asked By | Asked At | Status |
+|---|----------------|----------|----------|----------|--------|
+| 3 | src/auth.ts:42 | Is the admin bypass intentional? | Reviewer | 2026-02-21 | open |
+
+## Resolved Questions
+
+| # | File/Component | Question | Asked By | Asked At | Resolution | Resolved By | Status | Resolved At |
+|---|----------------|----------|----------|----------|------------|-------------|--------|-------------|
+| 1 | src/api/users.ts:15 | Should we rate-limit? | Reviewer | 2026-02-20 | Added 100 req/min | Author | answered | 2026-02-21 |
+| 2 | src/db/queries.ts:88 | Is the N+1 acceptable? | Reviewer | 2026-02-20 | Superseded by pagination | Author | superseded | 2026-02-21 |
+```
+
+## Configuration
+
+### Enable with Defaults
+
+```json
+{
+  "decisionRegister": {
+    "enabled": true
+  }
+}
+```
+
+### Custom Path and Mode
+
+```json
+{
+  "decisionRegister": {
+    "enabled": true,
+    "path": "docs/decisions",
+    "mode": "load"
+  }
+}
+```
+
+### Options
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `enabled` | boolean | `false` | Whether to track questions during reviews |
+| `path` | string | `".candid/register"` | Directory for the register file |
+| `mode` | string | `"lookup"` | `"lookup"` (per-question check) or `"load"` (full context) |
+
+## Statuses
+
+| Status | Meaning |
+|--------|---------|
+| `open` | Question awaiting answer |
+| `answered` | Question resolved with an answer |
+| `superseded` | Question made irrelevant by other changes |
+| `declined` | Question explicitly declined / not applicable |
+
+## Git Integration
+
+The register file should be committed to your repository. Unlike `.candid/last-review.json` (which is ephemeral review state), the decision register captures architectural decisions that benefit your whole team.
+
+If your `.gitignore` excludes the `.candid/` directory, add an exception for the register:
+
+```
+# .gitignore
+.candid/*
+!.candid/register/
+```
+
+## Loop Mode
+
+In `candid-loop`, the register works across iterations:
+
+- **Auto mode**: Prior decisions from the register are applied automatically. New Clarification Needed issues (no prior answer) are skipped and recorded as open — they don't block loop completion.
+- **Review-each / Interactive**: You can answer questions during each iteration. Answers are recorded and reused in subsequent iterations.
+- Questions from iteration 1 are available to inform iteration 2+.
+
+## Deduplication
+
+Candid avoids duplicate entries for the same logical question. If a question about the same file and topic already exists as `open`, a new duplicate is not created. If a matching question was previously resolved and the same question resurfaces, a new entry is allowed.
+
+## During Init
+
+When running `/candid-init`, you'll be asked whether to enable the decision register. This adds the config to your `.candid/config.json`.
