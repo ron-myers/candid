@@ -868,11 +868,100 @@ For quick mode: Generate ~50 lines (essential rules only)
 
 ## Step 10: Generate config.json
 
-Same as before - auto-detect settings from codebase analysis.
+Build the project config by auto-detecting what you can from the codebase and prompting the user for preferences. Always set `"version": 1`.
 
-#### Decision Register Option
+**Note:** The `focus` field is intentionally not set during init — it's a per-review concern (e.g., `--focus security` before a release), not a project-level default.
 
-During the interactive confirmation flow for config.json, include the decision register as a configurable option:
+### 10.1: Detect Merge Target Branches
+
+Run:
+```bash
+git branch -a 2>/dev/null
+```
+
+Map detected branches to a branching strategy:
+
+| Detection | Strategy | `mergeTargetBranches` |
+|-----------|----------|----------------------|
+| `develop` branch exists | Git Flow | `["develop", "main"]` |
+| `trunk` branch exists | Trunk-based | `["trunk"]` |
+| `main` and `master` both exist | Migration | `["main"]` |
+| `main` exists (no develop/trunk) | GitHub Flow | `["main"]` |
+| `master` exists (no main) | Legacy | `["master"]` |
+| None detected | Default | `["main"]` |
+
+Check both local and remote branch names (e.g., `remotes/origin/develop` counts as `develop`).
+
+Use AskUserQuestion to confirm:
+
+**Question:** "Detected [strategy] branching strategy. Use `[detected branches]` as merge target branches?"
+
+**Options:**
+1. "Yes, use [detected branches]" → Use detected value
+2. "No, let me specify" → Follow-up prompt for custom branch list
+3. "Skip — use default" → Omit `mergeTargetBranches` field (candid-review defaults to `["main", "stable", "master"]`)
+
+### 10.2: Detect Exclude Patterns
+
+Scan the project for files and directories that should be excluded from reviews. Check for:
+
+```bash
+# Generated files
+find . -maxdepth 4 \( -name "*.generated.ts" -o -name "*.generated.js" -o -name "*.g.dart" \) 2>/dev/null | head -5
+
+# Vendor directories
+ls -d vendor/ third_party/ 2>/dev/null
+
+# Build output
+ls -d dist/ build/ .next/ out/ 2>/dev/null
+
+# Minified files
+find . -maxdepth 4 \( -name "*.min.js" -o -name "*.min.css" \) 2>/dev/null | head -5
+```
+
+Build a list of detected exclude patterns:
+- `*.generated.ts` / `*.generated.js` — if generated files found
+- `vendor/*` — if vendor directory found
+- `dist/*` / `build/*` / `.next/*` — if build output directories found
+- `*.min.js` / `*.min.css` — if minified files found
+
+**If patterns detected:** Use AskUserQuestion:
+
+**Question:** "Detected files that should be excluded from reviews:\n[list each pattern with example file]\n\nUse these exclude patterns?"
+
+**Options:**
+1. "Yes, use detected patterns" → Use detected list
+2. "Yes, and add more" → Use detected list + follow-up prompt for additional patterns
+3. "No, skip exclusions" → Omit `exclude` field
+
+**If no patterns detected:** Skip this step silently. Omit `exclude` field.
+
+### 10.3: Prompt for Tone
+
+Use AskUserQuestion:
+
+**Question:** "What review tone do you prefer?"
+
+**Options:**
+1. "Harsh — brutal honesty, no sugar-coating"
+2. "Constructive — caring feedback that still challenges directly"
+3. "Skip — decide per review"
+
+If "Harsh" → set `"tone": "harsh"`. If "Constructive" → set `"tone": "constructive"`. If "Skip" → omit `tone` field (candid-review will prompt each time or use user config).
+
+### 10.4: Prompt for Auto-Commit
+
+Use AskUserQuestion:
+
+**Question:** "Automatically commit fixes after applying them during reviews?"
+
+**Options:**
+1. "Yes — auto-commit applied fixes"
+2. "No — I'll commit manually" (default)
+
+If "Yes" → set `"autoCommit": true`. If "No" → omit `autoCommit` field (defaults to false).
+
+### 10.5: Decision Register Option
 
 Use AskUserQuestion:
 
@@ -883,6 +972,37 @@ Use AskUserQuestion:
 2. "No, skip" → Omit the `decisionRegister` field from the generated config (disabled by default)
 
 If the user enables it, the default path (`.candid/register`) and default mode (`"lookup"`) are used. The user can customize these later in the config file.
+
+### 10.6: Preview and Confirm
+
+Assemble the config object from all detected and prompted values. Only include fields that were explicitly set — omit fields the user skipped (they default correctly when absent).
+
+Show the assembled config as valid JSON. Example with all fields enabled:
+
+```
+⚙️  Generated config.json:
+
+{
+  "version": 1,
+  "tone": "harsh",
+  "mergeTargetBranches": ["main"],
+  "exclude": ["dist/*", "*.min.js"],
+  "autoCommit": true,
+  "decisionRegister": {
+    "enabled": true
+  }
+}
+```
+
+Only include fields the user selected — omit any they skipped.
+
+Use AskUserQuestion:
+
+**Question:** "Write this config to `.candid/config.json`?"
+
+**Options:**
+1. "Yes, write it" → Proceed to Step 11
+2. "Let me adjust" → Ask what to change, update the config, and re-preview
 
 ---
 

@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.8.0] - 2026-02-21
+
+### Changed
+
+- **candid-init config builder** (Step 10): Replaced the placeholder "auto-detect settings" step with a structured 6-sub-step guided config builder
+  - **10.1 — Branch strategy detection**: Runs `git branch -a`, maps to branching strategy (Git Flow, GitHub Flow, trunk-based, legacy), confirms with user via AskUserQuestion with option to customize or skip
+  - **10.2 — Exclude pattern detection**: Scans for generated files, vendor directories, build output, and minified files using portable `find` commands; presents detected patterns for confirmation
+  - **10.3 — Tone preference**: Interactive prompt for harsh, constructive, or skip (defer to per-review choice)
+  - **10.4 — Auto-commit preference**: Interactive prompt to enable or skip (defaults to false)
+  - **10.5 — Decision register**: Existing prompt retained for enable/skip
+  - **10.6 — Preview and confirm**: Shows assembled JSON for user approval before writing, with option to adjust
+  - Explicit note that `focus` field is intentionally skipped — it's a per-review concern, not a project-level default
+  - Consistently omits skipped fields rather than writing defaults — sparse configs that age well
+  - Handles `main`+`master` coexistence (migration repos) and checks remote branch names
+
 ## [1.7.0] - 2026-02-21
 
 ### Added
