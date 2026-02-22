@@ -7,5 +7,6 @@ export default {
   're-review': 'Re-Review',
   'candid-loop': 'Candid Loop',
   'decision-register': 'Decision Register',
+  'context-optimization': 'Context Optimization',
   'slash-commands': 'Slash Commands',
 }

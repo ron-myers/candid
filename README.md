@@ -31,6 +31,7 @@ The review process follows these steps:
 - **Auto-Commit** - Automatically commit applied fixes with detailed messages
 - **Todo Integration** - Convert issues to tracked todos with multi-select
 - **Issue Categorization** - Organized by severity (Critical → Architectural)
+- **Context Optimization** - Audit and optimize token usage for leaner, deeper reviews
 
 ## Installation
 
