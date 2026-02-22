@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.9.0] - 2026-02-21
+
+### Added
+
+- **Context Optimization** (`/candid-optimize`): New command to audit and optimize the context candid loads during reviews
+  - **Token budget estimation**: Shows breakdown of tokens consumed by Technical.md, decision register, and config files with visual bar chart
+  - **Technical.md efficiency analysis**: Identifies verbose rules (>200 chars), near-duplicate rules (keyword overlap), and low-signal rules (no project-specific references) with condensed rewrites and token savings estimates
+  - **Exclude pattern scanning**: Detects generated files, build output, vendored code, minified files, lock files, and source maps missing from exclusion config
+  - **Decision register optimization**: Recommends "lookup" mode for large registers in "load" mode, suggests pruning resolved entries beyond 100, detects duplicate questions
+  - **Config tuning recommendations**: Flags missing config.json, unconfigured merge target branches, and suggests focus modes for large Technical.md files
+  - **Interactive apply**: Choose to apply all, review each recommendation, or dry-run only
+  - **Section filtering**: `--section technical-md|excludes|register|config` to analyze specific areas
+  - **Before/after summary**: Shows token reduction after applying optimizations
+
 ## [1.8.0] - 2026-02-21
 
 ### Changed

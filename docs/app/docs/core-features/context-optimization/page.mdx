@@ -1,0 +1,101 @@
+export const metadata = {
+  title: 'Context Optimization - Audit and Optimize Review Context',
+  description: 'Use candid-optimize to audit token usage, find missing exclude patterns, tune your config, and reduce context waste during code reviews.',
+}
+
+# Context Optimization
+
+Audit and optimize the context that candid loads during reviews.
+
+## Why Optimize Context?
+
+Every code review loads fixed context into the LLM: your Technical.md, config files, and decision register. This competes with tokens available for reading your actual code. Lean context means deeper code analysis.
+
+## Quick Start
+
+```
+/candid-optimize
+```
+
+This runs a full audit and presents recommendations interactively.
+
+## What It Checks
+
+### Token Budget Estimation
+
+Shows a breakdown of how many tokens each context source consumes:
+
+- **Technical.md** — your project standards
+- **Decision register** — tracked questions and decisions
+- **Config files** — project and user configuration
+
+Flags when total fixed context is unusually high.
+
+### Technical.md Efficiency
+
+Goes beyond `/candid-validate-standards` to analyze token efficiency:
+
+- **Verbose rules** — rules that could be condensed without losing meaning
+- **Near-duplicate rules** — rules with overlapping content across sections
+- **Low-signal rules** — generic rules without project-specific references
+
+Each finding includes estimated token savings and a condensed alternative.
+
+### Exclude Patterns
+
+Scans your repo for files that waste review context:
+
+- Generated files (`*.generated.ts`, `*.g.dart`)
+- Build output (`dist/`, `build/`, `.next/`)
+- Vendored code (`vendor/`, `third_party/`)
+- Minified files (`*.min.js`, `*.min.css`)
+- Lock files (`package-lock.json`, `yarn.lock`)
+- Source maps (`*.map`)
+
+Compares against your current `exclude` config and suggests missing patterns.
+
+### Decision Register
+
+If the decision register is enabled:
+
+- Recommends `"lookup"` mode when `"load"` mode register is large
+- Suggests pruning old resolved entries beyond 100
+- Detects duplicate questions
+
+### Config Tuning
+
+Checks for common misconfigurations:
+
+- Technical.md exists but no config.json
+- Missing exclude patterns for detected generated/vendor files
+- Large Technical.md without focus mode usage
+- Merge target branches not configured
+
+## Usage
+
+```
+/candid-optimize                          # Full audit, interactive apply
+/candid-optimize --dry-run                # Show recommendations only
+/candid-optimize --apply-all              # Apply all optimizations
+/candid-optimize --section technical-md   # Only analyze Technical.md
+/candid-optimize --section excludes       # Only analyze exclude patterns
+/candid-optimize --section register       # Only analyze decision register
+/candid-optimize --section config         # Only analyze config tuning
+```
+
+## Example Output
+
+```
+Context Budget Estimate
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Source                    Tokens     Budget
+──────────────────────────────────────────────
+Technical.md              ~2,400     ████████░░  62%
+Decision register         ~1,200     ████░░░░░░  31%
+Config files              ~100       ░░░░░░░░░░   3%
+──────────────────────────────────────────────
+Fixed context total       ~3,700
+```
+
+After applying optimizations, a before/after summary shows the token reduction.
