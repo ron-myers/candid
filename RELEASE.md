@@ -273,4 +273,4 @@ Consider automating the website version badge update:
 ---
 
 **Last Updated**: 2026-01-27
-**Current Version**: 1.6.0
+**Current Version**: 1.10.0

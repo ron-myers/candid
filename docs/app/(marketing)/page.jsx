@@ -120,7 +120,7 @@ export default function HomePage() {
           style={getHeroAnimationStyle(heroLoaded, 0)}
         >
           <span className="version-dot"></span>
-          v1.8.0 Now Available for Claude Code
+          v1.10.0 Now Available for Claude Code
         </div>
         <h1
           style={getHeroAnimationStyle(heroLoaded, 100)}
