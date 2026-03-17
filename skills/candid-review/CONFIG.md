@@ -21,6 +21,13 @@ Valid config file format:
     "enabled": true | false,
     "path": ".candid/register",
     "mode": "lookup" | "load"
+  },
+  "ship": {
+    "buildCommand": "npm run build",
+    "testCommand": "npm test",
+    "targetBranch": "stable",
+    "autoMerge": false,
+    "additionalPrompt": "Focus on security"
   }
 }
 ```
@@ -46,6 +53,12 @@ Valid config file format:
   - `decisionRegister.mode` (optional): How the register is consulted during reviews. Must be exactly `"lookup"` or `"load"`. Defaults to `"lookup"`.
     - `"lookup"` — Before raising each Clarification Needed question, check the register for a matching resolved answer. If found, reuse the prior answer instead of re-asking. Efficient for large registers.
     - `"load"` — Load the entire register into context at the start of the review. The reviewer has full awareness of all prior decisions throughout. Better for small-to-medium registers where broad context helps.
+- `ship` (optional): Configuration for the candid-ship shipping workflow. If not present, candid-ship uses defaults for all settings.
+  - `ship.buildCommand` (optional): Shell command for build verification before creating PR. If not set, build step is skipped. Must be a non-empty string.
+  - `ship.testCommand` (optional): Shell command for running tests before creating PR. If not set, test step is skipped. Must be a non-empty string.
+  - `ship.targetBranch` (optional): Branch name for PR target. Defaults to first entry in `mergeTargetBranches` or `"main"`. Must be a non-empty string.
+  - `ship.autoMerge` (optional): Whether to auto-merge the PR after creation via `gh pr merge --squash --auto`. Defaults to `false`. Must be a boolean.
+  - `ship.additionalPrompt` (optional): Extra prompt text passed to candid-loop/candid-review as additional review context. Must be a non-empty string.
 
 ## Validation Rules
 
@@ -56,8 +69,9 @@ Valid config file format:
 5. **mergeTargetBranches field validation** - If present, must be an array of non-empty strings. Empty arrays or invalid values show warning and are ignored.
 6. **AutoCommit field validation** - If `autoCommit` field is present, must be a boolean (`true` or `false`). Invalid values show warning and are ignored.
 7. **DecisionRegister field validation** - If `decisionRegister` field is present, must be an object. If `decisionRegister.enabled` is present, must be a boolean. If `decisionRegister.path` is present, must be a non-empty string. If `decisionRegister.mode` is present, must be exactly `"lookup"` or `"load"` (case-sensitive). Invalid values show warning and are ignored (feature defaults to disabled).
-8. **Unknown fields ignored** - Any fields other than `tone`, `exclude`, `focus`, `mergeTargetBranches`, `autoCommit`, and `decisionRegister` are ignored for forward compatibility
-9. **Empty object is valid** - `{}` is a valid config with no preferences set, system continues to next source
+8. **Ship field validation** - If `ship` field is present, must be an object. If `ship.buildCommand` is present, must be a non-empty string. If `ship.testCommand` is present, must be a non-empty string. If `ship.targetBranch` is present, must be a non-empty string. If `ship.autoMerge` is present, must be a boolean. If `ship.additionalPrompt` is present, must be a non-empty string. Invalid values show warning and are ignored.
+9. **Unknown fields ignored** - Any fields other than `tone`, `exclude`, `focus`, `mergeTargetBranches`, `autoCommit`, `decisionRegister`, and `ship` are ignored for forward compatibility
+10. **Empty object is valid** - `{}` is a valid config with no preferences set, system continues to next source
 
 ## Config Validation Procedure
 
@@ -257,6 +271,43 @@ Using constructive tone (from interactive prompt)
     "enabled": true,
     "path": ".candid/register",
     "mode": "lookup"
+  }
+}
+```
+
+**With ship configuration:**
+```json
+{
+  "version": 1,
+  "tone": "constructive",
+  "ship": {
+    "buildCommand": "npm run build",
+    "testCommand": "npm test",
+    "targetBranch": "main",
+    "autoMerge": false
+  }
+}
+```
+
+**Full config with all features:**
+```json
+{
+  "version": 1,
+  "tone": "harsh",
+  "exclude": ["*.generated.ts", "vendor/*"],
+  "focus": "performance",
+  "autoCommit": true,
+  "decisionRegister": {
+    "enabled": true,
+    "path": ".candid/register",
+    "mode": "lookup"
+  },
+  "ship": {
+    "buildCommand": "npm run build",
+    "testCommand": "npm test",
+    "targetBranch": "stable",
+    "autoMerge": true,
+    "additionalPrompt": "Ensure error handling covers all async operations"
   }
 }
 ```
