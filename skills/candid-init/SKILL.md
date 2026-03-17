@@ -973,7 +973,104 @@ Use AskUserQuestion:
 
 If the user enables it, the default path (`.candid/register`) and default mode (`"lookup"`) are used. The user can customize these later in the config file.
 
-### 10.6: Preview and Confirm
+### 10.6: Ship Configuration
+
+Use AskUserQuestion:
+
+**Question:** "Configure the candid-ship shipping workflow? (review → build → test → PR → merge)"
+
+**Options:**
+1. "Yes, configure ship settings"
+2. "No, skip"
+
+If "No, skip" → omit `ship` field. Proceed to Step 10.7.
+
+If "Yes, configure ship settings":
+
+#### 10.6a: Build Command
+
+Auto-detect from package.json:
+```bash
+jq -r '.scripts.build // null' package.json 2>/dev/null
+```
+
+**If build script detected:** Use AskUserQuestion:
+- **Question:** "Build command for ship verification?\nDetected: `[detected command]`"
+- **Options:**
+  1. "[detected package manager] run build" (e.g., "npm run build")
+  2. "Custom command"
+  3. "Skip build step"
+
+**If no build script detected:** Use AskUserQuestion:
+- **Question:** "Build command for ship verification?"
+- **Options:**
+  1. "npm run build"
+  2. "yarn build"
+  3. "Custom command"
+  4. "Skip build step"
+
+If "Custom command" → follow-up: "Enter build command:" with free-text response.
+If "Skip build step" → omit `buildCommand` field.
+
+#### 10.6b: Test Command
+
+Auto-detect from package.json:
+```bash
+jq -r '.scripts.test // null' package.json 2>/dev/null
+```
+
+Same pattern as 10.6a but for tests. Detect `pytest`, `go test`, etc. from project structure if not in package.json:
+```bash
+ls pytest.ini setup.cfg pyproject.toml 2>/dev/null  # Python
+ls go.mod 2>/dev/null                                # Go
+```
+
+**If test script detected:** Use AskUserQuestion with detected command as first option.
+**If no test script detected:** Offer common options (npm test, yarn test, Custom, Skip).
+
+If "Custom command" → follow-up: "Enter test command:" with free-text response.
+If "Skip test step" → omit `testCommand` field.
+
+#### 10.6c: Target Branch
+
+Use the branch detected in Step 10.1 (mergeTargetBranches).
+
+**Question:** "Target branch for PRs created by candid-ship?"
+
+**Options:**
+1. "[first detected branch]" (from Step 10.1 result)
+2. "Custom branch"
+3. "Skip (use default from mergeTargetBranches)"
+
+If "Custom branch" → follow-up: "Enter target branch name:"
+If "Skip" → omit `targetBranch` field.
+
+#### 10.6d: Auto-Merge
+
+Use AskUserQuestion:
+
+**Question:** "Auto-merge PRs after creation? (requires GitHub auto-merge enabled on repo)"
+
+**Options:**
+1. "Yes — auto-merge with squash"
+2. "No — manual merge (default)"
+
+If "Yes" → set `"autoMerge": true`. If "No" → omit `autoMerge` field.
+
+#### 10.6e: Additional Prompt
+
+Use AskUserQuestion:
+
+**Question:** "Add an additional review prompt for candid-ship? (extra context passed to code review during ship)"
+
+**Options:**
+1. "Yes, add a prompt"
+2. "No, skip"
+
+If "Yes" → follow-up: "Enter additional review prompt:" with free-text response.
+If "No" → omit `additionalPrompt` field.
+
+### 10.7: Preview and Confirm
 
 Assemble the config object from all detected and prompted values. Only include fields that were explicitly set — omit fields the user skipped (they default correctly when absent).
 
@@ -990,6 +1087,12 @@ Show the assembled config as valid JSON. Example with all fields enabled:
   "autoCommit": true,
   "decisionRegister": {
     "enabled": true
+  },
+  "ship": {
+    "buildCommand": "npm run build",
+    "testCommand": "npm test",
+    "targetBranch": "main",
+    "autoMerge": false
   }
 }
 ```
