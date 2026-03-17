@@ -1,0 +1,211 @@
+export const metadata = {
+  title: 'Candid Ship - Review, Build, Test, PR, and Merge',
+  description: 'Use candid-ship to orchestrate the full shipping workflow: code review, build verification, test execution, PR creation, and optional auto-merge in one command.',
+}
+
+# Candid Ship
+
+Ship your branch with one command — review, build, test, PR, and merge.
+
+## Quick Start
+
+```
+/candid-ship
+```
+
+Candid Ship orchestrates the full shipping workflow:
+
+1. Run `candid-loop` to review and fix code issues
+2. Execute your build command
+3. Run your tests
+4. Create a pull request
+5. Optionally auto-merge
+
+Any failure aborts immediately with a clear message.
+
+## How It Works
+
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Candid Ship Plan
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Branch: feature/add-auth → stable
+
+Steps:
+  1. 🔍 Review code (candid-loop)
+  2. 🔨 Build: npm run build
+  3. 🧪 Tests: npm test
+  4. 📋 Create pull request
+  5. 🔀 Auto-merge: disabled
+```
+
+Before executing, the plan is shown for confirmation. Use `--dry-run` to preview without executing.
+
+## Pre-Flight Checks
+
+Before starting, candid-ship validates:
+
+- **GitHub CLI** — `gh` is installed and authenticated
+- **Git repository** — you're inside a git repo
+- **Branch state** — you're on a feature branch (not the target branch)
+- **Commits ahead** — your branch has commits beyond the target
+
+If any check fails, you get a clear error message before any work begins.
+
+## Configuration
+
+### CLI Flags
+
+| Flag | Description | Default |
+|------|-------------|---------|
+| `--auto-merge` | Enable auto-merge after PR creation | from config |
+| `--no-auto-merge` | Disable auto-merge even if config enables it | from config |
+| `--skip-review` | Skip the candid-loop review step | `false` |
+| `--skip-build` | Skip build verification | `false` |
+| `--skip-tests` | Skip test execution | `false` |
+| `--dry-run` | Show plan without executing | `false` |
+
+### Config File
+
+Add to `.candid/config.json`:
+
+```json
+{
+  "ship": {
+    "buildCommand": "npm run build",
+    "testCommand": "npm test",
+    "targetBranch": "stable",
+    "autoMerge": false,
+    "additionalPrompt": "Focus on security and ensure all API endpoints have auth middleware"
+  }
+}
+```
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `buildCommand` | string | — | Shell command for build verification. Skipped if not set. |
+| `testCommand` | string | — | Shell command for running tests. Skipped if not set. |
+| `targetBranch` | string | first `mergeTargetBranches` or `"main"` | Branch to target for the PR. |
+| `autoMerge` | boolean | `false` | Auto-merge the PR after creation. |
+| `additionalPrompt` | string | — | Extra context passed to candid-loop/review during the review step. |
+
+## Additional Prompt
+
+The `additionalPrompt` field lets you add review context that's specific to your shipping workflow. This text is passed to `candid-loop` which forwards it to `candid-review`.
+
+```json
+{
+  "ship": {
+    "additionalPrompt": "Focus on security and ensure all API endpoints have auth middleware"
+  }
+}
+```
+
+This is useful for enforcing team-wide shipping standards beyond what's in your Technical.md.
+
+## Auto-Merge
+
+When `autoMerge` is enabled, candid-ship uses GitHub's auto-merge feature:
+
+```bash
+gh pr merge --squash --auto
+```
+
+This means the PR will merge automatically once all branch protection checks pass. If your repository doesn't have auto-merge enabled, you'll see a warning but the PR is still created.
+
+> **Note:** Auto-merge requires the "Allow auto-merge" setting to be enabled in your GitHub repository settings under Settings → General → Pull Requests.
+
+## Examples
+
+```bash
+# Full workflow with config defaults
+/candid-ship
+
+# Force auto-merge
+/candid-ship --auto-merge
+
+# Quick ship — skip review, just build/test/PR
+/candid-ship --skip-review
+
+# Preview the plan without executing
+/candid-ship --dry-run
+
+# Skip everything except PR creation
+/candid-ship --skip-review --skip-build --skip-tests
+
+# Override auto-merge for this run
+/candid-ship --no-auto-merge
+```
+
+## Output Examples
+
+### Success
+
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Candid Ship Complete
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Review:   PASS (3 iterations, 7 issues fixed)
+Build:    PASS
+Tests:    PASS
+PR:       https://github.com/org/repo/pull/42
+Merge:    Auto-merge enabled
+```
+
+### With Skipped Steps
+
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Candid Ship Complete
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Review:   SKIPPED
+Build:    PASS
+Tests:    SKIPPED
+PR:       https://github.com/org/repo/pull/42
+Merge:    Manual merge required
+```
+
+### Build Failure
+
+```
+Step 2/5: Running build...
+$ npm run build
+
+[build output with errors]
+
+Build failed. Ship aborted.
+```
+
+## Combining with Other Features
+
+Candid Ship respects your other Candid settings:
+
+- **Tone** — the review step uses your configured tone
+- **Loop settings** — max iterations, enforce categories, and ignored issues from your `loop` config
+- **Decision register** — prior decisions are applied during the review step
+- **Exclude patterns** — files excluded from review carry through
+
+## Workflow Example
+
+A typical shipping workflow with candid-ship configured:
+
+```json
+{
+  "version": 1,
+  "tone": "constructive",
+  "mergeTargetBranches": ["stable"],
+  "autoCommit": true,
+  "ship": {
+    "buildCommand": "npm run build",
+    "testCommand": "npm test",
+    "targetBranch": "stable",
+    "autoMerge": true,
+    "additionalPrompt": "Ensure error handling covers all async operations"
+  }
+}
+```
+
+Then just run `/candid-ship` and your code goes from review to merged PR.

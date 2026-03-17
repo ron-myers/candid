@@ -93,6 +93,35 @@ Generate a Technical.md file by analyzing your codebase.
 /candid-init --effort thorough
 ```
 
+## /candid-ship
+
+Ship your branch — review, build, test, create PR, and optionally auto-merge.
+
+```
+/candid-ship
+```
+
+### Options
+
+| Flag | Description |
+|------|-------------|
+| `--auto-merge` | Auto-merge the PR after creation |
+| `--no-auto-merge` | Disable auto-merge even if config enables it |
+| `--skip-review` | Skip the candid-loop review step |
+| `--skip-build` | Skip build verification |
+| `--skip-tests` | Skip test execution |
+| `--dry-run` | Show plan without executing |
+
+### Examples
+
+```
+/candid-ship
+/candid-ship --auto-merge
+/candid-ship --skip-review
+/candid-ship --dry-run
+/candid-ship --skip-review --skip-build --skip-tests
+```
+
 ## /candid-validate-standards
 
 Check your Technical.md for issues.

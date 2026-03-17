@@ -8,5 +8,6 @@ export default {
   'candid-loop': 'Candid Loop',
   'decision-register': 'Decision Register',
   'context-optimization': 'Context Optimization',
+  'candid-ship': 'Candid Ship',
   'slash-commands': 'Slash Commands',
 }
