@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "tone": "constructive",
+  "mergeTargetBranches": ["main"],
+  "ship": {
+    "buildCommand": "npm run build",
+    "testCommand": "npm test",
+    "targetBranch": "main",
+    "autoMerge": false,
+    "additionalPrompt": "Focus on security and ensure all API endpoints have auth middleware"
+  }
+}
