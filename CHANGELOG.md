@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.10.0] - 2026-03-17
+
+### Added
+
+- **Ship Workflow** (`/candid-ship`): New command to orchestrate the full shipping workflow — review, build, test, PR, and merge in one command
+  - **Review step**: Runs candid-loop to iteratively fix all code issues before shipping
+  - **Build verification**: Runs configured build command (e.g., `npm run build`) with fail-fast abort
+  - **Test execution**: Runs configured test command (e.g., `npm test`) with fail-fast abort
+  - **PR creation**: Auto-generates PR title and body from git log, creates via `gh pr create`
+  - **Auto-merge**: Optionally enables GitHub auto-merge via `gh pr merge --squash --auto`
+  - **Configurable**: New `ship` field in config.json for build/test commands, target branch, auto-merge, and additional review prompt
+  - **Additional prompt**: Pass extra review context via `ship.additionalPrompt` — e.g., "Focus on security and ensure all API endpoints have auth middleware"
+  - **CLI flags**: `--auto-merge`, `--no-auto-merge`, `--skip-review`, `--skip-build`, `--skip-tests`, `--dry-run`
+  - **Fail-fast**: Aborts on review incomplete, build failure, or test failure with clear error messages
+  - **Pre-flight checks**: Validates `gh` CLI availability, authentication, branch state, and commits ahead before starting
+  - **Ship plan**: Displays full execution plan before starting, with `--dry-run` option to preview without executing
+
+### Changed
+
+- **candid-init config builder**: New step 10.6 for ship configuration with auto-detection of build/test commands from package.json, target branch from git branches, and prompts for auto-merge and additional review context
+- **CONFIG.md schema**: Added `ship` field with validation rules for `buildCommand`, `testCommand`, `targetBranch`, `autoMerge`, and `additionalPrompt` sub-fields
+
 ## [1.9.0] - 2026-02-21
 
 ### Added
