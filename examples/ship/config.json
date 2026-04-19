@@ -7,6 +7,7 @@
     "testCommand": "npm test",
     "targetBranch": "main",
     "autoMerge": false,
-    "additionalPrompt": "Focus on security and ensure all API endpoints have auth middleware"
+    "additionalPrompt": "Focus on security and ensure all API endpoints have auth middleware",
+    "postMergeCommand": "echo 'Ship complete!'"
   }
 }
