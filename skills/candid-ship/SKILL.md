@@ -80,6 +80,7 @@ If the `ship` field exists, extract:
 - `targetBranch` (string) — PR target branch
 - `autoMerge` (boolean) — auto-merge after PR creation
 - `additionalPrompt` (string) — extra context for candid-loop/review
+- `postMergeCommand` (string) — shell command to run after auto-merge succeeds
 
 Output when loading: `Using ship settings from project config`
 
@@ -112,6 +113,7 @@ testCommand = null (skip tests if not set)
 targetBranch = resolved per above
 autoMerge = false
 additionalPrompt = null
+postMergeCommand = null (skip if not set)
 ```
 
 #### Validate Current Branch != Target Branch
@@ -147,6 +149,7 @@ Steps:
   3. 🧪 Tests: [testCommand]                [or SKIP — not configured]
   4. 📋 Create pull request
   5. 🔀 Auto-merge: enabled                 [or disabled]
+  6. 🚀 Post-merge: [postMergeCommand]      [or SKIP — not configured]
 ```
 
 If `additionalPrompt` is set:
@@ -344,7 +347,40 @@ If auto-merge succeeds:
 Auto-merge enabled. PR will merge when checks pass.
 ```
 
-### Step 9: Display Summary
+### Step 9: Run Post-Merge Command (Conditional)
+
+**Skip if** `postMergeCommand` is not configured. Output: `Skipping post-merge command (not configured)`
+
+**Skip if** `autoMerge` is `false`. Output: `Skipping post-merge command (auto-merge disabled)`
+
+**Skip if** auto-merge failed in Step 8. Output: `Skipping post-merge command (auto-merge failed)`
+
+If all conditions are met (command configured, auto-merge enabled, auto-merge succeeded):
+
+Display:
+```
+Step 6/6: Running post-merge command...
+$ [postMergeCommand]
+```
+
+Execute the post-merge command:
+```bash
+[postMergeCommand]
+```
+
+**If command fails** (non-zero exit code):
+```
+⚠️  Post-merge command failed: [error output]
+PR is still merging at: [URL]
+```
+Do NOT abort — the PR was already created and auto-merge is enabled. Continue to summary.
+
+**If command succeeds:**
+```
+Post-merge command completed.
+```
+
+### Step 10: Display Summary
 
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -356,6 +392,7 @@ Build:    [PASS | SKIPPED]
 Tests:    [PASS | SKIPPED]
 PR:       [URL]
 Merge:    [Auto-merge enabled | Manual merge required | Auto-merge failed]
+Post-merge: [PASS | SKIPPED | FAILED | N/A]
 ```
 
 ## Configuration
@@ -372,7 +409,8 @@ Add to `.candid/config.json`:
     "testCommand": "npm test",
     "targetBranch": "stable",
     "autoMerge": false,
-    "additionalPrompt": "Focus on security and ensure all API endpoints have auth middleware"
+    "additionalPrompt": "Focus on security and ensure all API endpoints have auth middleware",
+    "postMergeCommand": "curl -X POST https://deploy.example.com/trigger"
   }
 }
 ```
@@ -386,6 +424,7 @@ Add to `.candid/config.json`:
 | `ship.targetBranch` | string | first `mergeTargetBranches` or `"main"` | Branch to target for PR. |
 | `ship.autoMerge` | boolean | `false` | Auto-merge PR after creation via `gh pr merge --squash --auto`. |
 | `ship.additionalPrompt` | string | `null` | Extra context passed to candid-loop/review. |
+| `ship.postMergeCommand` | string | `null` | Shell command to run after auto-merge succeeds. Skipped if auto-merge is disabled or fails. |
 
 ### Examples
 
@@ -406,7 +445,8 @@ Add to `.candid/config.json`:
     "testCommand": "npm test",
     "targetBranch": "stable",
     "autoMerge": true,
-    "additionalPrompt": "Ensure error handling covers all async operations"
+    "additionalPrompt": "Ensure error handling covers all async operations",
+    "postMergeCommand": "curl -X POST https://deploy.example.com/trigger"
   }
 }
 ```
