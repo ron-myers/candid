@@ -2,7 +2,8 @@
 .context/
 
 # Candid review state (user-specific)
-.candid/
+.candid/last-review.json
+.candid/register
 
 # macOS metadata
 .DS_Store

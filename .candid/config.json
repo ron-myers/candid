@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "tone": "harsh",
+  "mergeTargetBranches": ["stable"],
+  "autoCommit": true,
+  "decisionRegister": {
+    "enabled": true
+  },
+  "ship": {
+    "targetBranch": "stable",
+    "autoMerge": true,
+    "additionalPrompt": "Ensure the docs site builds, and ask whether the version number has changed. Ask the user if they wish to update the version number if it has not been updated."
+  }
+}
