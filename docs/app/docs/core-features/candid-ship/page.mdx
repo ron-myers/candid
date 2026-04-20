@@ -162,7 +162,7 @@ If the command fails, a warning is shown but the workflow is **not** aborted —
 
 ## Output Examples
 
-### Success
+### Success (with post-merge command)
 
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -177,6 +177,20 @@ Merge:    Auto-merge enabled
 Post-merge: PASS
 ```
 
+### Success (without post-merge command)
+
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Candid Ship Complete
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Review:   PASS (3 iterations, 7 issues fixed)
+Build:    PASS
+Tests:    PASS
+PR:       https://github.com/org/repo/pull/42
+Merge:    Auto-merge enabled
+```
+
 ### With Skipped Steps
 
 ```
@@ -189,7 +203,6 @@ Build:    PASS
 Tests:    SKIPPED
 PR:       https://github.com/org/repo/pull/42
 Merge:    Manual merge required
-Post-merge: SKIPPED
 ```
 
 ### Build Failure

@@ -134,6 +134,8 @@ If no commits ahead: abort with `No commits ahead of [targetBranch]. Nothing to 
 
 ### Step 3: Display Plan
 
+Calculate `totalSteps = 5 + (postMergeCommand is set ? 1 : 0)`. Use this value as the step total in all step progress displays throughout the workflow.
+
 Show what will be executed:
 
 ```
@@ -149,7 +151,7 @@ Steps:
   3. 🧪 Tests: [testCommand]                [or SKIP — not configured]
   4. 📋 Create pull request
   5. 🔀 Auto-merge: enabled                 [or disabled]
-  6. 🚀 Post-merge: [postMergeCommand]      [or SKIP — not configured]
+  6. 🚀 Post-merge: [postMergeCommand]      [only shown if postMergeCommand is set]
 ```
 
 If `additionalPrompt` is set:
@@ -177,7 +179,7 @@ If "No, cancel": exit with `Ship cancelled.`
 
 Display:
 ```
-Step 1/5: Running code review...
+Step 1/[totalSteps]: Running code review...
 ```
 
 Invoke candid-loop via the Skill tool: `/candid-loop`
@@ -205,7 +207,7 @@ If skipped due to flag: Output: `Skipping build (--skip-build)`
 
 Display:
 ```
-Step 2/5: Running build...
+Step 2/[totalSteps]: Running build...
 $ [buildCommand]
 ```
 
@@ -235,7 +237,7 @@ If skipped due to flag: Output: `Skipping tests (--skip-tests)`
 
 Display:
 ```
-Step 3/5: Running tests...
+Step 3/[totalSteps]: Running tests...
 $ [testCommand]
 ```
 
@@ -260,7 +262,7 @@ Tests passed.
 
 Display:
 ```
-Step 4/5: Creating pull request...
+Step 4/[totalSteps]: Creating pull request...
 ```
 
 #### 7.1: Generate PR Title
@@ -327,7 +329,7 @@ If `autoMerge` is `true`:
 
 Display:
 ```
-Step 5/5: Enabling auto-merge...
+Step 5/[totalSteps]: Enabling auto-merge...
 ```
 
 ```bash
@@ -359,7 +361,7 @@ If all conditions are met (command configured, auto-merge enabled, auto-merge su
 
 Display:
 ```
-Step 6/6: Running post-merge command...
+Step 6/[totalSteps]: Running post-merge command...
 $ [postMergeCommand]
 ```
 
