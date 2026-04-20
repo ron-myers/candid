@@ -1,5 +1,3 @@
-'use client'
-
 import * as Fathom from 'fathom-client'
 
 /**
