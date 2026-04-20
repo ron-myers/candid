@@ -76,46 +76,14 @@ npm run bump <major|minor|patch>
 1. ✅ Validates git working directory is clean
 2. ✅ Reads current version from `.claude-plugin/plugin.json`
 3. ✅ Calculates new version
-4. ✅ Updates `.claude-plugin/plugin.json`
+4. ✅ Updates `.claude-plugin/plugin.json` (single source of truth)
 5. ✅ Updates `.claude-plugin/marketplace.json`
 6. ✅ Updates `CHANGELOG.md` (adds new version header with date)
 7. ✅ Creates git commit: `"Bump plugin version to X.Y.Z"`
 8. ✅ Creates git tag: `vX.Y.Z`
 9. ✅ Pushes to `origin/stable`
 
-### 2.2 Update Website Version Badge (CRITICAL - Often Missed!)
-
-**This step is NOT automated and has been missed in recent releases.**
-
-Update the version badge on the homepage:
-
-**File**: `docs/app/(marketing)/page.jsx`
-
-**Line 118**: Change the version number:
-
-```jsx
-// BEFORE
-<span className="version-dot"></span>
-v1.5.0 Now Available for Claude Code
-
-// AFTER (example for 1.6.0)
-<span className="version-dot"></span>
-v1.6.0 Now Available for Claude Code
-```
-
-**Why this matters**: The homepage is the first thing users see. An outdated version number creates confusion and makes the site look unmaintained.
-
-### 2.3 Commit Website Version Update
-
-After updating the homepage version:
-
-```bash
-git add docs/app/(marketing)/page.jsx
-git commit -m "Update homepage version badge to v1.6.0
-
-Co-authored-by: Claude Sonnet 4.5 <noreply@anthropic.com>"
-git push origin HEAD:stable
-```
+The homepage version badge (`docs/app/(marketing)/page.jsx`) reads directly from `plugin.json` at build time — no manual update needed.
 
 ## Phase 3: Post-Release Verification
 
@@ -193,7 +161,7 @@ git revert HEAD
 git push origin HEAD:stable
 ```
 
-**Then**: Manually revert any other changes (like the website version badge).
+**Then**: Manually revert any other changes (CHANGELOG content, etc.).
 
 ## Complete Release Checklist
 

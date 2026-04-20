@@ -77,7 +77,8 @@ Add to `.candid/config.json`:
     "testCommand": "npm test",
     "targetBranch": "stable",
     "autoMerge": false,
-    "additionalPrompt": "Focus on security and ensure all API endpoints have auth middleware"
+    "additionalPrompt": "Focus on security and ensure all API endpoints have auth middleware",
+    "postMergeCommand": "curl -X POST https://deploy.example.com/trigger"
   }
 }
 ```
@@ -89,6 +90,7 @@ Add to `.candid/config.json`:
 | `targetBranch` | string | first `mergeTargetBranches` or `"main"` | Branch to target for the PR. |
 | `autoMerge` | boolean | `false` | Auto-merge the PR after creation. |
 | `additionalPrompt` | string | — | Extra context passed to candid-loop/review during the review step. |
+| `postMergeCommand` | string | — | Shell command to run after auto-merge succeeds. Skipped if auto-merge is disabled or fails. |
 
 ## Additional Prompt
 
@@ -116,6 +118,26 @@ This means the PR will merge automatically once all branch protection checks pas
 
 > **Note:** Auto-merge requires the "Allow auto-merge" setting to be enabled in your GitHub repository settings under Settings → General → Pull Requests.
 
+## Post-Merge Command
+
+When `postMergeCommand` is configured, candid-ship runs the specified shell command after auto-merge is successfully enabled. This is useful for triggering deployments, sending notifications, or running cleanup scripts.
+
+```json
+{
+  "ship": {
+    "autoMerge": true,
+    "postMergeCommand": "curl -X POST https://deploy.example.com/trigger"
+  }
+}
+```
+
+The command only runs when all three conditions are met:
+- `postMergeCommand` is configured
+- `autoMerge` is enabled
+- `gh pr merge --squash --auto` succeeded
+
+If the command fails, a warning is shown but the workflow is **not** aborted — the PR is already created and auto-merge is in progress.
+
 ## Examples
 
 ```bash
@@ -140,7 +162,22 @@ This means the PR will merge automatically once all branch protection checks pas
 
 ## Output Examples
 
-### Success
+### Success (with post-merge command)
+
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Candid Ship Complete
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Review:   PASS (3 iterations, 7 issues fixed)
+Build:    PASS
+Tests:    PASS
+PR:       https://github.com/org/repo/pull/42
+Merge:    Auto-merge enabled
+Post-merge: PASS
+```
+
+### Success (without post-merge command)
 
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -203,7 +240,8 @@ A typical shipping workflow with candid-ship configured:
     "testCommand": "npm test",
     "targetBranch": "stable",
     "autoMerge": true,
-    "additionalPrompt": "Ensure error handling covers all async operations"
+    "additionalPrompt": "Ensure error handling covers all async operations",
+    "postMergeCommand": "echo 'Shipped successfully!'"
   }
 }
 ```

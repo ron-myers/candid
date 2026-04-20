@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.11.0] - 2026-04-19
+
+### Added
+
+- **Post-Merge Command** (`ship.postMergeCommand`): New config field to run a shell command after auto-merge is successfully enabled
+  - Fires after `gh pr merge --squash --auto` succeeds — useful for triggering deployments, notifications, or cleanup scripts
+  - Conditional execution: only runs when `autoMerge` is enabled and the auto-merge command succeeds
+  - Non-blocking: if the command fails, a warning is shown but the workflow is not aborted (the PR is already merging)
+  - Shown in ship plan display and summary output
+  - Documented in CONFIG.md, candid-ship docs, and example configs
+
 ## [1.10.0] - 2026-03-17
 
 ### Added
