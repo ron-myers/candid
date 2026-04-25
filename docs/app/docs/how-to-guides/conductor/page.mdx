@@ -41,12 +41,12 @@ In **Settings → Create PR preferences**, set the instructions Conductor sends 
 
 <Image
   src="/screenshots/conductor-build-pr-settings.png"
-  alt="Conductor's Create PR preferences settings, customized to run candid ship"
+  alt="Conductor's Create PR preferences settings, showing an advanced custom prompt; the recommended minimal config is below"
   width={1328}
   height={542}
 />
 
-A minimal config:
+The screenshot above shows a more elaborate prompt; the simpler `Run /candid-ship` is enough to get started:
 
 ```
 Run /candid-ship
@@ -76,6 +76,8 @@ Repo-level config wins over anything implied by your Conductor preferences promp
 ## Troubleshooting
 
 **Button doesn't run the Candid command.** Re-open Settings and confirm the preferences field is saved (Conductor shows a `Customized` badge next to the section title when a non-default value is set).
+
+**Wrong command runs.** Conductor sends your preferences text verbatim. If the agent does something unexpected, re-open Settings and check for typos in the slash command name (`/candid-review`, `/candid-ship`).
 
 **`gh: command not found` or auth errors.** Conductor workspaces inherit your shell environment, so install and authenticate `gh` once on your Mac (`brew install gh && gh auth login`) and every workspace gets it.
 
