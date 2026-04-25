@@ -890,7 +890,6 @@ header a:has(.logo):hover {
   color: var(--text-secondary);
   font-size: 1rem;
   line-height: 1.7;
-  position: relative;
   background: var(--surface-light);
   border-radius: 8px;
   border-left: 4px solid var(--accent-main);
