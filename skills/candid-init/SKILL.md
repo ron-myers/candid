@@ -1139,7 +1139,46 @@ In either case, write the resulting `prompt` field into the config:
 
 The skill's runtime default is identical to the value written here — the explicit-in-config approach simply makes the prompt visible to the user without changing behavior.
 
-### 10.7: Preview and Confirm
+### 10.7: Fast Ship Configuration
+
+Use AskUserQuestion:
+
+**Question:** "Configure `candid-fast-ship`? It's a minimal ship path that runs only the steps you enable — nothing runs by default except PR creation. (Command values are inherited from the `ship` block you just configured.)"
+
+**Options:**
+1. "Yes, configure fast ship"
+2. "No, skip"
+
+If "No, skip" → omit `fastShip` field. Proceed to Step 10.8.
+
+If "Yes, configure fast ship":
+
+Use AskUserQuestion:
+
+**Question:** "Which steps should `candid-fast-ship` enable by default?"
+
+**Options:**
+1. "None — PR creation only (safest default, decide per-run)"
+2. "Build only"
+3. "Build + auto-merge"
+4. "Custom — let me choose"
+
+If "Custom — let me choose": Ask the user to confirm each of the following with Yes/No:
+- Enable review (candid-loop)?
+- Enable build? (only shown if `ship.buildCommand` was configured)
+- Enable tests? (only shown if `ship.testCommand` was configured)
+- Enable issue tracker update? (only shown if `ship.issueTracker` was configured)
+- Enable auto-merge?
+- Enable post-merge command? (only shown if `ship.postMergeCommand` was configured)
+
+Build the `fastShip` object from the selections. Set only fields that the user explicitly enabled to `true`; omit fields that are `false` (they default to `false` when absent). Always omit `targetBranch` from the generated config (it falls back to `ship.targetBranch` automatically).
+
+For the preset options:
+- "None" → `"fastShip": {}`
+- "Build only" → `"fastShip": { "build": true }` (omit if `ship.buildCommand` not configured; use `{}` instead with a note)
+- "Build + auto-merge" → `"fastShip": { "build": true, "autoMerge": true }` (same caveat for build)
+
+### 10.8: Preview and Confirm
 
 Assemble the config object from all detected and prompted values. Only include fields that were explicitly set — omit fields the user skipped (they default correctly when absent).
 
@@ -1162,9 +1201,15 @@ Show the assembled config as valid JSON. Example with all fields enabled:
     "testCommand": "npm test",
     "targetBranch": "main",
     "autoMerge": false
+  },
+  "fastShip": {
+    "build": true,
+    "autoMerge": true
   }
 }
 ```
+
+Include the `fastShip` field in the preview only if the user configured it in Step 10.7. Omit it entirely if the user skipped fast ship configuration.
 
 Only include fields the user selected — omit any they skipped.
 
@@ -1190,7 +1235,7 @@ mkdir -p .candid
 
 Use the Write tool to create:
 - `.candid/Technical.md` (or the path passed via `--output`) — the synthesized content from Step 9
-- `.candid/config.json` — the assembled config from Step 10.7
+- `.candid/config.json` — the assembled config from Step 10.8
 
 ### 11.2: Optionally Run Optimize Stage
 
@@ -1249,6 +1294,8 @@ A fresh init with `--optimize` therefore yields mostly Technical.md findings, wi
 
 ⚙️  Configuration
    Location: .candid/config.json
+   Ship: [configured | not configured]
+   Fast Ship: [configured ([N] steps enabled) | not configured]
 
 📝 Next Steps
    1. Review architecture rules - ensure they match your intent

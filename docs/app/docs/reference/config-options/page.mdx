@@ -30,6 +30,15 @@ Complete reference for Candid configuration.
       "state": "string",
       "prompt": "string"
     }
+  },
+  "fastShip": {
+    "review": boolean,
+    "build": boolean,
+    "tests": boolean,
+    "issueTracker": boolean,
+    "autoMerge": boolean,
+    "postMergeCommand": boolean,
+    "targetBranch": "string"
   }
 }
 ```
@@ -190,6 +199,37 @@ Example:
 - provider is unsupported (anything other than `"linear"`) → warning with link to issue tracker, step skipped, ship continues
 
 See [Candid Ship — Issue Tracker Integration](/docs/core-features/candid-ship#issue-tracker-integration) for full setup and usage.
+
+### fastShip
+
+Configuration for the [`/candid-fast-ship`](/docs/core-features/candid-fast-ship) minimal shipping workflow. All steps are opt-in — nothing runs by default except PR creation. Command values are inherited from the `ship` block.
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `review` | boolean | `false` | Run candid-loop code review. |
+| `build` | boolean | `false` | Run `ship.buildCommand`. Skipped if not configured in `ship`. |
+| `tests` | boolean | `false` | Run `ship.testCommand`. Skipped if not configured in `ship`. |
+| `issueTracker` | boolean | `false` | Update issue tracker after PR creation. Uses `ship.issueTracker` config. |
+| `autoMerge` | boolean | `false` | Auto-merge the PR after creation. |
+| `postMergeCommand` | boolean | `false` | Run `ship.postMergeCommand` after auto-merge succeeds. |
+| `targetBranch` | string | from `ship.targetBranch` or `mergeTargetBranches` | PR target branch override. |
+
+Example (build check + auto-merge, no review):
+
+```json
+{
+  "ship": {
+    "buildCommand": "npm run build",
+    "targetBranch": "stable"
+  },
+  "fastShip": {
+    "build": true,
+    "autoMerge": true
+  }
+}
+```
+
+See [Candid Fast Ship](/docs/core-features/candid-fast-ship) for full documentation.
 
 ## Config Precedence
 

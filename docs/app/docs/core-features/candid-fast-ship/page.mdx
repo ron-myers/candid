@@ -1,0 +1,225 @@
+export const metadata = {
+  title: 'Candid Fast Ship - Minimal PR Shipping for Low-Risk Changes',
+  description: 'Use candid-fast-ship to ship low-risk changes with only the steps you explicitly enable. Nothing runs by default except PR creation.',
+}
+
+# Candid Fast Ship
+
+Ship low-risk changes with a minimal, opt-in workflow.
+
+## Quick Start
+
+```
+/candid-fast-ship
+```
+
+`candid-fast-ship` is the opposite of `candid-ship`: instead of running everything by default and letting you skip steps, it runs **nothing by default** and only executes the steps you explicitly enable in your `fastShip` config. The only step that always runs is PR creation.
+
+This makes it ideal for changes where a full review cycle would be overkill — docs updates, config changes, dependency bumps, or hotfixes you've already verified locally.
+
+## How It Works
+
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Candid Fast Ship Plan
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Branch: feature/update-readme → stable
+
+Steps:
+  1. 🔍 Review code (candid-loop)           SKIPPED — not enabled
+  2. 🔨 Build: npm run build                ENABLED
+  3. 🧪 Tests: npm test                     SKIPPED — not enabled
+  4. 📋 Create pull request
+  5. 🎯 Update issue tracker (linear)       SKIPPED — not enabled
+  6. 🔀 Auto-merge                          ENABLED
+```
+
+Before executing, the plan shows exactly which steps are enabled and which are skipped. Use `--dry-run` to preview without executing.
+
+## Configuration
+
+### CLI Flags
+
+| Flag | Description | Default |
+|------|-------------|---------|
+| `--auto-merge` | Enable auto-merge after PR creation | from config |
+| `--no-auto-merge` | Disable auto-merge even if config enables it | from config |
+| `--dry-run` | Show plan without executing | `false` |
+
+### fastShip Config Block
+
+Add to `.candid/config.json` alongside your `ship` block:
+
+```json
+{
+  "fastShip": {
+    "review": false,
+    "build": false,
+    "tests": false,
+    "issueTracker": false,
+    "autoMerge": false,
+    "postMergeCommand": false
+  }
+}
+```
+
+All fields default to `false`. Set any to `true` to enable that step.
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `review` | boolean | `false` | Run `candid-loop` code review before creating the PR. |
+| `build` | boolean | `false` | Run `ship.buildCommand`. Skipped if `ship.buildCommand` is not set. |
+| `tests` | boolean | `false` | Run `ship.testCommand`. Skipped if `ship.testCommand` is not set. |
+| `issueTracker` | boolean | `false` | Update issue tracker after PR creation. Uses `ship.issueTracker` for provider/state/prompt config. |
+| `autoMerge` | boolean | `false` | Auto-merge the PR after creation via `gh pr merge --squash --auto`. |
+| `postMergeCommand` | boolean | `false` | Run `ship.postMergeCommand` after auto-merge succeeds. |
+| `targetBranch` | string | from `ship` or `mergeTargetBranches` | PR target branch override. |
+
+### Relationship to the `ship` Block
+
+`fastShip` is purely a set of on/off toggles. The actual commands and configuration for each step come from the existing `ship` block:
+
+| `fastShip` toggle | Where the config comes from |
+|-------------------|-----------------------------|
+| `build: true` | `ship.buildCommand` |
+| `tests: true` | `ship.testCommand` |
+| `issueTracker: true` | `ship.issueTracker` (provider, state, teamPrefixes, prompt) |
+| `postMergeCommand: true` | `ship.postMergeCommand` |
+
+This means you configure your commands once in `ship` and use them from both `/candid-ship` and `/candid-fast-ship`.
+
+## Use Cases
+
+### Docs and config changes — just create a PR
+
+```json
+{
+  "fastShip": {}
+}
+```
+
+Nothing runs except PR creation. The plan still confirms before executing.
+
+### Build check + auto-merge, skip review and tests
+
+```json
+{
+  "fastShip": {
+    "build": true,
+    "autoMerge": true
+  }
+}
+```
+
+Useful for dependency bumps where CI handles testing but you want to confirm the build locally first.
+
+### Issue tracker update only (docs shipped, no code change)
+
+```json
+{
+  "fastShip": {
+    "issueTracker": true,
+    "autoMerge": true
+  }
+}
+```
+
+Creates the PR, moves the Linear issue to "In Review", and enables auto-merge — without touching review or tests.
+
+### Everything except review
+
+```json
+{
+  "fastShip": {
+    "build": true,
+    "tests": true,
+    "issueTracker": true,
+    "autoMerge": true,
+    "postMergeCommand": true
+  }
+}
+```
+
+Full pipeline minus the code review loop. Useful when you've already done review via a different mechanism.
+
+## When a Step Is Skipped
+
+If you enable a step but the required configuration isn't in your `ship` block, the step is skipped silently with a message:
+
+| Situation | Output |
+|-----------|--------|
+| `build: true` but no `ship.buildCommand` | `Skipping build (buildCommand not configured in ship)` |
+| `tests: true` but no `ship.testCommand` | `Skipping tests (testCommand not configured in ship)` |
+| `issueTracker: true` but no `ship.issueTracker` | `Skipping issue tracker (issueTracker not configured in ship)` |
+| `postMergeCommand: true` but `autoMerge` not enabled | `Skipping post-merge command (auto-merge not enabled)` |
+
+## Output Example
+
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Candid Fast Ship Complete
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Review:   SKIPPED
+Build:    PASS
+Tests:    SKIPPED
+PR:       https://github.com/org/repo/pull/42
+Issue:    Updated DIS-509 → In Review
+Merge:    Auto-merge enabled
+```
+
+## Choosing Between candid-ship and candid-fast-ship
+
+| | `/candid-ship` | `/candid-fast-ship` |
+|---|---|---|
+| Default behavior | Runs all configured steps | Runs nothing (PR only) |
+| Skipping steps | Use `--skip-*` flags | Don't enable them in config |
+| Best for | Feature work, any change needing review | Hotfixes, docs, config, low-risk changes |
+| Code review | Always runs (unless skipped) | Only if `review: true` |
+
+If you want to ship with just a subset of steps for a one-off run, use `/candid-ship --skip-review --skip-tests` (flags are per-run). If you have a class of changes that consistently need fewer checks, use `/candid-fast-ship` with those steps enabled in config.
+
+## Examples
+
+```bash
+# Fast ship with fastShip config defaults
+/candid-fast-ship
+
+# Override auto-merge for this run
+/candid-fast-ship --auto-merge
+/candid-fast-ship --no-auto-merge
+
+# Preview the plan without executing
+/candid-fast-ship --dry-run
+```
+
+## Full Config Example
+
+```json
+{
+  "version": 1,
+  "tone": "constructive",
+  "mergeTargetBranches": ["stable"],
+  "ship": {
+    "buildCommand": "npm run build",
+    "testCommand": "npm test",
+    "targetBranch": "stable",
+    "autoMerge": false,
+    "postMergeCommand": "curl -X POST https://deploy.example.com/trigger",
+    "issueTracker": {
+      "provider": "linear",
+      "enabled": true,
+      "teamPrefixes": ["DIS", "ENG"],
+      "state": "In Review"
+    }
+  },
+  "fastShip": {
+    "build": true,
+    "issueTracker": true,
+    "autoMerge": true
+  }
+}
+```
+
+Then `/candid-fast-ship` runs build, creates the PR, updates the Linear issue, and enables auto-merge — no review, no tests.

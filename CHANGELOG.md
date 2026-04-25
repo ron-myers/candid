@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.14.0] - 2026-04-25
+
+### Added
+
+- **Candid Fast Ship** (`/candid-fast-ship`): A new minimal shipping command for low-risk changes. Unlike `/candid-ship` (which runs everything by default and lets you skip steps), `/candid-fast-ship` runs **nothing by default** and only executes the steps you explicitly enable in a new `fastShip` config block. PR creation is the only mandatory step
+  - **New `fastShip` config block** (sibling to `ship` in `.candid/config.json`): boolean toggles for `review`, `build`, `tests`, `issueTracker`, `autoMerge`, and `postMergeCommand` — all default to `false`. Optional `targetBranch` override
+  - **Inherits configuration from `ship`**: command values (`buildCommand`, `testCommand`, `postMergeCommand`), tracker config (`issueTracker.provider`, `state`, `prompt`, `teamPrefixes`), and target branch all come from the existing `ship` block — `fastShip` only controls which steps run, not how
+  - **Use cases**: hotfixes, docs updates, dependency bumps, config changes, or any class of changes where the full review cycle would be overkill
+  - **CLI flags**: `--auto-merge` / `--no-auto-merge` (override config), `--dry-run` (preview plan). No `--skip-*` flags — there's nothing to skip when steps are off by default
+  - **Graceful skipping**: enabling a step in `fastShip` without the corresponding `ship` configuration shows a clear `SKIPPED — not configured in ship` message rather than failing
+  - **candid-init flow**: new Step 10.7 prompts the user to configure `fastShip` after the main ship config is set, with preset options (None / Build only / Build + auto-merge / Custom)
+  - **Comprehensive docs**: dedicated `/docs/core-features/candid-fast-ship` page covering quick start, config block, relationship to `ship`, use cases (4 real examples), skip-behavior table, and a comparison table between `candid-ship` and `candid-fast-ship`
+  - **Config reference updated**: `docs/reference/config-options` now documents the full `fastShip` schema, and `skills/candid-review/CONFIG.md` covers the validation rules
+
 ## [1.13.0] - 2026-04-25
 
 ### Added
