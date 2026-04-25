@@ -11,7 +11,7 @@
         "source": "url",
         "url": "https://github.com/ron-myers/candid.git"
       },
-      "description": "Configurable code reviews with radical candor - choose between harsh or constructive tone. Features Technical.md for project standards, architectural context analysis, actionable fixes, decision register for tracking review decisions, and seamless todo integration.",
+      "description": "Configurable code reviews with radical candor - choose between harsh or constructive tone. Features Technical.md for project standards, architectural context analysis, actionable fixes, decision register for tracking review decisions, seamless todo integration, and live browser QA via Chrome.",
       "version": "1.16.0",
       "author": {
         "name": "Ron Myers",
@@ -27,7 +27,13 @@
         "quality",
         "architecture",
         "full-stack",
-        "todos"
+        "todos",
+        "qa",
+        "testing",
+        "browser",
+        "chrome",
+        "a11y",
+        "accessibility"
       ]
     }
   ]

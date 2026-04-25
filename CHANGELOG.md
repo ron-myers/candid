@@ -20,8 +20,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - **End-of-pass summary**: writes the `summary` block to JSON and prints to stdout — total finding count, severity breakdown, category breakdown, and the title + URL of every P0/P1 finding. JSON file remains the source of truth; stdout is a courtesy for users without a triage tool
   - **CLI flags**: `--url <url>` (skip URL prompt), `--mobile-only` (invert default to mobile-only)
   - **Hard rules enforced**: never click destructive actions (delete/disconnect/drop/force/publish/purchase) without explicit per-action approval; never silently downgrade to source-only review when data is missing; never invent the schema; never batch-write findings; never skip mobile or cross-cutting probes; never use a stale tab
-  - **Comprehensive docs**: dedicated `/docs/core-features/candid-chrome-qa` page covering quick start, the flush-capture cycle, edge-case patterns, schema reference with v1→v2 migration table, severity scale → Linear priority mapping, and FAQ
-  - **Requires** the `mcp__claude-in-chrome__*` tools (auto-loaded via `ToolSearch` on first use) and a running web app reachable via HTTP
+  - **Pre-flight step 0** detects whether the Claude in Chrome MCP is installed (via `ToolSearch`) and aborts with a clear install link if absent. Batch-loads every browser tool the skill will use so subsequent calls don't pay per-tool ToolSearch overhead
+  - **Project-context loading**: pre-flight reads `Technical.md` for QA-relevant rules (browser support matrix, accessibility target, API base path, design-system constraints, auth setup) and an optional `chromeQA` block in `.candid/config.json` (`defaultUrl`, `apiPathPattern`, `desktopViewport`, `mobileViewport`) — keeps the skill from being an island next to the rest of the Candid pack
+  - **Deterministic finding IDs**: `id` is now `F-` + the first 8 hex chars of `SHA-1(url|title)`, so the same finding in a re-run gets the same ID and downstream tools can dedup across passes
+  - **Deterministic slug + filename collision handling**: file slug derived from the first 4 words of `goal` (lowercased, alphanumerics + hyphens, ≤40 chars). If today's file with the same slug exists, the skill writes to `<YYYY-MM-DD>-<HHmm>-<slug>.json` instead of overwriting
+  - **Comprehensive docs**: dedicated `/docs/core-features/candid-chrome-qa` page covering quick start, the flush-capture cycle, edge-case patterns, schema reference with v1→v2 migration table, severity scale → Linear priority mapping, configuration reference, Technical.md integration, and FAQ
+  - **Requires** the Claude in Chrome MCP installed in your Claude Code environment and a running web app reachable via HTTP
+
+### Changed
+
+- **Plugin description + keywords** updated in `.claude-plugin/plugin.json` and `.claude-plugin/marketplace.json` to surface the new browser-QA capability for marketplace discovery — added keywords `qa`, `testing`, `browser`, `chrome`, `a11y`, `accessibility`
 
 ## [1.15.0] - 2026-04-25
 

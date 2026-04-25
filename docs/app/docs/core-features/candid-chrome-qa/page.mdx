@@ -246,14 +246,49 @@ The skill enforces these — it will refuse to act otherwise:
 3. **Never invent the schema.** v2.0 fields, byte-for-byte. Downstream consumers depend on it.
 4. **Never batch-write findings at the end.** Append per-finding. Context can exhaust mid-pass.
 5. **Never claim "no issues" without running the cross-cutting probes.**
-6. **Never resize to mobile without first finishing desktop.** Mobile is additive, not a substitute.
+6. **Never resize to mobile without first finishing desktop.** Mobile is additive, not a substitute. **Exception:** `--mobile-only` explicitly opts out of this rule.
 7. **Never use a stale tab.** Always confirm tab context first.
+8. **Never proceed without verifying Claude in Chrome is loaded** in pre-flight — without it, every browser tool call fails opaquely.
+
+## Configuration
+
+Optional `chromeQA` block in `.candid/config.json`:
+
+```json
+{
+  "chromeQA": {
+    "defaultUrl": "http://localhost:3000",
+    "apiPathPattern": "/api/",
+    "desktopViewport": "1440x900",
+    "mobileViewport": "390x844"
+  }
+}
+```
+
+| Field | Default | Description |
+|-------|---------|-------------|
+| `defaultUrl` | (prompted) | Skip the URL prompt on every run |
+| `apiPathPattern` | `/api/` | What path prefix to capture when pulling network telemetry — useful for non-standard backends (e.g. `/v2/api/`, `supabase`) |
+| `desktopViewport` | `1440x900` | Viewport size for the desktop pass |
+| `mobileViewport` | `390x844` | Viewport size for the mobile pass |
+
+## Technical.md integration
+
+If your project has a `Technical.md` (Candid's standards file — see [Technical.md docs](/docs/core-features/technical-md)), the skill reads it during pre-flight and uses any QA-relevant rules during the pass. Project-specific rules to encode there:
+
+- **Browser support matrix** (e.g. "support last 2 Chrome / Safari / Firefox; no IE")
+- **Accessibility target** (WCAG A / AA / AAA)
+- **API base path** (e.g. "/v2/api/")
+- **Design-system constraints** (e.g. "all CTA buttons use Button.Primary; no inline styles")
+- **Auth setup** (e.g. "test account `qa@example.com` lives in `.env.local`")
+
+Findings against Technical.md rules surface with `surface: "Technical.md"` so they're easy to filter downstream.
 
 ## Requirements
 
 - A running web app reachable via HTTP (typically `http://localhost:<port>`)
-- The `mcp__claude-in-chrome__*` tools available in your Claude Code environment (auto-loaded on first use via `ToolSearch`)
-- A writable `.context/findings/` directory in your workspace
+- The Claude in Chrome MCP installed in your Claude Code environment — the skill checks for `mcp__claude-in-chrome__*` tools in pre-flight step 0 and aborts with an install link if absent
+- A writable `.context/` directory in your workspace (the skill creates `.context/findings/` if missing)
 
 ## FAQ
 
@@ -265,14 +300,22 @@ Yes, but be explicit about it. The skill's "Hard Rules" prevent destructive acti
 
 Pre-flight aborts with a focused error: `Pre-flight failed: <url> returned 000 (not 2xx/3xx). Start your dev server and re-run.` No browser work happens until the server responds.
 
+### What if Claude in Chrome isn't installed?
+
+Pre-flight step 0 catches this and prints an install link. Run `/candid-chrome-qa` again after you've installed the MCP and restarted Claude Code.
+
 ### Why JSON instead of a markdown report?
 
 Findings are designed to feed downstream triage tools that turn them into Linear issues. The JSON contract is stable across passes; markdown rendering can be done at consumption time. The end-of-pass stdout summary covers the "I just want to read it" case.
 
 ### What if my findings file already exists for today?
 
-The skill suffixes `-<HHmm>` to avoid clobbering a prior pass. Two passes on the same day produce two files, both preserved.
+The skill switches to a `<YYYY-MM-DD>-<HHmm>-<slug>.json` filename to avoid clobbering a prior pass. Two passes on the same day produce two files, both preserved.
 
 ### Can I disable the mobile pass?
 
-Mobile is required by default — a third of bugs are mobile-only. If you genuinely don't need it, run `/candid-chrome-qa --mobile-only` to invert (mobile-only) or run twice with focused goals.
+Mobile is required by default — a third of bugs are mobile-only. There is no flag to skip it; if you truly want desktop-only, run a single-target pass and stop after the desktop section. The `--mobile-only` flag does the **opposite** — it skips desktop and runs mobile only (use sparingly; it's an explicit opt-out of Hard Rule 6).
+
+### Can the same finding be deduplicated across passes?
+
+Yes. The `id` field is a deterministic SHA-1 hash of `<url>|<title>` — the same finding in a re-run gets the same ID. Triage tools can use this to suppress duplicates.
