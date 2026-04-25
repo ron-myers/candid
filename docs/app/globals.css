@@ -861,36 +861,38 @@ header a:has(.logo):hover {
   padding-bottom: 0;
 }
 
-.faq-item dt {
+.faq-item summary {
   font-family: var(--font-display);
   font-weight: 600;
   font-size: 1.25rem;
   color: var(--text-primary);
-  margin-bottom: 0.75rem;
   transition: color 200ms ease;
   cursor: pointer;
+  list-style: none;
 }
 
-.faq-item dt:hover {
+.faq-item summary::-webkit-details-marker {
+  display: none;
+}
+
+.faq-item details[open] > summary {
+  margin-bottom: 0.75rem;
+}
+
+.faq-item summary:hover {
   color: var(--accent-main);
 }
 
-.faq-item dd {
+.faq-item details > p {
   margin: 0;
   padding: 1.5rem;
   padding-left: 2rem;
   color: var(--text-secondary);
   font-size: 1rem;
   line-height: 1.7;
-  position: relative;
   background: var(--surface-light);
   border-radius: 8px;
   border-left: 4px solid var(--accent-main);
-}
-
-.faq-item dd::before {
-  content: "";
-  display: none;
 }
 
 /* ===== CTA Section ===== */
@@ -1297,15 +1299,15 @@ html.dark .faq-item {
   border-color: var(--border-light-dark);
 }
 
-html.dark .faq-item dt {
+html.dark .faq-item summary {
   color: var(--text-primary-dark);
 }
 
-html.dark .faq-item dt:hover {
+html.dark .faq-item summary:hover {
   color: var(--accent-main-dark);
 }
 
-html.dark .faq-item dd {
+html.dark .faq-item details > p {
   background: var(--surface-dark);
   color: var(--text-secondary-dark);
   border-left-color: var(--accent-main-dark);
