@@ -1,0 +1,278 @@
+export const metadata = {
+  title: 'Candid Chrome QA - Live browser testing for your web app',
+  description: 'Drive a real Chrome session against your running web app, walk it like a real user across desktop and mobile, and emit structured findings JSON ready for triage.',
+}
+
+# Candid Chrome QA
+
+Drive a real Chrome session against your running web app, walk it like a real user, and write structured findings to disk for triage. Catches the bugs your unit tests miss — UX quirks, mobile-only layout breaks, accessibility violations, console errors, slow API calls.
+
+## Quick Start
+
+```
+/candid-chrome-qa
+```
+
+You'll be asked for:
+
+- **goal** — what surface to test (e.g. "Agent Config tabs, all 16")
+- **prompt** — free-form QA plan (edge cases, hot spots, recently-changed surfaces)
+- **app URL** — verified before any work begins (curl health check)
+
+The pass writes findings to `.context/findings/<YYYY-MM-DD>-<slug>.json` and prints a summary to your terminal at the end.
+
+```
+/candid-chrome-qa --url http://localhost:3000     # Skip URL prompt
+/candid-chrome-qa --mobile-only                   # Mobile pass only
+```
+
+## How It Works
+
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Candid Chrome QA
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Goal:   Agent Config tabs, all 16
+URL:    http://localhost:3000
+
+Steps:
+  1. ✅ Pre-flight (server up, fresh tab, baseline cleared)
+  2. 🖥️  Desktop pass (1440x900) — walk every target
+  3. 📱 Mobile pass (390x844) — top 5 targets re-walked
+  4. 🔍 Cross-cutting probes (a11y, touch targets)
+  5. 📝 Append findings to JSON (per-finding, not batched)
+  6. 📊 Final summary (file + stdout)
+```
+
+Each target gets the **flush-capture cycle**: clear console + network → exercise interactions + 1 edge case → wait → capture telemetry → append finding. This keeps every step's signal clean.
+
+## Pre-Flight Checks
+
+Before any QA work, candid-chrome-qa verifies:
+
+- **Dev server is up** — `curl` health check on the URL. Anything other than 2xx/3xx aborts with a clear ask.
+- **Fresh Chrome tab** — uses `mcp__claude-in-chrome__tabs_context_mcp` to enumerate, creates a new tab unless you say otherwise.
+- **Desktop default viewport** — `1440x900`.
+- **Logged-in state confirmed** — if you land on a login or onboarding route, the skill asks before proceeding.
+- **Console baseline cleared** — sets the high-water mark so per-target probes only show fresh entries.
+- **Required data present** — if the goal touches lists/details and the account is empty, the skill asks rather than silently downgrading to source-only review.
+- **Findings file opened** — `.context/findings/<YYYY-MM-DD>-<slug>.json` initialised with the schema and empty `findings: []`.
+
+If any check fails, the pass stops with a focused error before any browser work begins.
+
+## Per-Target Loop
+
+For each target identified in `goal` + `prompt`:
+
+1. Navigate (sidebar buttons, not direct URLs, for client-side routing apps)
+2. Flush console + network telemetry
+3. Read interactive elements
+4. Exercise 2–3 main interactions + **1 edge case** (empty input, invalid format, rapid double-click, navigation while dirty)
+5. Wait 1–2s for in-flight requests
+6. Capture telemetry — apply the console triage table and network thresholds
+7. Append findings to disk (immediately, not buffered)
+8. Reset state if you mutated something that affects subsequent targets
+
+### Edge-case patterns
+
+The "1 edge case" per target reaches for one of these — they catch the majority of production-only failures:
+
+- **Race condition** — fire 3+ identical requests within 500 ms (rapid double-click save). Watch for mixed 200/500 on the same endpoint.
+- **Stale state** — mutate → navigate away → come back. Missing re-fetch after mutation = stale state.
+- **Silent failure** — perform an action that returns 200, then refresh and verify the change actually persisted.
+- **Memory drift** — repeat an action 20× and snapshot `document.querySelectorAll('*').length` early vs late.
+- **Idle WebSocket** — for real-time features, idle 60s and check console for close events without reconnect.
+
+## Cross-Cutting Probes
+
+Run once per pass via `javascript_exec`. These catch things click-by-click won't:
+
+- **A11y probe** — counts icon-only buttons without labels, images without alt text, inputs without labels.
+- **Touch-target probe** (mobile) — flags any tappable element under 44×44 px.
+
+Both probes return structured data the skill turns into findings tagged `category: "a11y"`.
+
+## Mobile Pass
+
+After desktop, the skill resizes to `390x844` and re-walks the 5 most-used targets (or your specified subset). The touch-target probe runs here. Mobile-only bugs surface in roughly 30% of passes — this step is required, not optional.
+
+> **Resize ceiling:** Chrome may enforce a minimum content width of ~1075 px depending on UI chrome. If 390 doesn't take effect, the skill falls back to the smallest reachable width (often ~500 px) — the mobile breakpoint still triggers, the desktop sidebar still hides, and the hamburger drawer still appears. The actual width is recorded in the finding's `evidence`.
+
+## Output Schema (v2.0)
+
+Every finding file looks like this:
+
+```json
+{
+  "schemaVersion": "2.0",
+  "context": {
+    "createdAt": "2026-04-25T18:30:00Z",
+    "scope": "Agent Config tabs, all 16",
+    "originatingPrompt": "Walk every tab, exercise save/cancel, hammer phone provisioning",
+    "environment": {
+      "url": "http://localhost:3000",
+      "branch": "feature/agent-config-v2",
+      "commit": "8001a89",
+      "viewport": "1440x900",
+      "agentModel": "claude-opus-4-7"
+    }
+  },
+  "findings": [
+    {
+      "id": "F-a3f29b71",
+      "severity": "P0",
+      "category": "bug",
+      "surface": "dashboard/agents/[id]/voice",
+      "viewport": "both",
+      "url": "http://localhost:3000/dashboard/agents/agent_123/voice",
+      "title": "Save button does nothing on Voice tab when phone is unprovisioned",
+      "repro": "1. Open agent\n2. Voice tab\n3. Click Save",
+      "expected": "Either save or show validation error",
+      "actual": "Click registers, no network call, no error, no state change",
+      "evidence": {
+        "consoleErrors": [
+          {"level": "warn", "message": "[react-hook-form] missing required: phoneNumber"}
+        ],
+        "networkRequests": [],
+        "filesLikelyTouched": ["app/src/components/agent/VoiceTab.tsx:142"]
+      },
+      "suggestedFix": "Surface the form validation error in the UI; current handler swallows it",
+      "groupHint": "form-state",
+      "confidence": "definite",
+      "capturedAt": "2026-04-25T18:34:12Z"
+    }
+  ],
+  "summary": {
+    "total": 19,
+    "bySeverity": {"p0": 2, "p1": 5, "p2": 8, "p3": 2, "p4": 1, "p5": 1},
+    "byCategory": {"bug": 8, "a11y": 4, "perf": 2, "ux": 3, "copy": 1, "security": 0, "compat": 1}
+  }
+}
+```
+
+### Per-finding required fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | string | `F-<8charSlug>` |
+| `severity` | enum | `P0` (urgent) → `P5` (idea) |
+| `category` | enum | `bug` \| `a11y` \| `perf` \| `ux` \| `copy` \| `security` \| `compat` |
+| `surface` | string | Route or component name |
+| `viewport` | enum | `desktop` \| `mobile` \| `both` |
+| `url` | string | Full repro URL with query/hash |
+| `title` | string | One-line, < 80 chars |
+| `repro` | string | Numbered steps |
+| `expected` | string | One-line expected behaviour |
+| `actual` | string | One-line observed behaviour |
+| `suggestedFix` | string | One-line fix proposal |
+| `groupHint` | string | Topic slug for clustering related findings |
+| `confidence` | enum | `definite` \| `likely` \| `suspected` |
+| `capturedAt` | ISO8601 | Per-finding timestamp |
+
+`evidence` is optional but include any non-obvious signal you captured.
+
+### Severity scale
+
+Maps to Linear priority:
+
+| Severity | Meaning | Linear |
+|----------|---------|--------|
+| **P0** | feature broken, blocks user | Urgent |
+| **P1** | clear bug or a11y violation | High |
+| **P2** | UX polish | Medium |
+| **P3** | perf concern | Medium |
+| **P4** | copy / wording | Low |
+| **P5** | enhancement idea | No priority |
+
+### Migrating from v1
+
+`schemaVersion: "2.0"` is the current contract. v1 consumers expecting `body`, `status`, `tag`, or stringified `consoleErrors`/`networkRequests` arrays need migration:
+
+- `tag` → `surface` (rename)
+- `consoleErrors: string[]` → `[{level, message}]`
+- `networkRequests: string[]` → `[{method, url, status, durationMs?}]`
+- `body` field — **dropped** (pure derivation; render at consumption time from `repro`/`expected`/`actual`)
+- `status` field — **dropped** (finding lifecycle is the consumer's concern, not the producer's)
+
+## Final Summary
+
+When the pass completes, the skill writes the `summary` block to the JSON file **and** prints to stdout:
+
+```
+Chrome QA pass: Agent Config tabs, all 16
+Total findings: 19
+
+Severity:
+  P0 (urgent):   2
+  P1 (high):     5
+  P2 (medium):   8
+  P3 (perf):     2
+  P4 (copy):     1
+  P5 (idea):     1
+
+Category:
+  bug:      8
+  a11y:     4
+  perf:     2
+  ux:       3
+  copy:     1
+  compat:   1
+
+Top issues (P0 + P1):
+  • [P0] Save button does nothing on Voice tab when phone is unprovisioned — http://localhost:3000/dashboard/agents/agent_123/voice
+  • [P0] Empty agent list crashes dashboard render — http://localhost:3000/dashboard
+  • [P1] Phone number input accepts non-numeric characters — http://localhost:3000/dashboard/agents/new
+  ...
+
+Findings file: .context/findings/2026-04-25-agent-config.json
+```
+
+This is a courtesy for users who don't run a triage tool — the JSON file is always the source of truth.
+
+## CLI Flags
+
+| Flag | Description | Default |
+|------|-------------|---------|
+| `--url <url>` | App URL to test (overrides prompted value) | (prompted) |
+| `--mobile-only` | Skip desktop pass and run mobile-only | `false` |
+
+## Hard Rules
+
+The skill enforces these — it will refuse to act otherwise:
+
+1. **Never click destructive actions** without explicit approval each time: delete, disconnect, drop, force, publish, purchase.
+2. **Never silently downgrade** from live QA to source-only review. If data is missing, ask.
+3. **Never invent the schema.** v2.0 fields, byte-for-byte. Downstream consumers depend on it.
+4. **Never batch-write findings at the end.** Append per-finding. Context can exhaust mid-pass.
+5. **Never claim "no issues" without running the cross-cutting probes.**
+6. **Never resize to mobile without first finishing desktop.** Mobile is additive, not a substitute.
+7. **Never use a stale tab.** Always confirm tab context first.
+
+## Requirements
+
+- A running web app reachable via HTTP (typically `http://localhost:<port>`)
+- The `mcp__claude-in-chrome__*` tools available in your Claude Code environment (auto-loaded on first use via `ToolSearch`)
+- A writable `.context/findings/` directory in your workspace
+
+## FAQ
+
+### Can I use it on production URLs?
+
+Yes, but be explicit about it. The skill's "Hard Rules" prevent destructive actions by default — but production URLs deserve a careful read of the goal/prompt before kicking off a pass that mutates data.
+
+### What if the dev server isn't running?
+
+Pre-flight aborts with a focused error: `Pre-flight failed: <url> returned 000 (not 2xx/3xx). Start your dev server and re-run.` No browser work happens until the server responds.
+
+### Why JSON instead of a markdown report?
+
+Findings are designed to feed downstream triage tools that turn them into Linear issues. The JSON contract is stable across passes; markdown rendering can be done at consumption time. The end-of-pass stdout summary covers the "I just want to read it" case.
+
+### What if my findings file already exists for today?
+
+The skill suffixes `-<HHmm>` to avoid clobbering a prior pass. Two passes on the same day produce two files, both preserved.
+
+### Can I disable the mobile pass?
+
+Mobile is required by default — a third of bugs are mobile-only. If you genuinely don't need it, run `/candid-chrome-qa --mobile-only` to invert (mobile-only) or run twice with focused goals.

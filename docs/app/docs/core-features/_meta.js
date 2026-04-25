@@ -10,5 +10,6 @@ export default {
   'context-optimization': 'Context Optimization',
   'candid-ship': 'Candid Ship',
   'candid-fast-ship': 'Candid Fast Ship',
+  'candid-chrome-qa': 'Candid Chrome QA',
   'slash-commands': 'Slash Commands',
 }

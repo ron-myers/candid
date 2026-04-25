@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.16.0] - 2026-04-25
+
+### Added
+
+- **Candid Chrome QA** (`/candid-chrome-qa`): A new skill that drives a real Chrome session against your running web app, walks the target like a real user across desktop and mobile, runs DOM/console/network probes, and emits structured findings JSON to `.context/findings/<date>-<slug>.json` for downstream triage
+  - **Pre-flight protocol**: verifies dev server (curl health check), confirms a fresh Chrome tab, resizes to desktop default (1440x900), navigates and confirms logged-in state, clears the console baseline, and verifies required data is present before any QA work begins. Aborts with a focused error if any check fails — no silent downgrade to source-only review
+  - **Per-target flush-capture cycle**: for each route or tab, flush console + network telemetry, exercise 2–3 main interactions plus 1 edge case, capture telemetry against a console-triage table (P0–P3 mapping for the noisy stuff: TypeError, hydration mismatch, CORS, deprecated lifecycle, unmounted setState, etc.) and a network health threshold table (4xx rate, response time, payload size, duplicate requests). Findings appended per-finding, never batched
+  - **Mobile pass required by default**: resizes to 390x844 and re-walks the top 5 targets with a 44×44px touch-target probe. Falls back to ~500px if Chrome's UI chrome enforces a larger min content width. Mobile-only bugs surface in roughly 30% of passes
+  - **Cross-cutting probes**: a single `javascript_exec` call per pass enumerates icon-only buttons without aria-labels, images without alt text, and inputs without labels — catches DOM-level a11y violations that click-by-click testing misses
+  - **Schema v2.0** (best-in-class redesign over the source skill): top-level adds `schemaVersion`, `summary` block (severity + category counts populated at end-of-pass); per-finding adds `category` (bug/a11y/perf/ux/copy/security/compat — separate routing dimension from severity), `viewport` (desktop/mobile/both — first-class mobile signal), `url` (full repro URL), `capturedAt` (per-finding ISO8601 timestamp), `confidence` (definite/likely/suspected); renames `tag` → `surface`; promotes `evidence.consoleErrors` from `string[]` to `[{level, message}]` and `evidence.networkRequests` from `string[]` to `[{method, url, status, durationMs?}]`; drops `body` (pure derivation) and `status` (consumer-owned). v1 triage tool consumers will need migration — see `schemaVersion` field
+  - **End-of-pass summary**: writes the `summary` block to JSON and prints to stdout — total finding count, severity breakdown, category breakdown, and the title + URL of every P0/P1 finding. JSON file remains the source of truth; stdout is a courtesy for users without a triage tool
+  - **CLI flags**: `--url <url>` (skip URL prompt), `--mobile-only` (invert default to mobile-only)
+  - **Hard rules enforced**: never click destructive actions (delete/disconnect/drop/force/publish/purchase) without explicit per-action approval; never silently downgrade to source-only review when data is missing; never invent the schema; never batch-write findings; never skip mobile or cross-cutting probes; never use a stale tab
+  - **Comprehensive docs**: dedicated `/docs/core-features/candid-chrome-qa` page covering quick start, the flush-capture cycle, edge-case patterns, schema reference with v1→v2 migration table, severity scale → Linear priority mapping, and FAQ
+  - **Requires** the `mcp__claude-in-chrome__*` tools (auto-loaded via `ToolSearch` on first use) and a running web app reachable via HTTP
+
 ## [1.15.0] - 2026-04-25
 
 ### Added
