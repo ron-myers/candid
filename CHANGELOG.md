@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.12.0] - 2026-04-25
+
+### Added
+
+- **Integrated optimization stage in `/candid-init`**: Two new opt-in flags run the `/candid-optimize` audit immediately after Technical.md and config.json are generated, so users get a tightened file in one command (closes #19)
+  - `--optimize` — runs the full candid-optimize audit (Technical.md + excludes + register + config) in interactive mode after generation; user chooses to apply all, review each, or skip
+  - `--auto-optimize` — runs the audit and applies all recommendations without prompting
+  - Default behavior unchanged: when neither flag is passed, candid-init writes the raw generated files and prints a `Tip: run /candid-optimize…` hint
+  - Implementation delegates to the existing candid-optimize skill — no analysis logic is duplicated, so verbose/duplicate/low-signal heuristics stay in one place
+  - Useful for thorough mode where 5 parallel generation sub-agents can produce cross-section duplicates and verbose rules without joint awareness
+
 ## [1.11.0] - 2026-04-19
 
 ### Added

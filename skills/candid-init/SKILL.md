@@ -1109,7 +1109,57 @@ Use AskUserQuestion:
 
 ---
 
-## Step 11: Write Files and Show Summary
+## Step 11: Write Files, Optimize, and Show Summary
+
+### 11.1: Write Files to Disk
+
+Ensure the `.candid/` directory exists, then write both files:
+
+```bash
+mkdir -p .candid
+```
+
+Use the Write tool to create:
+- `.candid/Technical.md` (or the path passed via `--output`) — the synthesized content from Step 9
+- `.candid/config.json` — the assembled config from Step 10.7
+
+### 11.2: Optionally Run Optimize Stage
+
+**Skip this substep entirely unless `--optimize` or `--auto-optimize` was passed.**
+
+Why this exists: the 5 generation sub-agents in Step 9 each write a section independently and have no awareness of each other's output. The result frequently contains cross-section duplicates, verbose rules with redundant qualifiers, and low-signal generic rules. Running `/candid-optimize` immediately after generation tightens the file before the user opens it.
+
+**If `--optimize` is set (interactive):**
+
+Print:
+```
+Running optimization audit on generated context…
+```
+
+Invoke the `candid-optimize` skill with no extra flags. It will display the token budget (Step 2), analyze Technical.md / excludes / register / config (Steps 3–6), and run its own interactive apply phase (Step 7) including the before/after token report.
+
+When `candid-optimize` returns, continue to Step 11.3.
+
+**If `--auto-optimize` is set (non-interactive):**
+
+Print:
+```
+Running optimization audit and applying all recommendations…
+```
+
+Invoke the `candid-optimize` skill with the `--apply-all` flag. All recommendations are applied without prompting; the before/after report still prints.
+
+When `candid-optimize` returns, continue to Step 11.3.
+
+**Edge cases (delegated to candid-optimize):**
+
+- Decision register absent — Step 5 of candid-optimize skips silently (a fresh init has no register).
+- Config newly written by Step 10 — Step 6 of candid-optimize typically emits the "well-tuned" message.
+- Technical.md already optimal — Step 3 of candid-optimize emits the "efficient" message.
+
+A fresh init with `--optimize` therefore yields mostly Technical.md findings, with the broader audit serving as a no-cost confirmation.
+
+### 11.3: Show Summary
 
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -1136,6 +1186,13 @@ Use AskUserQuestion:
    2. Address identified gaps if desired
    3. Run /candid-validate-standards to check rule quality
    4. Run /candid-review to test enforcement
+```
+
+**If Step 11.2 ran (either `--optimize` or `--auto-optimize`):** replace step 3 of "Next Steps" with `Run /candid-validate-standards to check rule quality (optimization already applied)` so the user knows the audit pass already happened.
+
+**If Step 11.2 was skipped:** append a final hint line below the Next Steps block:
+```
+💡 Tip: run /candid-optimize to audit and tighten the generated context.
 ```
 
 ---

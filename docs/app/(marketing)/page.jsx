@@ -6,7 +6,7 @@ import Image from 'next/image'
 import { trackEvent, EVENTS } from '../components/trackEvent'
 import Pre from '../components/Pre'
 import SoftwareApplicationSchema from '../components/schema/SoftwareApplicationSchema'
-import pluginJson from '../../../.claude-plugin/plugin.json'
+import pluginJson from '../../data/plugin.json'
 
 const SCREENSHOTS = [
   {

@@ -77,6 +77,8 @@ Generate a Technical.md file by analyzing your codebase.
 | `--template <name>` | Use a specific template (minimal, react, node, python) |
 | `--effort <level>` | Analysis depth: quick (~30s), medium (~1-2min), thorough (~5-10min, default) |
 | `--output <path>` | Custom output path (default: .candid/Technical.md) |
+| `--optimize` | Run `/candid-optimize` after generation with interactive apply |
+| `--auto-optimize` | Run `/candid-optimize` after generation and apply all recommendations without prompting |
 
 ### Effort Levels
 
@@ -91,6 +93,8 @@ Generate a Technical.md file by analyzing your codebase.
 /candid-init --template react
 /candid-init --effort quick
 /candid-init --effort thorough
+/candid-init --optimize         # Audit and tighten the generated context
+/candid-init --auto-optimize    # Same, but apply all recommendations automatically
 ```
 
 ## /candid-ship
