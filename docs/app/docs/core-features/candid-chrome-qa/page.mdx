@@ -319,3 +319,9 @@ Mobile is required by default — a third of bugs are mobile-only. There is no f
 ### Can the same finding be deduplicated across passes?
 
 Yes. The `id` field is a deterministic SHA-1 hash of `<url>|<title>` — the same finding in a re-run gets the same ID. Triage tools can use this to suppress duplicates.
+
+## See Also
+
+- [Candid Chrome QA Fix](/docs/core-features/candid-chrome-qa-fix) — automatically fix findings from a QA pass
+- [Candid Ship](/docs/core-features/candid-ship) — ship fixes after resolving QA findings
+- [Technical.md](/docs/core-features/technical-md) — define standards that QA checks enforce

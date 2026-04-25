@@ -281,3 +281,9 @@ Not yet — only Linear is implemented in v1. `github`, `jira`, and `asana` are 
 ### What's the difference between this and `/candid-loop`?
 
 `/candid-loop` runs `/candid-review` repeatedly until code-review issues are gone. `/candid-chrome-qa-fix` consumes a single Chrome QA findings file and routes each finding through fix + ship + (optional) tracker. They're complementary: `/candid-loop` cleans the diff, `/candid-chrome-qa-fix` closes user-observable QA loops.
+
+## See Also
+
+- [Candid Chrome QA](/docs/core-features/candid-chrome-qa) — the QA pass that generates the findings file this skill consumes
+- [Candid Ship](/docs/core-features/candid-ship) — the ship step invoked for each finding fix
+- [Focus Modes](/docs/core-features/focus-modes) — narrow which categories of findings get fixed
