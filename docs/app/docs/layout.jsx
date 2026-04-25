@@ -33,6 +33,10 @@ export default async function DocsLayout({ children }) {
           <a href="https://www.linkedin.com/company/fritter-factory/" target="_blank" rel="noopener noreferrer">
             LinkedIn
           </a>
+          {' · '}
+          <a href="/privacy">
+            Privacy
+          </a>
         </Footer>
       }
     >
