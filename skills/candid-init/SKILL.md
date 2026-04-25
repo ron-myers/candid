@@ -1165,6 +1165,7 @@ Use AskUserQuestion:
 
 If "Custom — let me choose": Ask the user to confirm each of the following with Yes/No:
 - Enable review (candid-loop)?
+- Enable install? (only shown if `ship.installCommand` was configured)
 - Enable build? (only shown if `ship.buildCommand` was configured)
 - Enable tests? (only shown if `ship.testCommand` was configured)
 - Enable issue tracker update? (only shown if `ship.issueTracker` was configured)

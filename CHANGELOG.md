@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.15.0] - 2026-04-25
+
+### Added
+
+- **Install step** (`ship.installCommand` / `fastShip.install`): New optional step that runs a dependency-install command before build and tests. Addresses the common failure mode where build/test logs are really stale-dependency errors. Common values: `pnpm install`, `npm ci`, `poetry install`, `bundle install`. Opt-in — leave `installCommand` unset to skip the step entirely
+  - **`ship.installCommand`** — runs by default in `/candid-ship` when set, skipped silently when unset
+  - **`fastShip.install`** — explicit toggle for `/candid-fast-ship`; requires `ship.installCommand` to be configured
+  - **`--skip-install`** flag on `/candid-ship` for one-off skips when deps are known to be current
+  - **PR body** now includes an `Install: PASS | SKIPPED` row in the Verification block
+  - **Summary output** includes an `Install:` row when `installCommand` is configured
+
+### Changed
+
+- **Shared shipping workflow** extracted to `skills/candid-ship/WORKFLOW.md`. Both `candid-ship` and `candid-fast-ship` now reference this single document for the mechanics of pre-flight, install, build, tests, PR creation, issue tracker, auto-merge, post-merge, and summary. Each skill owns only the **skip semantics** unique to its mode (`--skip-*` flags vs `fastShip.*` toggles). Removes ~80% duplication between the two skill files and substantially reduces tokens loaded per shipping invocation
+- **`candid-ship` SKILL.md** trimmed from 631 → ~180 lines. Field-descriptions table now references `skills/candid-review/CONFIG.md` rather than restating it
+- **`candid-fast-ship` SKILL.md** trimmed from 532 → ~180 lines. Same dedup pattern
+- **Single `git log` call** during PR creation now serves both title generation and body generation (previously three separate calls on the same range)
+- **`git rev-list --count`** replaces `git log | head -20` for the commits-ahead pre-flight check
+
 ## [1.14.0] - 2026-04-25
 
 ### Added

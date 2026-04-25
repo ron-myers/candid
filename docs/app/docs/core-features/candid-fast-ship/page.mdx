@@ -28,11 +28,12 @@ Branch: feature/update-readme → stable
 
 Steps:
   1. 🔍 Review code (candid-loop)           SKIPPED — not enabled
-  2. 🔨 Build: npm run build                ENABLED
-  3. 🧪 Tests: npm test                     SKIPPED — not enabled
-  4. 📋 Create pull request
-  5. 🎯 Update issue tracker (linear)       SKIPPED — not enabled
-  6. 🔀 Auto-merge                          ENABLED
+  2. 🛠️  Install: pnpm install              ENABLED
+  3. 🔨 Build: npm run build                ENABLED
+  4. 🧪 Tests: npm test                     SKIPPED — not enabled
+  5. 📋 Create pull request
+  6. 🎯 Update issue tracker (linear)       SKIPPED — not enabled
+  7. 🔀 Auto-merge                          ENABLED
 ```
 
 Before executing, the plan shows exactly which steps are enabled and which are skipped. Use `--dry-run` to preview without executing.
@@ -55,6 +56,7 @@ Add to `.candid/config.json` alongside your `ship` block:
 {
   "fastShip": {
     "review": false,
+    "install": false,
     "build": false,
     "tests": false,
     "issueTracker": false,
@@ -69,6 +71,7 @@ All fields default to `false`. Set any to `true` to enable that step.
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
 | `review` | boolean | `false` | Run `candid-loop` code review before creating the PR. |
+| `install` | boolean | `false` | Run `ship.installCommand`. Skipped if `ship.installCommand` is not set. |
 | `build` | boolean | `false` | Run `ship.buildCommand`. Skipped if `ship.buildCommand` is not set. |
 | `tests` | boolean | `false` | Run `ship.testCommand`. Skipped if `ship.testCommand` is not set. |
 | `issueTracker` | boolean | `false` | Update issue tracker after PR creation. Uses `ship.issueTracker` for provider/state/prompt config. |
@@ -82,6 +85,7 @@ All fields default to `false`. Set any to `true` to enable that step.
 
 | `fastShip` toggle | Where the config comes from |
 |-------------------|-----------------------------|
+| `install: true` | `ship.installCommand` |
 | `build: true` | `ship.buildCommand` |
 | `tests: true` | `ship.testCommand` |
 | `issueTracker: true` | `ship.issueTracker` (provider, state, teamPrefixes, prompt) |
@@ -106,13 +110,14 @@ Nothing runs except PR creation. The plan still confirms before executing.
 ```json
 {
   "fastShip": {
+    "install": true,
     "build": true,
     "autoMerge": true
   }
 }
 ```
 
-Useful for dependency bumps where CI handles testing but you want to confirm the build locally first.
+Useful for dependency bumps where CI handles testing but you want to confirm the build locally first. Enabling `install` makes the build run against fresh dependencies — the most common cause of "works on my machine" failures in PRs.
 
 ### Issue tracker update only (docs shipped, no code change)
 
@@ -132,6 +137,7 @@ Creates the PR, moves the Linear issue to "In Review", and enables auto-merge �
 ```json
 {
   "fastShip": {
+    "install": true,
     "build": true,
     "tests": true,
     "issueTracker": true,
@@ -149,6 +155,7 @@ If you enable a step but the required configuration isn't in your `ship` block, 
 
 | Situation | Output |
 |-----------|--------|
+| `install: true` but no `ship.installCommand` | `Skipping install (installCommand not configured in ship)` |
 | `build: true` but no `ship.buildCommand` | `Skipping build (buildCommand not configured in ship)` |
 | `tests: true` but no `ship.testCommand` | `Skipping tests (testCommand not configured in ship)` |
 | `issueTracker: true` but no `ship.issueTracker` | `Skipping issue tracker (issueTracker not configured in ship)` |
@@ -202,8 +209,9 @@ If you want to ship with just a subset of steps for a one-off run, use `/candid-
   "tone": "constructive",
   "mergeTargetBranches": ["stable"],
   "ship": {
-    "buildCommand": "npm run build",
-    "testCommand": "npm test",
+    "installCommand": "pnpm install",
+    "buildCommand": "pnpm build",
+    "testCommand": "pnpm test",
     "targetBranch": "stable",
     "autoMerge": false,
     "postMergeCommand": "curl -X POST https://deploy.example.com/trigger",
@@ -215,6 +223,7 @@ If you want to ship with just a subset of steps for a one-off run, use `/candid-
     }
   },
   "fastShip": {
+    "install": true,
     "build": true,
     "issueTracker": true,
     "autoMerge": true

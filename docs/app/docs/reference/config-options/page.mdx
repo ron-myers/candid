@@ -17,6 +17,7 @@ Complete reference for Candid configuration.
     "mode": "lookup" | "load"
   },
   "ship": {
+    "installCommand": "string",
     "buildCommand": "string",
     "testCommand": "string",
     "targetBranch": "string",
@@ -33,6 +34,7 @@ Complete reference for Candid configuration.
   },
   "fastShip": {
     "review": boolean,
+    "install": boolean,
     "build": boolean,
     "tests": boolean,
     "issueTracker": boolean,
@@ -113,6 +115,7 @@ Configuration for the [`/candid-ship`](/docs/core-features/candid-ship) shipping
 
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
+| `installCommand` | string | — | Shell command to install dependencies before build (e.g. `pnpm install`, `npm ci`). Runs before `buildCommand` and `testCommand`. Skipped if not set. |
 | `buildCommand` | string | — | Shell command for build verification before creating the PR. Skipped if not set. |
 | `testCommand` | string | — | Shell command for running tests before creating the PR. Skipped if not set. |
 | `targetBranch` | string | first `mergeTargetBranches` or `"main"` | Branch to target for the PR. |
@@ -136,8 +139,9 @@ Example (full pipeline):
 ```json
 {
   "ship": {
-    "buildCommand": "npm run build",
-    "testCommand": "npm test",
+    "installCommand": "pnpm install",
+    "buildCommand": "pnpm build",
+    "testCommand": "pnpm test",
     "targetBranch": "stable",
     "autoMerge": true,
     "additionalPrompt": "Ensure error handling covers all async operations",
@@ -207,6 +211,7 @@ Configuration for the [`/candid-fast-ship`](/docs/core-features/candid-fast-ship
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
 | `review` | boolean | `false` | Run candid-loop code review. |
+| `install` | boolean | `false` | Run `ship.installCommand`. Skipped if not configured in `ship`. |
 | `build` | boolean | `false` | Run `ship.buildCommand`. Skipped if not configured in `ship`. |
 | `tests` | boolean | `false` | Run `ship.testCommand`. Skipped if not configured in `ship`. |
 | `issueTracker` | boolean | `false` | Update issue tracker after PR creation. Uses `ship.issueTracker` config. |
@@ -214,15 +219,17 @@ Configuration for the [`/candid-fast-ship`](/docs/core-features/candid-fast-ship
 | `postMergeCommand` | boolean | `false` | Run `ship.postMergeCommand` after auto-merge succeeds. |
 | `targetBranch` | string | from `ship.targetBranch` or `mergeTargetBranches` | PR target branch override. |
 
-Example (build check + auto-merge, no review):
+Example (install + build check + auto-merge, no review):
 
 ```json
 {
   "ship": {
-    "buildCommand": "npm run build",
+    "installCommand": "pnpm install",
+    "buildCommand": "pnpm build",
     "targetBranch": "stable"
   },
   "fastShip": {
+    "install": true,
     "build": true,
     "autoMerge": true
   }
