@@ -25,9 +25,9 @@ export default function FAQSchema() {
         'Harsh provides brutally honest feedback, great for finding issues you might miss. Constructive provides caring but direct feedback, based on Radical Candor principles.',
     },
     {
-      question: 'What is Radical Candour?',
+      question: 'What is Radical Candor?',
       answer:
-        "Radical Candour is a management philosophy that combines caring personally with challenging directly. It's about giving honest, direct feedback while genuinely caring about the person receiving it. Candid's Constructive tone is based on these principles.",
+        "Radical Candor is a management philosophy that combines caring personally with challenging directly. It's about giving honest, direct feedback while genuinely caring about the person receiving it. Candid's Constructive tone is based on these principles.",
     },
     {
       question: 'Where does Candid save its state?',
