@@ -1235,7 +1235,7 @@ mkdir -p .candid
 
 Use the Write tool to create:
 - `.candid/Technical.md` (or the path passed via `--output`) — the synthesized content from Step 9
-- `.candid/config.json` — the assembled config from Step 10.7
+- `.candid/config.json` — the assembled config from Step 10.8
 
 ### 11.2: Optionally Run Optimize Stage
 
