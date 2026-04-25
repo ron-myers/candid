@@ -32,6 +32,7 @@ The review process follows these steps:
 - **Todo Integration** - Convert issues to tracked todos with multi-select
 - **Issue Categorization** - Organized by severity (Critical → Architectural)
 - **Context Optimization** - Audit and optimize token usage for leaner, deeper reviews
+- **Live Browser QA** - Drive a real Chrome session against your running app, walk it like a real user across desktop and mobile, and emit structured findings JSON ready for triage
 
 ## Installation
 
@@ -64,6 +65,13 @@ Then restart Claude Code.
 ```
 /candid-review --auto-commit
 ```
+
+**Live browser QA pass:**
+```
+/candid-chrome-qa
+```
+
+Drives a real Chrome session against your running app, walks it like a real user across desktop and mobile, and writes structured findings to `.context/findings/<date>-<slug>.json`. See [Candid Chrome QA docs](https://www.candid.tools/docs/core-features/candid-chrome-qa) for the full workflow and v2.0 schema reference.
 
 ## Documentation
 
