@@ -1,49 +1,84 @@
+import Image from 'next/image'
+
 # Using with Conductor
 
-Integrate Candid with Conductor for PR reviews.
+[Conductor](https://conductor.build) is a Mac app that runs many Claude Code agents in parallel, each in an isolated git worktree. Candid runs inside any Conductor workspace once installed — `/candid-review`, `/candid-loop`, and `/candid-ship` all work the same as in your terminal.
 
-## What is Conductor?
+The most useful Conductor setup is wiring its **Review** and **Create PR** buttons to Candid commands. Conductor lets you set custom instructions that get sent to the agent when you click each button, so one click runs a full Candid review or ship.
 
-[Conductor](https://conductor.build) is an AI-powered development environment that integrates with GitHub PRs.
+## Install Candid in Conductor
 
-## Using Candid in Conductor
-
-When reviewing a PR in Conductor:
-
-```
-/candid-review
-```
-
-Candid reviews the PR's changes against your Technical.md.
-
-## Workflow
-
-1. Open a PR in Conductor
-2. Run `/candid-review`
-3. Review findings
-4. Apply fixes directly
-5. Push updated changes
-
-## Benefits
-
-### Contextual Reviews
-
-Conductor provides full repository context, making Candid reviews more accurate.
-
-### Direct Fixes
-
-Apply fixes directly in the PR branch without switching contexts.
-
-### Consistent Standards
-
-Same Technical.md applies to local development and PR reviews.
-
-## Installation
-
-Candid should already be available if you've installed it:
+Candid travels with your Claude Code configuration:
 
 ```bash
 npx skills add https://github.com/ron-myers/candid
 ```
 
-The plugin travels with your Claude Code configuration.
+Once installed, Candid is available inside every Conductor workspace.
+
+## Wire the Review button to /candid-review
+
+In Conductor, open **Settings → Code review preferences**. The text you put here is sent to the agent every time you click the Review button.
+
+<Image
+  src="/screenshots/conductor-build-code-review.png"
+  alt="Conductor's Code review preferences settings, with 'Run a candid review' as the custom instruction"
+  width={1350}
+  height={528}
+/>
+
+A minimal config:
+
+```
+Run a candid review
+```
+
+That's it — clicking Review now runs `/candid-review` against the workspace's changes using your `Technical.md` standards.
+
+## Wire the Create PR button to /candid-ship
+
+In **Settings → Create PR preferences**, set the instructions Conductor sends when you click Create PR.
+
+<Image
+  src="/screenshots/conductor-build-pr-settings.png"
+  alt="Conductor's Create PR preferences settings, showing an advanced custom prompt; the recommended minimal config is below"
+  width={1328}
+  height={542}
+/>
+
+The screenshot above shows a more elaborate prompt; the simpler `Run /candid-ship` is enough to get started:
+
+```
+Run /candid-ship
+```
+
+Now clicking Create PR runs the full Candid Ship pipeline — review, build, test, PR. See [Candid Ship](/docs/core-features/candid-ship) for the underlying command's full behavior.
+
+You can layer extra judgement into the prompt if you want different behavior for low-risk changes — for example, "ask me whether to skip the build step for docs-only changes." The agent reads these instructions every time the button is clicked, so adjust freely.
+
+## Per-repo overrides
+
+Conductor's preferences are **global** across all workspaces. If a specific repo needs different ship behavior, configure it in that repo's `.candid/config.json`:
+
+```json
+{
+  "ship": {
+    "buildCommand": "npm run build",
+    "testCommand": "npm test",
+    "targetBranch": "stable",
+    "autoMerge": false
+  }
+}
+```
+
+Repo-level config wins over anything implied by your Conductor preferences prompt.
+
+## Troubleshooting
+
+**Button doesn't run the Candid command.** Re-open Settings and confirm the preferences field is saved (Conductor shows a `Customized` badge next to the section title when a non-default value is set).
+
+**Wrong command runs.** Conductor sends your preferences text verbatim. If the agent does something unexpected, re-open Settings and check for typos in the slash command name (`/candid-review`, `/candid-ship`).
+
+**`gh: command not found` or auth errors.** Conductor workspaces inherit your shell environment, so install and authenticate `gh` once on your Mac (`brew install gh && gh auth login`) and every workspace gets it.
+
+**`/candid-ship` aborts on pre-flight.** Candid Ship refuses to run when you're on the target branch, when there are no commits ahead, or when the workspace isn't a git repo. The error message tells you which check failed.
