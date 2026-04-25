@@ -6,6 +6,7 @@ import Image from 'next/image'
 import { trackEvent, EVENTS } from '../components/trackEvent'
 import Pre from '../components/Pre'
 import SoftwareApplicationSchema from '../components/schema/SoftwareApplicationSchema'
+import WorkflowAnimation from '../components/WorkflowAnimation'
 import pluginJson from '../../data/plugin.json'
 
 const SCREENSHOTS = [
@@ -170,6 +171,12 @@ export default function HomePage() {
         >
           <code>{`npx skills add https://github.com/ron-myers/candid`}</code>
         </Pre>
+        <div
+          className="hero-animation"
+          style={getHeroAnimationStyle(heroLoaded, 500)}
+        >
+          <WorkflowAnimation />
+        </div>
       </section>
 
       <section className="demo-section">
