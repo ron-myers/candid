@@ -126,6 +126,32 @@ Ship your branch — review, build, test, create PR, and optionally auto-merge.
 /candid-ship --skip-review --skip-build --skip-tests
 ```
 
+## /candid-fast-ship
+
+Ship low-risk changes — only the steps you enable in `fastShip` config will run.
+
+```
+/candid-fast-ship
+```
+
+### Options
+
+| Flag | Description |
+|------|-------------|
+| `--auto-merge` | Enable auto-merge after PR creation |
+| `--no-auto-merge` | Disable auto-merge even if config enables it |
+| `--dry-run` | Show plan without executing |
+
+### Examples
+
+```
+/candid-fast-ship
+/candid-fast-ship --auto-merge
+/candid-fast-ship --dry-run
+```
+
+Configure which steps run in `.candid/config.json` under the `fastShip` key. See [Candid Fast Ship](/docs/core-features/candid-fast-ship) for full documentation.
+
 ## /candid-validate-standards
 
 Check your Technical.md for issues.

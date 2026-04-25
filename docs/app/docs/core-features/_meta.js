@@ -9,5 +9,6 @@ export default {
   'decision-register': 'Decision Register',
   'context-optimization': 'Context Optimization',
   'candid-ship': 'Candid Ship',
+  'candid-fast-ship': 'Candid Fast Ship',
   'slash-commands': 'Slash Commands',
 }
