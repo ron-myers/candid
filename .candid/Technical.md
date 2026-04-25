@@ -75,8 +75,9 @@ that Claude executes as a structured workflow:
 **Skill Files (`skills/*/SKILL.md`):**
 - Must respect 3-level config precedence: CLI args → `.candid/config.json` → `~/.candid/config.json` → defaults
 - Must check for `.candid/Technical.md` before enforcing standards; gracefully proceed without it
-- Must not depend on other skills directly — coordinate through shared config only
-- Reference: `skills/candid-review/SKILL.md` Step 1 and Step 2.5
+- Must not depend on other skills' workflow logic directly — coordinate through shared config or shared specs
+- Cross-skill shared specifications live alongside their primary skill (e.g. `candid-review/CONFIG.md`, `candid-ship/WORKFLOW.md`). When extracting common steps from a skill workflow, prefer this pattern over duplication.
+- Reference: `skills/candid-review/SKILL.md` Step 1 and Step 2.5; `skills/candid-ship/WORKFLOW.md`
 
 **Documentation Website (`docs/`):**
 - Server Components (layouts, static pages): must NOT use `'use client'`, must NOT use React hooks directly

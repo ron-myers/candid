@@ -61,15 +61,15 @@ Candid Ship Plan
 
 Branch: [currentBranch] → [targetBranch]
 
-Steps:
-  1. 🔍 Review code (candid-loop)           [or SKIP]
-  2. 🛠️  Install: [installCommand]          [only if installCommand is set]
-  3. 🔨 Build: [buildCommand]               [or SKIP — not configured]
-  4. 🧪 Tests: [testCommand]                [or SKIP — not configured]
-  5. 📋 Create pull request
-  6. 🎯 Update issue tracker ([provider]): state="[state]"  [only if issueTracker.enabled]
-  7. 🔀 Auto-merge: enabled                 [or disabled]
-  8. 🚀 Post-merge: [postMergeCommand]      [only if postMergeCommand is set]
+Steps (numbers assigned dynamically — only running steps get a number):
+  [N]. 🔍 Review code (candid-loop)           [or SKIP]
+  [N]. 🛠️  Install: [installCommand]          [only if installCommand is set]
+  [N]. 🔨 Build: [buildCommand]               [or SKIP — not configured]
+  [N]. 🧪 Tests: [testCommand]                [or SKIP — not configured]
+  [N]. 📋 Create pull request
+  [N]. 🎯 Update issue tracker ([provider]): state="[state]"  [only if issueTracker.enabled]
+  [N]. 🔀 Auto-merge: enabled                 [or disabled]
+  [N]. 🚀 Post-merge: [postMergeCommand]      [only if postMergeCommand is set]
 ```
 
 If `additionalPrompt` is set, append: `Review context: "[additionalPrompt]"`.

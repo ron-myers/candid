@@ -45,11 +45,14 @@ For field types, defaults, and validation rules see `skills/candid-review/CONFIG
 
 Priority: caller's explicit `targetBranch` (e.g. `fastShip.targetBranch` or `ship.targetBranch`) → first `mergeTargetBranches` entry → `"main"`.
 
-Verify it exists locally or on remote:
+Resolve to a concrete ref, **preferring `origin/[targetBranch]` when it exists** so that a stale local branch doesn't silently include already-shipped commits:
+
 ```bash
-git rev-parse --verify [targetBranch] 2>/dev/null || git rev-parse --verify origin/[targetBranch] 2>/dev/null
+target_ref=$(git rev-parse --verify origin/[targetBranch] 2>/dev/null || git rev-parse --verify [targetBranch] 2>/dev/null)
 ```
-If neither resolves, abort: `Target branch "[targetBranch]" does not exist locally or on remote.`
+If `target_ref` is empty, abort: `Target branch "[targetBranch]" does not exist locally or on remote.`
+
+Use `target_ref` (not the bare branch name) for every subsequent diff/log comparison in this workflow.
 
 ### Validate Branch State
 
@@ -57,7 +60,7 @@ If `currentBranch == targetBranch`: abort with `Cannot ship: you are on the targ
 
 Check commits ahead:
 ```bash
-git rev-list --count [targetBranch]..HEAD
+git rev-list --count $target_ref..HEAD
 ```
 If `0`: abort with `No commits ahead of [targetBranch]. Nothing to ship.`
 
@@ -125,8 +128,10 @@ Step [N]/[totalSteps]: Creating pull request...
 
 ### Read commits once
 
+Use the `target_ref` resolved in "Resolve targetBranch" — preferring `origin/[targetBranch]` so a stale local branch doesn't pollute the PR body with already-shipped commits.
+
 ```bash
-git log [targetBranch]..HEAD --pretty=format:"%s"
+git log $target_ref..HEAD --pretty=format:"%s"
 ```
 
 Store output as `commitSubjects` (one commit subject per line).
@@ -181,9 +186,10 @@ The issue-tracker step is post-PR — it warns on every failure mode but never a
 
 ### Skip Conditions
 
-Skip silently with the matching reason:
-- `issueTracker` config absent → `No issue tracker configured — skipping`
-- `issueTracker.enabled` is `false` (or `fastShip.issueTracker` is `false` when called from fast-ship) → `Skipping issue tracker update (disabled)`
+The calling skill resolves its own enable toggle (`ship.issueTracker.enabled` for candid-ship, `fastShip.issueTracker` for candid-fast-ship) before invoking this section. Once invoked, skip silently with the matching reason:
+
+- `ship.issueTracker` config absent → `No issue tracker configured — skipping`
+- Caller's enable toggle is `false` → `Skipping issue tracker update (disabled)`
 - `provider` is `"none"` → `Skipping issue tracker update (provider set to "none")`
 - `provider` is anything other than `"linear"` → warn `⚠️  Issue tracker provider "[provider]" is not yet supported. Request support at: https://github.com/ron-myers/candid/issues` and skip
 - Linear MCP tool (`mcp__claude_ai_Linear__save_issue`) unavailable → `Linear MCP not available — skipping issue update`

@@ -62,15 +62,15 @@ Candid Fast Ship Plan
 
 Branch: [currentBranch] → [targetBranch]
 
-Steps:
-  1. 🔍 Review code (candid-loop)           [ENABLED | SKIPPED — not enabled]
-  2. 🛠️  Install: [installCommand]          [ENABLED | SKIPPED — not enabled | SKIPPED — not configured]
-  3. 🔨 Build: [buildCommand]               [ENABLED | SKIPPED — not enabled | SKIPPED — not configured]
-  4. 🧪 Tests: [testCommand]                [ENABLED | SKIPPED — not enabled | SKIPPED — not configured]
-  5. 📋 Create pull request
-  6. 🎯 Update issue tracker ([provider])   [ENABLED | SKIPPED — not enabled | SKIPPED — not configured]
-  7. 🔀 Auto-merge                          [ENABLED | SKIPPED — not enabled]
-  8. 🚀 Post-merge: [postMergeCommand]      [ENABLED | SKIPPED — not enabled | SKIPPED — not configured]
+Steps (numbers assigned dynamically — only enabled+configured steps get a number):
+  [N]. 🔍 Review code (candid-loop)           [ENABLED | SKIPPED — not enabled]
+  [N]. 🛠️  Install: [installCommand]          [ENABLED | SKIPPED — not enabled | SKIPPED — not configured]
+  [N]. 🔨 Build: [buildCommand]               [ENABLED | SKIPPED — not enabled | SKIPPED — not configured]
+  [N]. 🧪 Tests: [testCommand]                [ENABLED | SKIPPED — not enabled | SKIPPED — not configured]
+  [N]. 📋 Create pull request
+  [N]. 🎯 Update issue tracker ([provider])   [ENABLED | SKIPPED — not enabled | SKIPPED — not configured]
+  [N]. 🔀 Auto-merge                          [ENABLED | SKIPPED — not enabled]
+  [N]. 🚀 Post-merge: [postMergeCommand]      [ENABLED | SKIPPED — not enabled | SKIPPED — not configured]
 ```
 
 If all optional steps are disabled, append `(All optional steps disabled — only PR creation will run)`.
