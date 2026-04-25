@@ -963,6 +963,12 @@ header a:has(.logo):hover {
   justify-content: center;
 }
 
+.copy-button::before {
+  content: '';
+  position: absolute;
+  inset: -8px;
+}
+
 .code-block-wrapper:hover .copy-button {
   opacity: 1;
 }

@@ -115,6 +115,13 @@ export default function MarketingLayout({ children }) {
           >
             LinkedIn
           </a>
+          {' · '}
+          <Link
+            href="/privacy"
+            onClick={() => trackEvent(EVENTS.PRIVACY_CLICK)}
+          >
+            Privacy
+          </Link>
         </p>
       </footer>
     </div>

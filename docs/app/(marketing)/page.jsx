@@ -481,8 +481,8 @@ export default function HomePage() {
           </div>
           <div className="faq-item">
             <details>
-              <summary>What is Radical Candour?</summary>
-              <p>Radical Candour is a management philosophy that combines caring personally with challenging directly. It's about giving honest, direct feedback while genuinely caring about the person receiving it. Candid's Constructive tone is based on these principles.</p>
+              <summary>What is Radical Candor?</summary>
+              <p>Radical Candor is a management philosophy that combines caring personally with challenging directly. It's about giving honest, direct feedback while genuinely caring about the person receiving it. Candid's Constructive tone is based on these principles.</p>
             </details>
           </div>
         </div>

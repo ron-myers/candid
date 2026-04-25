@@ -1,5 +1,6 @@
 import { Footer, Layout, Navbar } from 'nextra-theme-docs'
 import { getPageMap } from 'nextra/page-map'
+import { Search } from 'nextra/components'
 import 'nextra-theme-docs/style.css'
 import Logo from '../components/Logo'
 import BreadcrumbSchema from '../components/schema/BreadcrumbSchema'
@@ -21,6 +22,7 @@ export default async function DocsLayout({ children }) {
           }
         />
       }
+      search={<Search aria-label="Search documentation" />}
       pageMap={pageMap}
       docsRepositoryBase="https://github.com/ron-myers/candid/tree/main/docs"
       footer={
@@ -32,6 +34,10 @@ export default async function DocsLayout({ children }) {
           {' · '}
           <a href="https://www.linkedin.com/company/fritter-factory/" target="_blank" rel="noopener noreferrer">
             LinkedIn
+          </a>
+          {' · '}
+          <a href="/privacy">
+            Privacy
           </a>
         </Footer>
       }

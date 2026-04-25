@@ -22,6 +22,7 @@ export const EVENTS = {
   SLACK_CLICK: 'slack_click',
   LINKEDIN_CLICK: 'linkedin_click',
   FRITTER_FACTORY_CLICK: 'fritter_factory_click',
+  PRIVACY_CLICK: 'privacy_click',
 
   // Code interactions
   CODE_COPY: 'code_copy',
