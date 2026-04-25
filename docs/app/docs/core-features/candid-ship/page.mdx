@@ -138,6 +138,196 @@ The command only runs when all three conditions are met:
 
 If the command fails, a warning is shown but the workflow is **not** aborted — the PR is already created and auto-merge is in progress.
 
+## Issue Tracker Integration
+
+When `issueTracker.enabled` is `true`, candid-ship reads the current branch name, extracts an issue ID, and updates that issue's state in your tracker right after creating the PR. New in v1.13.0.
+
+> **Provider support:** Linear is the only supported provider today. The config is provider-agnostic and built to extend — see [requesting support](#requesting-support-for-other-trackers) below.
+
+### How it works
+
+1. After the PR is created, candid-ship reads the current branch name (`git branch --show-current`).
+2. It builds a case-insensitive regex from `issueTracker.teamPrefixes` — for example, `(DIS|ENG|DISC)-\d+`.
+3. If the branch name contains a match, candid-ship renders the prompt template (substituting `{issueId}`, `{state}`, `{provider}`) and calls the provider's MCP server to update **only that single issue** to `issueTracker.state` (default: `"In Review"`).
+4. The result appears in the ship summary as `Issue: Updated DIS-509 → In Review`.
+
+If no issue ID is found in the branch name, the step is skipped silently — branches without a tracked issue just ship normally. The same is true if the tracker isn't configured at all.
+
+### Configuration
+
+```json
+{
+  "ship": {
+    "issueTracker": {
+      "provider": "linear",
+      "enabled": true,
+      "teamPrefixes": ["DIS", "ENG", "DISC"],
+      "state": "In Review",
+      "prompt": "Update issue {issueId}: set its state to \"{state}\". Update only this one issue and only its state — do not modify any other issues, fields, or properties. If the issue is already in \"{state}\", report success without action. If the issue is missing or inaccessible, report the error and stop."
+    }
+  }
+}
+```
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `provider` | string | `"linear"` | Issue tracker. Only `"linear"` is supported today. |
+| `enabled` | boolean | `false` | Opt-in flag. Requires the provider's MCP. |
+| `teamPrefixes` | string[] | `["DIS", "ENG", "DISC"]` | Team keys to match in branch names. **Edit to match your tracker workspace's prefixes.** |
+| `state` | string | `"In Review"` | Workflow state to transition the issue to. Must match a state name in your tracker exactly. |
+| `prompt` | string | (see default) | Customizable prompt template sent to the MCP. Supports `{issueId}`, `{state}`, `{provider}` placeholders. **Must restrict the action to a single issue.** |
+
+### Branch naming
+
+Use a branch name that includes the issue ID anywhere in the name. The match is case-insensitive:
+
+| Branch name | Matched issue |
+|-------------|---------------|
+| `ron-myers/dis-509-add-auth` | `DIS-509` |
+| `feature/ENG-1234-fix-login` | `ENG-1234` |
+| `disc-42` | `DISC-42` |
+| `main` | (no match — skipped) |
+| `feature/refactor-auth` | (no match — skipped) |
+
+A common convention:
+
+```
+[your-name]/[issue-id]-[short-description]
+```
+
+Linear's "Copy git branch name" feature on each issue produces a perfectly formatted branch name with the issue ID baked in.
+
+### Customizing the prompt
+
+The default prompt is written into `.candid/config.json` by `candid-init` so it's visible and easy to edit:
+
+```
+Update issue {issueId}: set its state to "{state}". Update only this one issue and only its state — do not modify any other issues, fields, or properties. If the issue is already in "{state}", report success without action. If the issue is missing or inaccessible, report the error and stop.
+```
+
+The default encodes four safety invariants so a verbose MCP can't accidentally fan out:
+
+1. **Single issue** — only `{issueId}` is touched, never any other issue.
+2. **Single field** — only the `state` field changes (assignees, labels, priority, title, description are untouched).
+3. **Idempotent** — already in `{state}`? Succeed without action.
+4. **No fallback search** — missing or inaccessible issue? Stop. Don't look for "similar" issues.
+
+You can customize this to add domain-specific instructions (e.g. add a comment, set an assignee, link to the PR), but **any custom prompt must preserve invariants 1 and 4** — single issue, no fallback search. Without those, a chatty MCP could fan out and modify unrelated issues.
+
+Example custom prompt:
+
+```json
+{
+  "ship": {
+    "issueTracker": {
+      "provider": "linear",
+      "enabled": true,
+      "state": "Code Review",
+      "prompt": "Move {issueId} to \"{state}\" and add a comment 'PR ready for review.' Only modify this single issue."
+    }
+  }
+}
+```
+
+Available placeholders:
+
+| Placeholder | Substituted with | Example |
+|-------------|------------------|---------|
+| `{issueId}` | The matched issue ID (uppercase) | `DIS-509` |
+| `{state}` | Value of `issueTracker.state` | `In Review` |
+| `{provider}` | Value of `issueTracker.provider` | `linear` |
+
+### Setup: Linear MCP
+
+The Linear MCP server is required when `provider: "linear"`. If it's not installed, the issue-tracker step is skipped silently — the rest of the ship still works.
+
+**Step 1 — Install the Linear MCP.** From your Claude Code settings, add the official Linear MCP server (provided by claude.ai). When prompted, sign in with the Linear account that has access to the issues you want to update.
+
+**Step 2 — Verify the connection.** In a fresh Claude Code conversation, ask Claude to list your Linear teams. If Claude returns your team list, the MCP is wired up correctly.
+
+**Step 3 — Find your team prefixes.** Open Linear and look at any issue ID. The letters before the dash are your team key (e.g. `DIS-509` → team key `DIS`). Note every team key whose issues you ship from this repository.
+
+**Step 4 — Set `teamPrefixes` in your config.** Add an entry to `.candid/config.json`:
+
+```json
+{
+  "ship": {
+    "issueTracker": {
+      "provider": "linear",
+      "enabled": true,
+      "teamPrefixes": ["YOUR", "TEAM", "KEYS"]
+    }
+  }
+}
+```
+
+**Step 5 — Confirm the state name.** Open an issue in Linear and check the workflow state names in the right sidebar. The `state` field must match exactly. Common values:
+
+- `"In Review"`
+- `"Code Review"`
+- `"In Progress"`
+- `"Ready for Review"`
+
+If the state name has different capitalization or wording, the update will fail with a `state not found` error — you'll see a warning, the PR is still created.
+
+### When the update is skipped
+
+candid-ship skips the issue-tracker update gracefully in every case below. **The ship continues regardless** — the issue tracker is purely additive.
+
+| Scenario | Output |
+|----------|--------|
+| `issueTracker` field absent from config | `No issue tracker configured — skipping` |
+| `enabled` is `false` | `Skipping issue tracker update (disabled)` |
+| `provider` is `"none"` or unset | `Skipping issue tracker update (no provider set)` |
+| `provider` is unsupported (e.g. `"asana"`) | Warning + link to [GitHub issues](https://github.com/ron-myers/candid/issues), step skipped |
+| Provider's MCP isn't installed | `Linear MCP not available — skipping issue update` |
+| Branch name has no team prefix match | `No issue ID found in branch name — skipping` |
+| MCP returns an error (issue not found, bad state name, etc.) | Warning shown, ship continues. PR is already created. |
+
+This means you can safely commit `issueTracker` config to a repo that other developers ship from — if they don't have the Linear MCP, their ships still work.
+
+### Example flow
+
+```
+Branch: ron-myers/dis-509-add-auth → stable
+
+Step 4/6: Creating pull request...
+PR created: https://github.com/org/repo/pull/42
+
+Step 5/6: Updating issue tracker (linear)...
+Updated DIS-509 → In Review
+
+Step 6/6: Enabling auto-merge...
+Auto-merge enabled. PR will merge when checks pass.
+```
+
+### Adding more team prefixes later
+
+Team prefixes are workspace-specific. The defaults (`DIS`, `ENG`, `DISC`) are starting examples — **edit them to match your workspace.** To add a new team:
+
+1. Open `.candid/config.json`.
+2. Add the new team key to `ship.issueTracker.teamPrefixes`.
+3. Save. The next `/candid-ship` will recognize branches with that prefix.
+
+No restart, no reinstall — the config is read fresh on every run.
+
+### Requesting support for other trackers
+
+Today Linear is the only supported provider. The config schema is built to extend — adding Asana, Jira, GitHub Issues, Shortcut, or any other tracker is a matter of mapping the provider's MCP into the same `provider` / `teamPrefixes` / `state` / `prompt` contract.
+
+If you'd like support for another tracker:
+
+→ **Open a request:** [github.com/ron-myers/candid/issues](https://github.com/ron-myers/candid/issues)
+
+Tell us:
+
+- Which tracker you use
+- How issue IDs are formatted (e.g. team-prefix conventions)
+- The state/status field name and target state
+- Any tracker-specific quirks (custom fields, multi-step transitions, etc.)
+
+Until your tracker is supported, `provider: "your-tracker"` produces a friendly warning during ship and the step is skipped — the rest of the ship works normally.
+
 ## Examples
 
 ```bash

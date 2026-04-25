@@ -15,6 +15,21 @@ Complete reference for Candid configuration.
     "enabled": boolean,
     "path": "string",
     "mode": "lookup" | "load"
+  },
+  "ship": {
+    "buildCommand": "string",
+    "testCommand": "string",
+    "targetBranch": "string",
+    "autoMerge": boolean,
+    "additionalPrompt": "string",
+    "postMergeCommand": "string",
+    "issueTracker": {
+      "provider": "linear",
+      "enabled": boolean,
+      "teamPrefixes": ["string"],
+      "state": "string",
+      "prompt": "string"
+    }
   }
 }
 ```
@@ -82,6 +97,99 @@ Example:
 ```
 
 See [Decision Register](/docs/core-features/decision-register) for full documentation.
+
+### ship
+
+Configuration for the [`/candid-ship`](/docs/core-features/candid-ship) shipping workflow. All sub-fields are optional; if absent, candid-ship uses defaults or skips the corresponding step.
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `buildCommand` | string | — | Shell command for build verification before creating the PR. Skipped if not set. |
+| `testCommand` | string | — | Shell command for running tests before creating the PR. Skipped if not set. |
+| `targetBranch` | string | first `mergeTargetBranches` or `"main"` | Branch to target for the PR. |
+| `autoMerge` | boolean | `false` | Auto-merge the PR after creation via `gh pr merge --squash --auto`. |
+| `additionalPrompt` | string | — | Extra context passed to candid-loop/review during the review step. |
+| `postMergeCommand` | string | — | Shell command to run after auto-merge succeeds. Skipped if auto-merge is disabled or fails. |
+| `issueTracker` | object | — | Issue tracker auto-update config (see below). Opt-in. |
+
+Example (minimal):
+
+```json
+{
+  "ship": {
+    "targetBranch": "main"
+  }
+}
+```
+
+Example (full pipeline):
+
+```json
+{
+  "ship": {
+    "buildCommand": "npm run build",
+    "testCommand": "npm test",
+    "targetBranch": "stable",
+    "autoMerge": true,
+    "additionalPrompt": "Ensure error handling covers all async operations",
+    "postMergeCommand": "curl -X POST https://deploy.example.com/trigger"
+  }
+}
+```
+
+See [Candid Ship](/docs/core-features/candid-ship) for full documentation.
+
+### ship.issueTracker
+
+Optional auto-update of an external issue tracker after the PR is created. Currently `provider: "linear"` is the only supported provider; this field can be safely left unset, in which case the issue-tracker step is skipped silently and the rest of the ship runs unchanged.
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `provider` | string | `"linear"` | Issue tracker name. Only `"linear"` is supported today. Other values produce a warning with a link to [request support](https://github.com/ron-myers/candid/issues) and the step is skipped. |
+| `enabled` | boolean | `false` | Whether to attempt the issue update. Opt-in. |
+| `teamPrefixes` | string[] | `["DIS", "ENG", "DISC"]` | Team key prefixes to match in branch names. **Edit this list to match your tracker workspace's team keys.** |
+| `state` | string | `"In Review"` | Workflow state to transition the issue to. Must match a state name in your tracker exactly (case-sensitive). |
+| `prompt` | string | (see default) | Customizable prompt template sent to the tracker's MCP. Supports `{issueId}`, `{state}`, `{provider}` placeholders. **Must restrict the action to a single issue.** |
+
+**Default prompt:**
+
+```
+Update issue {issueId}: set its state to "{state}". Update only this one issue and only its state — do not modify any other issues, fields, or properties. If the issue is already in "{state}", report success without action. If the issue is missing or inaccessible, report the error and stop.
+```
+
+This default encodes four safety invariants so a verbose MCP can't accidentally fan out:
+
+1. **Single issue** — only `{issueId}` is touched.
+2. **Single field** — only the `state` field changes (assignees, labels, priority, etc. are untouched).
+3. **Idempotent** — already in `{state}`? Succeed without action.
+4. **No fallback search** — missing or inaccessible? Stop. Don't look for "similar" issues.
+
+`candid-init` writes this default into `.candid/config.json` so it's discoverable and easy to edit. Custom prompts must preserve invariants 1 and 4.
+
+Example:
+
+```json
+{
+  "ship": {
+    "issueTracker": {
+      "provider": "linear",
+      "enabled": true,
+      "teamPrefixes": ["DIS", "ENG"],
+      "state": "In Review"
+    }
+  }
+}
+```
+
+**Behavior when not configured or disabled:**
+
+- `issueTracker` field absent → step skipped silently
+- `enabled: false` → step skipped silently
+- branch name has no matching team prefix → step skipped silently (branches without an issue ID just ship normally)
+- provider's MCP is not installed → warning shown, step skipped, ship continues
+- provider is unsupported (anything other than `"linear"`) → warning with link to issue tracker, step skipped, ship continues
+
+See [Candid Ship — Issue Tracker Integration](/docs/core-features/candid-ship#issue-tracker-integration) for full setup and usage.
 
 ## Config Precedence
 

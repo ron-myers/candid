@@ -28,7 +28,14 @@ Valid config file format:
     "targetBranch": "stable",
     "autoMerge": false,
     "additionalPrompt": "Focus on security",
-    "postMergeCommand": "curl -X POST https://deploy.example.com/trigger"
+    "postMergeCommand": "curl -X POST https://deploy.example.com/trigger",
+    "issueTracker": {
+      "provider": "linear",
+      "enabled": true,
+      "teamPrefixes": ["DIS", "ENG", "DISC"],
+      "state": "In Review",
+      "prompt": "Update issue {issueId}: set its state to \"{state}\". Update only this one issue and only its state — do not modify any other issues, fields, or properties. If the issue is already in \"{state}\", report success without action. If the issue is missing or inaccessible, report the error and stop."
+    }
   }
 }
 ```
@@ -61,6 +68,12 @@ Valid config file format:
   - `ship.autoMerge` (optional): Whether to auto-merge the PR after creation via `gh pr merge --squash --auto`. Defaults to `false`. Must be a boolean.
   - `ship.additionalPrompt` (optional): Extra prompt text passed to candid-loop/candid-review as additional review context. Must be a non-empty string.
   - `ship.postMergeCommand` (optional): Shell command to run after auto-merge is successfully enabled. Only executes when `autoMerge` is `true` and `gh pr merge --squash --auto` succeeds. If the command fails, a warning is shown but the workflow is not aborted. Must be a non-empty string.
+  - `ship.issueTracker` (optional): Configuration for auto-updating an issue tracker after PR creation. Opt-in. If absent, the issue-tracker step is skipped silently — the rest of the ship runs unchanged. Currently `provider: "linear"` is the only supported provider; other values produce a warning with a link to request support. Sub-fields:
+    - `ship.issueTracker.provider` (optional): Issue tracker name. Currently only `"linear"` is supported. Defaults to `"linear"`. Future values may include `"asana"`, `"jira"`, `"github"`, etc. — set `"none"` (or omit `issueTracker` entirely) to disable.
+    - `ship.issueTracker.enabled` (optional): Whether to attempt the issue update. Defaults to `false`. Must be a boolean.
+    - `ship.issueTracker.teamPrefixes` (optional): Array of team key prefixes to match in branch names (e.g. for Linear, the letters before the dash in any issue ID). Defaults to `["DIS", "ENG", "DISC"]` — **edit this to match your tracker workspace's team keys.** Must be an array of non-empty strings.
+    - `ship.issueTracker.state` (optional): The workflow state to transition the issue to. Defaults to `"In Review"`. Must match a state name in your tracker workspace exactly (case-sensitive). Must be a non-empty string.
+    - `ship.issueTracker.prompt` (optional): Customizable prompt template sent to the tracker's MCP server. Supports `{issueId}`, `{state}`, and `{provider}` placeholders. The rendered prompt **must restrict the action to a single issue** — multiple-issue updates are explicitly disallowed. Defaults to: `Update issue {issueId}: set its state to "{state}". Update only this one issue and only its state — do not modify any other issues, fields, or properties. If the issue is already in "{state}", report success without action. If the issue is missing or inaccessible, report the error and stop.` This default also restricts the change to the `state` field (no assignee/label/title changes), is idempotent (no-op if already in `{state}`), and stops on a missing-issue error rather than searching for a fallback. candid-init writes this default into `.candid/config.json` so it's discoverable and easy to edit. Must be a non-empty string.
 
 ## Validation Rules
 
@@ -71,7 +84,7 @@ Valid config file format:
 5. **mergeTargetBranches field validation** - If present, must be an array of non-empty strings. Empty arrays or invalid values show warning and are ignored.
 6. **AutoCommit field validation** - If `autoCommit` field is present, must be a boolean (`true` or `false`). Invalid values show warning and are ignored.
 7. **DecisionRegister field validation** - If `decisionRegister` field is present, must be an object. If `decisionRegister.enabled` is present, must be a boolean. If `decisionRegister.path` is present, must be a non-empty string. If `decisionRegister.mode` is present, must be exactly `"lookup"` or `"load"` (case-sensitive). Invalid values show warning and are ignored (feature defaults to disabled).
-8. **Ship field validation** - If `ship` field is present, must be an object. If `ship.buildCommand` is present, must be a non-empty string. If `ship.testCommand` is present, must be a non-empty string. If `ship.targetBranch` is present, must be a non-empty string. If `ship.autoMerge` is present, must be a boolean. If `ship.additionalPrompt` is present, must be a non-empty string. If `ship.postMergeCommand` is present, must be a non-empty string. Invalid values show warning and are ignored.
+8. **Ship field validation** - If `ship` field is present, must be an object. If `ship.buildCommand` is present, must be a non-empty string. If `ship.testCommand` is present, must be a non-empty string. If `ship.targetBranch` is present, must be a non-empty string. If `ship.autoMerge` is present, must be a boolean. If `ship.additionalPrompt` is present, must be a non-empty string. If `ship.postMergeCommand` is present, must be a non-empty string. If `ship.issueTracker` is present, must be an object. If `ship.issueTracker.provider` is present, must be a non-empty string. If `ship.issueTracker.enabled` is present, must be a boolean. If `ship.issueTracker.teamPrefixes` is present, must be an array of non-empty strings. If `ship.issueTracker.state` is present, must be a non-empty string. If `ship.issueTracker.prompt` is present, must be a non-empty string. Invalid values show warning and are ignored — the ship continues without the issue tracker step.
 9. **Unknown fields ignored** - Any fields other than `tone`, `exclude`, `focus`, `mergeTargetBranches`, `autoCommit`, `decisionRegister`, and `ship` are ignored for forward compatibility
 10. **Empty object is valid** - `{}` is a valid config with no preferences set, system continues to next source
 
@@ -291,6 +304,39 @@ Using constructive tone (from interactive prompt)
 }
 ```
 
+**With Linear issue tracker:**
+```json
+{
+  "version": 1,
+  "tone": "constructive",
+  "ship": {
+    "buildCommand": "npm run build",
+    "targetBranch": "main",
+    "issueTracker": {
+      "provider": "linear",
+      "enabled": true,
+      "teamPrefixes": ["DIS", "ENG"],
+      "state": "In Review"
+    }
+  }
+}
+```
+
+**With custom issue tracker prompt:**
+```json
+{
+  "ship": {
+    "issueTracker": {
+      "provider": "linear",
+      "enabled": true,
+      "teamPrefixes": ["DIS"],
+      "state": "Code Review",
+      "prompt": "Move {issueId} to \"{state}\" and add a comment that the PR is ready. Only modify this single issue."
+    }
+  }
+}
+```
+
 **Full config with all features:**
 ```json
 {
@@ -310,7 +356,13 @@ Using constructive tone (from interactive prompt)
     "targetBranch": "stable",
     "autoMerge": true,
     "additionalPrompt": "Ensure error handling covers all async operations",
-    "postMergeCommand": "curl -X POST https://deploy.example.com/trigger"
+    "postMergeCommand": "curl -X POST https://deploy.example.com/trigger",
+    "issueTracker": {
+      "provider": "linear",
+      "enabled": true,
+      "teamPrefixes": ["DIS", "ENG", "DISC"],
+      "state": "In Review"
+    }
   }
 }
 ```
