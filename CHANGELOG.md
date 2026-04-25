@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.13.0] - 2026-04-25
+
+### Added
+
+- **Issue Tracker Integration** (`ship.issueTracker`): New optional step in candid-ship that automatically transitions a tracked issue to a configured state after PR creation
+  - **Provider-agnostic schema** (`provider`, `enabled`, `teamPrefixes`, `state`, `prompt`) — built to extend to Asana, Jira, GitHub Issues, Shortcut, etc. Today only `provider: "linear"` is implemented; other values produce a friendly warning with a link to [open a request](https://github.com/ron-myers/candid/issues), and the step is skipped
+  - **Configurable prompt with intelligent default** (`ship.issueTracker.prompt`): User-editable template sent to the MCP server, written by `candid-init` into `.candid/config.json` so it's discoverable and easy to edit. Supports `{issueId}`, `{state}`, `{provider}` placeholders. The default prompt encodes four safety invariants: (1) single-issue scope, (2) single-field scope (only `state` changes), (3) idempotent no-op when already in target state, and (4) no fallback search on missing-issue errors. Default: `Update issue {issueId}: set its state to "{state}". Update only this one issue and only its state — do not modify any other issues, fields, or properties. If the issue is already in "{state}", report success without action. If the issue is missing or inaccessible, report the error and stop.` Custom prompts must preserve invariants 1 and 4
+  - **Branch-name parsing**: extracts the issue ID using a case-insensitive regex built from `teamPrefixes` (defaults: `DIS`, `ENG`, `DISC`) — easy to edit to match your tracker workspace's team keys
+  - **Opt-in & graceful**: disabled by default. Skips silently in every "can't run" scenario — config absent, `enabled: false`, no provider set, unsupported provider, MCP not installed, no matching team prefix in branch, or MCP error. The ship continues regardless. Branches without a tracked issue and repos without an MCP are unaffected
+  - **Linear MCP integration**: requires the official Linear MCP server (claude.ai/Linear) when `provider: "linear"`
+  - **candid-init flow**: Step 10.6f asks "Yes — Linear / Yes — other tracker (request support) / No, skip" — the "other tracker" option links to the issues page so users can request their tracker, and skips configuration cleanly
+  - **Comprehensive docs**: provider setup, MCP installation, branch naming conventions, custom prompt examples, skip-scenario table, and instructions for requesting other providers — see [/docs/core-features/candid-ship#issue-tracker-integration](https://candid.dev/docs/core-features/candid-ship#issue-tracker-integration)
+  - **Config reference updated**: `docs/reference/config-options` now documents the full `ship.*` schema including `issueTracker`, and `skills/candid-review/CONFIG.md` covers the validation rules
+
+### Changed
+
+- **candid-ship summary**: Now includes an `Issue:` row when `issueTracker.enabled` is `true`
+- **`docs/reference/config-options/page.mdx`**: Now documents the complete `ship` config (was previously absent)
+
 ## [1.12.0] - 2026-04-25
 
 ### Added

@@ -8,6 +8,13 @@
     "targetBranch": "main",
     "autoMerge": false,
     "additionalPrompt": "Focus on security and ensure all API endpoints have auth middleware",
-    "postMergeCommand": "echo 'Ship complete!'"
+    "postMergeCommand": "echo 'Ship complete!'",
+    "issueTracker": {
+      "provider": "linear",
+      "enabled": true,
+      "teamPrefixes": ["DIS", "ENG", "DISC"],
+      "state": "In Review",
+      "prompt": "Update issue {issueId}: set its state to \"{state}\". Update only this one issue and only its state — do not modify any other issues, fields, or properties. If the issue is already in \"{state}\", report success without action. If the issue is missing or inaccessible, report the error and stop."
+    }
   }
 }

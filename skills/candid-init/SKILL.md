@@ -1070,6 +1070,75 @@ Use AskUserQuestion:
 If "Yes" → follow-up: "Enter additional review prompt:" with free-text response.
 If "No" → omit `additionalPrompt` field.
 
+#### 10.6f: Issue Tracker Integration
+
+Use AskUserQuestion:
+
+**Question:** "Do you use an issue tracker (Linear, Asana, Jira, etc.) and want candid-ship to auto-update issues when you ship?"
+
+**Options:**
+1. "Yes — Linear (supported)"
+2. "Yes — other tracker (request support)"
+3. "No, skip"
+
+**If "No, skip"** → omit `issueTracker` field. Proceed.
+
+**If "Yes — other tracker (request support)":**
+
+Display:
+```
+Issue tracker integration currently supports Linear only. To request support for your tracker (Asana, Jira, GitHub Issues, Shortcut, etc.):
+
+  → Open an issue: https://github.com/ron-myers/candid/issues
+
+Tell us which tracker you use and how you'd like the workflow to behave (state name, when to trigger, etc.) and we'll prioritize accordingly.
+
+Skipping issue tracker config for now.
+```
+
+Omit the `issueTracker` field. Proceed.
+
+**If "Yes — Linear (supported)":**
+
+Display:
+```
+Linear integration requires the official Linear MCP server (claude.ai/Linear). If it isn't installed, the issue-tracker step is skipped at ship time — the rest of the ship still runs.
+```
+
+**Follow-up 1:** "Linear team prefixes (comma-separated, e.g. DIS,ENG,DISC):" — free-text response. Split on comma, trim each entry, uppercase. If the user leaves blank, default to `["DIS", "ENG", "DISC"]`.
+
+**Follow-up 2:** "Linear state name to set when PR is created:" — free-text response. If blank, default to `"In Review"`. The user should match the exact state name from their Linear workspace (e.g. `"In Review"`, `"Code Review"`, `"In Progress"`).
+
+**Follow-up 3:** Use AskUserQuestion: "Use the default Linear MCP prompt, or customize it?"
+
+Show the default below the question so the user can see what they're agreeing to:
+
+```
+Update issue {issueId}: set its state to "{state}". Update only this one issue and only its state — do not modify any other issues, fields, or properties. If the issue is already in "{state}", report success without action. If the issue is missing or inaccessible, report the error and stop.
+```
+
+Options:
+1. "Use the default (recommended) — written into your config so you can edit it later"
+2. "Customize now"
+
+**If "Use the default":** write the default prompt verbatim into the `prompt` field of the generated config. The user can edit `.candid/config.json` later. **Do not omit the field** — having the prompt visible in the config is a feature, not noise.
+
+**If "Customize now":** Free-text follow-up: "Enter your custom prompt. Use `{issueId}`, `{state}`, and `{provider}` as placeholders. **Required:** the prompt must restrict the action to a single issue and stop on missing-issue errors (don't search for a fallback)." Show the default below as a reference baseline. Use the user's response as the `prompt` value.
+
+In either case, write the resulting `prompt` field into the config:
+
+```json
+"issueTracker": {
+  "provider": "linear",
+  "enabled": true,
+  "teamPrefixes": ["..."],
+  "state": "...",
+  "prompt": "..."
+}
+```
+
+The skill's runtime default is identical to the value written here — the explicit-in-config approach simply makes the prompt visible to the user without changing behavior.
+
 ### 10.7: Preview and Confirm
 
 Assemble the config object from all detected and prompted values. Only include fields that were explicitly set — omit fields the user skipped (they default correctly when absent).

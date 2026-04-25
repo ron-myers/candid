@@ -317,6 +317,12 @@ export default function HomePage() {
               <p>Track questions raised during reviews and their resolutions. Prior answers are reused automatically so the same question is never asked twice.</p>
             </div>
           </Link>
+          <Link href="/docs/core-features/candid-ship#issue-tracker-integration" className="card-link">
+            <div className="card">
+              <h3>Issue Tracker Integration</h3>
+              <p>Ship a branch and <code>/candid-ship</code> automatically moves the linked issue (Linear today, more soon) to <code>In Review</code>. Provider, state, and prompt are configurable.</p>
+            </div>
+          </Link>
         </div>
       </section>
 

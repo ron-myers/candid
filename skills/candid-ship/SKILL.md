@@ -81,6 +81,7 @@ If the `ship` field exists, extract:
 - `autoMerge` (boolean) — auto-merge after PR creation
 - `additionalPrompt` (string) — extra context for candid-loop/review
 - `postMergeCommand` (string) — shell command to run after auto-merge succeeds
+- `issueTracker` (object) — issue tracker auto-update config with `provider`, `enabled`, `teamPrefixes`, `state`, `prompt` sub-fields
 
 Output when loading: `Using ship settings from project config`
 
@@ -114,6 +115,11 @@ targetBranch = resolved per above
 autoMerge = false
 additionalPrompt = null
 postMergeCommand = null (skip if not set)
+issueTracker.provider = "linear" (only "linear" is currently supported)
+issueTracker.enabled = false
+issueTracker.teamPrefixes = ["DIS", "ENG", "DISC"]
+issueTracker.state = "In Review"
+issueTracker.prompt = "Update issue {issueId}: set its state to \"{state}\". Update only this one issue and only its state — do not modify any other issues, fields, or properties. If the issue is already in \"{state}\", report success without action. If the issue is missing or inaccessible, report the error and stop."
 ```
 
 #### Validate Current Branch != Target Branch
@@ -134,7 +140,7 @@ If no commits ahead: abort with `No commits ahead of [targetBranch]. Nothing to 
 
 ### Step 3: Display Plan
 
-Calculate `totalSteps = 5 + (postMergeCommand is set ? 1 : 0)`. Use this value as the step total in all step progress displays throughout the workflow.
+Calculate `totalSteps = 4 + (issueTracker.enabled ? 1 : 0) + 1 + (postMergeCommand is set ? 1 : 0)`. Use this value as the step total in all step progress displays throughout the workflow. Renumber the visible step list (below) to skip rows for any disabled optional steps.
 
 Show what will be executed:
 
@@ -150,8 +156,9 @@ Steps:
   2. 🔨 Build: [buildCommand]               [or SKIP — not configured]
   3. 🧪 Tests: [testCommand]                [or SKIP — not configured]
   4. 📋 Create pull request
-  5. 🔀 Auto-merge: enabled                 [or disabled]
-  6. 🚀 Post-merge: [postMergeCommand]      [only shown if postMergeCommand is set]
+  5. 🎯 Update issue tracker ([provider]): state="[state]"  [only shown if issueTracker.enabled]
+  6. 🔀 Auto-merge: enabled                 [or disabled]
+  7. 🚀 Post-merge: [postMergeCommand]      [only shown if postMergeCommand is set]
 ```
 
 If `additionalPrompt` is set:
@@ -321,7 +328,115 @@ Capture the PR URL from stdout. If creation fails, abort with error message.
 
 Output: `PR created: [URL]`
 
-### Step 8: Auto-Merge (Optional)
+### Step 8: Update Issue Tracker (Optional)
+
+This step transitions the linked issue in the configured tracker (Linear today, more providers planned) to the configured state. The step is fully optional and skipped silently in every case where it can't or shouldn't run — the ship continues regardless.
+
+**Skip if** `issueTracker` is missing from config. Output: `No issue tracker configured — skipping`. Continue to Step 9.
+
+**Skip if** `issueTracker.enabled` is `false`. Output: `Skipping issue tracker update (disabled)`. Continue to Step 9.
+
+**Skip if** `issueTracker.provider` is `"none"`. Output: `Skipping issue tracker update (provider set to "none")`. Continue to Step 9.
+
+**Skip if** `issueTracker.provider` is anything other than `"linear"`:
+```
+⚠️  Issue tracker provider "[provider]" is not yet supported.
+Request support at: https://github.com/ron-myers/candid/issues
+```
+Continue to Step 9.
+
+**Skip if** `issueTracker.provider` is `"linear"` but the Linear MCP tool (`mcp__claude_ai_Linear__save_issue`) is unavailable. Output: `Linear MCP not available — skipping issue update`. Continue to Step 9.
+
+If enabled, the provider is supported, and the corresponding MCP is available, proceed.
+
+Display:
+```
+Step [N]/[totalSteps]: Updating issue tracker ([provider])...
+```
+(where `N` is the count of active steps so far + 1 — typically 5 if review, build, and tests all ran; lower otherwise)
+
+#### 8.1: Extract Issue Identifier
+
+Build a case-insensitive regex from `issueTracker.teamPrefixes`:
+
+```
+pattern = (PREFIX1|PREFIX2|...)-\d+
+```
+
+For example, with `teamPrefixes = ["DIS", "ENG", "DISC"]`:
+
+```
+pattern = (DIS|ENG|DISC)-\d+/i
+```
+
+Match the pattern against `currentBranch`. Examples:
+- `ron-myers/dis-509-add-auth` → matches `dis-509` → normalize to `DIS-509`
+- `feature/ENG-1234-fix-login` → matches `ENG-1234`
+- `feature/refactor-auth` → no match
+
+If no match, output `No issue ID found in branch name — skipping` and continue to Step 9. **This is not an error** — branches without a tracked issue ship normally.
+
+If matched, normalize the captured ID to uppercase (e.g. `dis-509` → `DIS-509`).
+
+**Note for editors:** The default `teamPrefixes` list (`DIS`, `ENG`, `DISC`) reflects one Linear workspace's team keys. **Edit this list in `.candid/config.json`** to match your workspace's team prefixes — every Linear team has its own key (the letters before the dash in any issue ID).
+
+#### 8.2: Render the Prompt
+
+Take `issueTracker.prompt` and substitute placeholders:
+
+- `{issueId}` → the matched issue ID (e.g. `DIS-509`)
+- `{state}` → `issueTracker.state` (e.g. `In Review`)
+- `{provider}` → `issueTracker.provider` (e.g. `linear`)
+
+Default prompt:
+```
+Update issue {issueId}: set its state to "{state}". Update only this one issue and only its state — do not modify any other issues, fields, or properties. If the issue is already in "{state}", report success without action. If the issue is missing or inaccessible, report the error and stop.
+```
+
+The default codifies four invariants that protect the user from accidental fan-out:
+1. **Single issue** — only `{issueId}` is touched, never any other issue.
+2. **Single field** — only the `state` field changes; assignees, labels, priority, title, description are untouched.
+3. **Idempotent** — already in `{state}`? Succeed without action.
+4. **No fallback search** — if the issue is missing or inaccessible, stop. Don't look for "similar" issues.
+
+The user can customize the prompt (e.g. add a comment, set an assignee), but **any custom prompt must preserve invariants 1 and 4** — single issue, no search fallback. Without those, a chatty MCP could fan out and modify unrelated issues.
+
+#### 8.3: Pre-Call Invariant Check
+
+Before calling the MCP, scan the rendered prompt for the single-issue restriction. If the user has customized `issueTracker.prompt` and stripped this protection, abort the issue-tracker step rather than risk fan-out.
+
+Treat the prompt as preserving the single-issue invariant if it contains any of these substrings (case-insensitive): `"only this one issue"`, `"only this single issue"`, `"only one issue"`, `"this issue only"`. If none match:
+
+```
+⚠️  Issue tracker prompt is missing the single-issue restriction.
+Refusing to call the MCP. Restore the invariant in `ship.issueTracker.prompt` (see candid-ship docs).
+```
+Continue to Step 9 without calling the MCP. The PR is already created.
+
+This check is defense-in-depth at the prompt layer. The structured `id` argument to the next step's MCP call already enforces single-issue scope from the API side.
+
+#### 8.4: Update Issue State (Linear)
+
+Call the Linear MCP using the rendered prompt as the instruction context, with the structured `id` and `state` arguments:
+
+```
+mcp__claude_ai_Linear__save_issue
+  id: "[matched issue ID]"
+  state: "[issueTracker.state]"
+```
+
+The structured arguments are the source of truth for what gets updated. The rendered prompt is the natural-language instruction wrapping this call — it shapes Claude's intent when invoking the tool but the `id` field is what the API enforces.
+
+**On success:** Output: `Updated [issueId] → [state]` (e.g. `Updated DIS-509 → In Review`)
+
+**On error** (issue not found, permission denied, state name not recognized, etc.):
+```
+⚠️  Issue tracker update failed: [error message]
+PR is still open at: [URL]
+```
+Do NOT abort — the PR already exists and shouldn't be wasted. Continue to Step 9.
+
+### Step 9: Auto-Merge (Optional)
 
 **Skip if** `autoMerge` is `false`. Output: `Auto-merge: disabled (manual merge required)`
 
@@ -329,8 +444,9 @@ If `autoMerge` is `true`:
 
 Display:
 ```
-Step 5/[totalSteps]: Enabling auto-merge...
+Step [N]/[totalSteps]: Enabling auto-merge...
 ```
+(where `N` is the count of active steps so far + 1)
 
 ```bash
 gh pr merge [PR_URL] --squash --auto
@@ -349,7 +465,7 @@ If auto-merge succeeds:
 Auto-merge enabled. PR will merge when checks pass.
 ```
 
-### Step 9: Run Post-Merge Command (Conditional)
+### Step 10: Run Post-Merge Command (Conditional)
 
 **Skip if** `postMergeCommand` is not configured. Output: `Skipping post-merge command (not configured)`
 
@@ -361,9 +477,10 @@ If all conditions are met (command configured, auto-merge enabled, auto-merge su
 
 Display:
 ```
-Step 6/[totalSteps]: Running post-merge command...
+Step [N]/[totalSteps]: Running post-merge command...
 $ [postMergeCommand]
 ```
+(where `N` is the active step number — `totalSteps` itself, since post-merge is always the last step when present)
 
 Execute the post-merge command:
 ```bash
@@ -382,7 +499,7 @@ Do NOT abort — the PR was already created and auto-merge is enabled. Continue 
 Post-merge command completed.
 ```
 
-### Step 10: Display Summary
+### Step 11: Display Summary
 
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -393,6 +510,7 @@ Review:   [PASS (N iterations, M issues fixed) | SKIPPED]
 Build:    [PASS | SKIPPED]
 Tests:    [PASS | SKIPPED]
 PR:       [URL]
+Issue:    [Updated DIS-509 → In Review | Skipped — no match | Skipped — provider unsupported | Failed: <error>]   [only shown if issueTracker.enabled]
 Merge:    [Auto-merge enabled | Manual merge required | Auto-merge failed]
 Post-merge: [PASS | SKIPPED | FAILED | N/A]
 ```
@@ -412,12 +530,21 @@ Add to `.candid/config.json`:
     "targetBranch": "stable",
     "autoMerge": false,
     "additionalPrompt": "Focus on security and ensure all API endpoints have auth middleware",
-    "postMergeCommand": "curl -X POST https://deploy.example.com/trigger"
+    "postMergeCommand": "curl -X POST https://deploy.example.com/trigger",
+    "issueTracker": {
+      "provider": "linear",
+      "enabled": true,
+      "teamPrefixes": ["DIS", "ENG", "DISC"],
+      "state": "In Review",
+      "prompt": "Update issue {issueId}: set its state to \"{state}\". Update only this one issue and only its state — do not modify any other issues, fields, or properties. If the issue is already in \"{state}\", report success without action. If the issue is missing or inaccessible, report the error and stop."
+    }
   }
 }
 ```
 
 ### Field Descriptions
+
+> **Note:** `issueTracker` is an optional, opt-in integration. When omitted, the issue-tracker step is skipped silently — the rest of the ship runs unchanged. Currently `provider: "linear"` is the only supported provider; it requires the Linear MCP server installed and authenticated. To request support for another tracker (Asana, Jira, GitHub Issues, etc.), open an issue at https://github.com/ron-myers/candid/issues.
 
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
@@ -427,6 +554,16 @@ Add to `.candid/config.json`:
 | `ship.autoMerge` | boolean | `false` | Auto-merge PR after creation via `gh pr merge --squash --auto`. |
 | `ship.additionalPrompt` | string | `null` | Extra context passed to candid-loop/review. |
 | `ship.postMergeCommand` | string | `null` | Shell command to run after auto-merge succeeds. Skipped if auto-merge is disabled or fails. |
+| `ship.issueTracker.provider` | string | `"linear"` | Issue tracker to integrate with. Currently only `"linear"` is supported. Other values produce a warning with a link to request support. |
+| `ship.issueTracker.enabled` | boolean | `false` | Enable automatic issue state update after PR creation. Opt-in. |
+| `ship.issueTracker.teamPrefixes` | string[] | `["DIS", "ENG", "DISC"]` | Team keys to match in branch names (e.g. Linear team keys). **Edit this list to match your tracker workspace's team prefixes.** |
+| `ship.issueTracker.state` | string | `"In Review"` | The workflow state to transition the issue to. Must match a state name in your tracker workspace. |
+| `ship.issueTracker.prompt` | string | see default below | Customizable prompt template sent to the MCP. Supports `{issueId}`, `{state}`, `{provider}` placeholders. **Must restrict the action to one issue.** |
+
+**Default prompt:**
+```
+Update issue {issueId}: set its state to "{state}". Update only this one issue and only its state — do not modify any other issues, fields, or properties. If the issue is already in "{state}", report success without action. If the issue is missing or inaccessible, report the error and stop.
+```
 
 ### Examples
 
