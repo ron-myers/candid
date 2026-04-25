@@ -73,6 +73,7 @@ Valid config file format:
 - `ship` (optional): Configuration for the candid-ship shipping workflow. If not present, candid-ship uses defaults for all settings.
   - `ship.buildCommand` (optional): Shell command for build verification before creating PR. If not set, build step is skipped. Must be a non-empty string.
   - `ship.testCommand` (optional): Shell command for running tests before creating PR. If not set, test step is skipped. Must be a non-empty string.
+  - `ship.installCommand` (optional): Shell command to install dependencies before build. Runs before `buildCommand` (and before `testCommand`). If not set, the install step is skipped. Common values: `"pnpm install"`, `"npm ci"`, `"poetry install"`, `"bundle install"`. Must be a non-empty string.
   - `ship.targetBranch` (optional): Branch name for PR target. Defaults to first entry in `mergeTargetBranches` or `"main"`. Must be a non-empty string.
   - `ship.autoMerge` (optional): Whether to auto-merge the PR after creation via `gh pr merge --squash --auto`. Defaults to `false`. Must be a boolean.
   - `ship.additionalPrompt` (optional): Extra prompt text passed to candid-loop/candid-review as additional review context. Must be a non-empty string.
@@ -85,6 +86,7 @@ Valid config file format:
     - `ship.issueTracker.prompt` (optional): Customizable prompt template sent to the tracker's MCP server. Supports `{issueId}`, `{state}`, and `{provider}` placeholders. The rendered prompt **must restrict the action to a single issue** — multiple-issue updates are explicitly disallowed. Defaults to: `Update issue {issueId}: set its state to "{state}". Update only this one issue and only its state — do not modify any other issues, fields, or properties. If the issue is already in "{state}", report success without action. If the issue is missing or inaccessible, report the error and stop.` This default also restricts the change to the `state` field (no assignee/label/title changes), is idempotent (no-op if already in `{state}`), and stops on a missing-issue error rather than searching for a fallback. candid-init writes this default into `.candid/config.json` so it's discoverable and easy to edit. Must be a non-empty string.
 - `fastShip` (optional): Configuration for the `candid-fast-ship` minimal shipping workflow. Unlike `ship` (which runs all steps by default), `fastShip` is **opt-in**: every step is disabled by default and must be explicitly enabled. Command values and issue tracker configuration are inherited from the `ship` block. If not present, `candid-fast-ship` runs with all steps disabled (PR creation only).
   - `fastShip.review` (optional): Run candid-loop code review. Defaults to `false`. Must be a boolean.
+  - `fastShip.install` (optional): Run `ship.installCommand`. Skipped silently if `ship.installCommand` is not set. Defaults to `false`. Must be a boolean.
   - `fastShip.build` (optional): Run `ship.buildCommand`. Skipped silently if `ship.buildCommand` is not set. Defaults to `false`. Must be a boolean.
   - `fastShip.tests` (optional): Run `ship.testCommand`. Skipped silently if `ship.testCommand` is not set. Defaults to `false`. Must be a boolean.
   - `fastShip.issueTracker` (optional): Update issue tracker after PR creation. Uses `ship.issueTracker` for provider, state, and prompt configuration. `ship.issueTracker.enabled` is ignored — this toggle takes precedence. Skipped silently if `ship.issueTracker` is not configured. Defaults to `false`. Must be a boolean.
@@ -101,8 +103,8 @@ Valid config file format:
 5. **mergeTargetBranches field validation** - If present, must be an array of non-empty strings. Empty arrays or invalid values show warning and are ignored.
 6. **AutoCommit field validation** - If `autoCommit` field is present, must be a boolean (`true` or `false`). Invalid values show warning and are ignored.
 7. **DecisionRegister field validation** - If `decisionRegister` field is present, must be an object. If `decisionRegister.enabled` is present, must be a boolean. If `decisionRegister.path` is present, must be a non-empty string. If `decisionRegister.mode` is present, must be exactly `"lookup"` or `"load"` (case-sensitive). Invalid values show warning and are ignored (feature defaults to disabled).
-8. **Ship field validation** - If `ship` field is present, must be an object. If `ship.buildCommand` is present, must be a non-empty string. If `ship.testCommand` is present, must be a non-empty string. If `ship.targetBranch` is present, must be a non-empty string. If `ship.autoMerge` is present, must be a boolean. If `ship.additionalPrompt` is present, must be a non-empty string. If `ship.postMergeCommand` is present, must be a non-empty string. If `ship.issueTracker` is present, must be an object. If `ship.issueTracker.provider` is present, must be a non-empty string. If `ship.issueTracker.enabled` is present, must be a boolean. If `ship.issueTracker.teamPrefixes` is present, must be an array of non-empty strings. If `ship.issueTracker.state` is present, must be a non-empty string. If `ship.issueTracker.prompt` is present, must be a non-empty string. Invalid values show warning and are ignored — the ship continues without the issue tracker step.
-9. **FastShip field validation** - If `fastShip` field is present, must be an object. Boolean fields (`review`, `build`, `tests`, `issueTracker`, `autoMerge`, `postMergeCommand`) must be booleans if present. `targetBranch` must be a non-empty string if present. Invalid values show warning and are ignored — `fastShip` defaults to all steps disabled.
+8. **Ship field validation** - If `ship` field is present, must be an object. If `ship.buildCommand` is present, must be a non-empty string. If `ship.testCommand` is present, must be a non-empty string. If `ship.installCommand` is present, must be a non-empty string. If `ship.targetBranch` is present, must be a non-empty string. If `ship.autoMerge` is present, must be a boolean. If `ship.additionalPrompt` is present, must be a non-empty string. If `ship.postMergeCommand` is present, must be a non-empty string. If `ship.issueTracker` is present, must be an object. If `ship.issueTracker.provider` is present, must be a non-empty string. If `ship.issueTracker.enabled` is present, must be a boolean. If `ship.issueTracker.teamPrefixes` is present, must be an array of non-empty strings. If `ship.issueTracker.state` is present, must be a non-empty string. If `ship.issueTracker.prompt` is present, must be a non-empty string. Invalid values show warning and are ignored — the ship continues without the issue tracker step.
+9. **FastShip field validation** - If `fastShip` field is present, must be an object. Boolean fields (`review`, `install`, `build`, `tests`, `issueTracker`, `autoMerge`, `postMergeCommand`) must be booleans if present. `targetBranch` must be a non-empty string if present. Invalid values show warning and are ignored — `fastShip` defaults to all steps disabled.
 10. **Unknown fields ignored** - Any fields other than `tone`, `exclude`, `focus`, `mergeTargetBranches`, `autoCommit`, `decisionRegister`, `ship`, and `fastShip` are ignored for forward compatibility
 10. **Empty object is valid** - `{}` is a valid config with no preferences set, system continues to next source
 
@@ -318,6 +320,18 @@ Using constructive tone (from interactive prompt)
     "testCommand": "npm test",
     "targetBranch": "main",
     "autoMerge": false
+  }
+}
+```
+
+**With install before build:**
+```json
+{
+  "ship": {
+    "installCommand": "pnpm install",
+    "buildCommand": "pnpm build",
+    "testCommand": "pnpm test",
+    "targetBranch": "main"
   }
 }
 ```

@@ -16,12 +16,13 @@ Ship your branch with one command — review, build, test, PR, and merge.
 Candid Ship orchestrates the full shipping workflow:
 
 1. Run `candid-loop` to review and fix code issues
-2. Execute your build command
-3. Run your tests
-4. Create a pull request
-5. Optionally auto-merge
+2. Install dependencies (when `installCommand` is set)
+3. Execute your build command
+4. Run your tests
+5. Create a pull request
+6. Optionally auto-merge
 
-Any failure aborts immediately with a clear message.
+Any failure before PR creation aborts immediately with a clear message.
 
 ## How It Works
 
@@ -34,10 +35,11 @@ Branch: feature/add-auth → stable
 
 Steps:
   1. 🔍 Review code (candid-loop)
-  2. 🔨 Build: npm run build
-  3. 🧪 Tests: npm test
-  4. 📋 Create pull request
-  5. 🔀 Auto-merge: disabled
+  2. 🛠️  Install: pnpm install
+  3. 🔨 Build: npm run build
+  4. 🧪 Tests: npm test
+  5. 📋 Create pull request
+  6. 🔀 Auto-merge: disabled
 ```
 
 Before executing, the plan is shown for confirmation. Use `--dry-run` to preview without executing.
@@ -62,6 +64,7 @@ If any check fails, you get a clear error message before any work begins.
 | `--auto-merge` | Enable auto-merge after PR creation | from config |
 | `--no-auto-merge` | Disable auto-merge even if config enables it | from config |
 | `--skip-review` | Skip the candid-loop review step | `false` |
+| `--skip-install` | Skip dependency install | `false` |
 | `--skip-build` | Skip build verification | `false` |
 | `--skip-tests` | Skip test execution | `false` |
 | `--dry-run` | Show plan without executing | `false` |
@@ -73,6 +76,7 @@ Add to `.candid/config.json`:
 ```json
 {
   "ship": {
+    "installCommand": "pnpm install",
     "buildCommand": "npm run build",
     "testCommand": "npm test",
     "targetBranch": "stable",
@@ -85,12 +89,43 @@ Add to `.candid/config.json`:
 
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
+| `installCommand` | string | — | Shell command to install dependencies. Runs before build/tests. Skipped if not set. Common values: `pnpm install`, `npm ci`, `poetry install`. |
 | `buildCommand` | string | — | Shell command for build verification. Skipped if not set. |
 | `testCommand` | string | — | Shell command for running tests. Skipped if not set. |
 | `targetBranch` | string | first `mergeTargetBranches` or `"main"` | Branch to target for the PR. |
 | `autoMerge` | boolean | `false` | Auto-merge the PR after creation. |
 | `additionalPrompt` | string | — | Extra context passed to candid-loop/review during the review step. |
 | `postMergeCommand` | string | — | Shell command to run after auto-merge succeeds. Skipped if auto-merge is disabled or fails. |
+
+## Install Step
+
+When `installCommand` is set, candid-ship runs it before the build and test steps. This avoids the common failure mode where build/test errors are really stale-dependency errors.
+
+```json
+{
+  "ship": {
+    "installCommand": "pnpm install",
+    "buildCommand": "pnpm build",
+    "testCommand": "pnpm test"
+  }
+}
+```
+
+The install step is **opt-in** — leave `installCommand` unset to skip it entirely. If your build/test commands already handle their own install (e.g. `buildCommand: "pnpm install && pnpm build"`), you can keep that pattern; the dedicated `installCommand` field just makes the install phase visible and independently skippable via `--skip-install`.
+
+Common values:
+
+| Stack | Install command |
+|-------|-----------------|
+| pnpm | `pnpm install` |
+| npm (CI-friendly) | `npm ci` |
+| npm | `npm install` |
+| yarn | `yarn install --frozen-lockfile` |
+| poetry | `poetry install` |
+| bundler | `bundle install` |
+| go | `go mod download` |
+
+If install fails, the ship aborts before review/build/tests run — giving you a clear, focused error.
 
 ## Additional Prompt
 
@@ -337,14 +372,17 @@ Until your tracker is supported, `provider: "your-tracker"` produces a friendly 
 # Force auto-merge
 /candid-ship --auto-merge
 
-# Quick ship — skip review, just build/test/PR
+# Quick ship — skip review, just install/build/test/PR
 /candid-ship --skip-review
+
+# Skip install (deps already up to date)
+/candid-ship --skip-install
 
 # Preview the plan without executing
 /candid-ship --dry-run
 
 # Skip everything except PR creation
-/candid-ship --skip-review --skip-build --skip-tests
+/candid-ship --skip-review --skip-install --skip-build --skip-tests
 
 # Override auto-merge for this run
 /candid-ship --no-auto-merge
@@ -352,7 +390,7 @@ Until your tracker is supported, `provider: "your-tracker"` produces a friendly 
 
 ## Output Examples
 
-### Success (with post-merge command)
+### Success (with install and post-merge command)
 
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -360,6 +398,7 @@ Candid Ship Complete
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 Review:   PASS (3 iterations, 7 issues fixed)
+Install:  PASS
 Build:    PASS
 Tests:    PASS
 PR:       https://github.com/org/repo/pull/42
@@ -367,7 +406,7 @@ Merge:    Auto-merge enabled
 Post-merge: PASS
 ```
 
-### Success (without post-merge command)
+### Success (without install or post-merge command)
 
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -398,7 +437,7 @@ Merge:    Manual merge required
 ### Build Failure
 
 ```
-Step 2/5: Running build...
+Step 3/6: Running build...
 $ npm run build
 
 [build output with errors]
@@ -426,8 +465,9 @@ A typical shipping workflow with candid-ship configured:
   "mergeTargetBranches": ["stable"],
   "autoCommit": true,
   "ship": {
-    "buildCommand": "npm run build",
-    "testCommand": "npm test",
+    "installCommand": "pnpm install",
+    "buildCommand": "pnpm build",
+    "testCommand": "pnpm test",
     "targetBranch": "stable",
     "autoMerge": true,
     "additionalPrompt": "Ensure error handling covers all async operations",

@@ -3,6 +3,7 @@
   "tone": "constructive",
   "mergeTargetBranches": ["main"],
   "ship": {
+    "installCommand": "pnpm install",
     "buildCommand": "npm run build",
     "testCommand": "npm test",
     "targetBranch": "main",

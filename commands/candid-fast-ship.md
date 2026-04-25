@@ -29,6 +29,7 @@ Configure which steps run in `.candid/config.json`:
 {
   "fastShip": {
     "review": false,
+    "install": false,
     "build": false,
     "tests": false,
     "issueTracker": false,
