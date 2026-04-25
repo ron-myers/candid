@@ -3,6 +3,7 @@ import { getPageMap } from 'nextra/page-map'
 import 'nextra-theme-docs/style.css'
 import Logo from '../components/Logo'
 import BreadcrumbSchema from '../components/schema/BreadcrumbSchema'
+import ThemeButtonA11y from '../components/ThemeButtonA11y'
 
 export default async function DocsLayout({ children }) {
   const pageMap = await getPageMap()
@@ -37,6 +38,7 @@ export default async function DocsLayout({ children }) {
       }
     >
       <BreadcrumbSchema />
+      <ThemeButtonA11y />
       {children}
     </Layout>
   )
