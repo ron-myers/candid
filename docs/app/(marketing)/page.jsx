@@ -47,6 +47,7 @@ export default function HomePage() {
   // Refs for scroll-triggered animations
   const featuresRef = useRef(null)
   const howItWorksRef = useRef(null)
+  const qaFlowRef = useRef(null)
   const commandsRef = useRef(null)
   const communityRef = useRef(null)
   const faqRef = useRef(null)
@@ -80,7 +81,7 @@ export default function HomePage() {
 
     const observer = new IntersectionObserver(observerCallback, observerOptions)
 
-    const refs = [featuresRef, howItWorksRef, commandsRef, communityRef, faqRef, ctaRef]
+    const refs = [featuresRef, howItWorksRef, qaFlowRef, commandsRef, communityRef, faqRef, ctaRef]
     refs.forEach(ref => {
       if (ref.current) {
         observer.observe(ref.current)
@@ -323,6 +324,18 @@ export default function HomePage() {
               <p>Ship a branch and <code>/candid-ship</code> automatically moves the linked issue (Linear today, more soon) to <code>In Review</code>. Provider, state, and prompt are configurable.</p>
             </div>
           </Link>
+          <Link href="/docs/core-features/candid-chrome-qa" className="card-link">
+            <div className="card">
+              <h3>Chrome QA</h3>
+              <p>Drive a real Chrome session with <code>/candid-chrome-qa</code>. Walks your app like a real user across desktop and mobile, writes structured findings JSON for triage.</p>
+            </div>
+          </Link>
+          <Link href="/docs/core-features/candid-chrome-qa-fix" className="card-link">
+            <div className="card">
+              <h3>Chrome QA Fix</h3>
+              <p>Pick which QA findings to fix with <code>/candid-chrome-qa-fix</code>. Batched PR, one PR per finding via Conductor, or file Linear issues — your choice.</p>
+            </div>
+          </Link>
         </div>
       </section>
 
@@ -359,6 +372,43 @@ export default function HomePage() {
         </ol>
       </section>
 
+      <section className="how-it-works scroll-animate" ref={qaFlowRef}>
+        <span className="section-badge">CHROME QA FLOW</span>
+        <h2>From bugs found to bugs fixed</h2>
+        <p className="hero-tagline">
+          QA your running app, then turn findings into shipped fixes — without leaving Claude Code.
+        </p>
+        <ol className="steps-list">
+          <li>
+            <div className="step-content">
+              <strong>QA your app.</strong>
+              <span>Drive a real Chrome session, walk every target across desktop and mobile, and write structured findings to JSON.</span>
+              <Pre className="step-code" trackingId="qa_step_chrome_qa">
+                <code>/candid-chrome-qa</code>
+              </Pre>
+            </div>
+          </li>
+          <li>
+            <div className="step-content">
+              <strong>Pick what to fix.</strong>
+              <span>Multi-select findings by severity or category. Choose batched PR, parallel PRs via Conductor deep links, local-only, or issues-only.</span>
+              <Pre className="step-code" trackingId="qa_step_chrome_qa_fix">
+                <code>/candid-chrome-qa-fix</code>
+              </Pre>
+            </div>
+          </li>
+          <li>
+            <div className="step-content">
+              <strong>Ship it — with issues linked.</strong>
+              <span>Files one Linear issue per finding before any code change, then opens PRs that link back to the tracker. Re-runs are safe — findings are deduplicated by ID.</span>
+              <Pre className="step-code" trackingId="qa_step_ship">
+                <code>/candid-chrome-qa-fix --create-issues --strategy batched</code>
+              </Pre>
+            </div>
+          </li>
+        </ol>
+      </section>
+
       <section className="commands-section scroll-animate" ref={commandsRef}>
         <span className="section-badge">SLASH COMMANDS</span>
         <ul className="commands-list">
@@ -369,6 +419,14 @@ export default function HomePage() {
           <li>
             <code>/candid-init</code>
             <span>Generate a Technical.md file by analyzing your codebase structure.</span>
+          </li>
+          <li>
+            <code>/candid-chrome-qa</code>
+            <span>Drive a real Chrome session against your running web app and write structured findings JSON.</span>
+          </li>
+          <li>
+            <code>/candid-chrome-qa-fix</code>
+            <span>Pick QA findings to fix and ship them — batched PR, parallel PRs via Conductor, or Linear issues only.</span>
           </li>
           <li>
             <code>/candid-validate-standards</code>
