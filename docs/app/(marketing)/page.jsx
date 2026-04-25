@@ -472,8 +472,8 @@ export default function HomePage() {
             <dd>Harsh mode is brutally honest—great for finding issues you might miss. Constructive mode is caring but direct, based on Radical Candor principles.</dd>
           </div>
           <div className="faq-item">
-            <dt>What is Radical Candour?</dt>
-            <dd>Radical Candour is a management philosophy that combines caring personally with challenging directly. It's about giving honest, direct feedback while genuinely caring about the person receiving it. Candid's Constructive tone is based on these principles.</dd>
+            <dt>What is Radical Candor?</dt>
+            <dd>Radical Candor is a management philosophy that combines caring personally with challenging directly. It's about giving honest, direct feedback while genuinely caring about the person receiving it. Candid's Constructive tone is based on these principles.</dd>
           </div>
         </dl>
       </section>
