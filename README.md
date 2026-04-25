@@ -87,6 +87,7 @@ Define project-specific standards that Candid enforces during reviews. Violation
 /candid-init minimal            # Minimal starter
 /candid-init --effort quick     # Fast analysis (~30 sec)
 /candid-init --effort thorough  # Deep analysis (~3-5 min, default)
+/candid-init --optimize         # Run /candid-optimize after generation
 ```
 
 **Or copy a template:**

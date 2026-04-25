@@ -23,3 +23,6 @@ next-env.d.ts
 # Generated at build time from root CHANGELOG.md
 app/docs/resources/changelog/page.mdx
 
+# Generated at build time from root .claude-plugin/plugin.json
+data/plugin.json
+

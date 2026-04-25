@@ -5,8 +5,10 @@
   "private": true,
   "scripts": {
     "copy-changelog": "node scripts/copy-changelog.js",
-    "dev": "npm run copy-changelog && next dev",
-    "build": "npm run copy-changelog && next build",
+    "copy-plugin-json": "node scripts/copy-plugin-json.js",
+    "prebuild-data": "npm run copy-changelog && npm run copy-plugin-json",
+    "dev": "npm run prebuild-data && next dev",
+    "build": "npm run prebuild-data && next build",
     "postbuild": "node scripts/generate-search-index.js",
     "start": "next start",
     "lint": "next lint"

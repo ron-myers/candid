@@ -12,6 +12,12 @@ args:
   - name: effort
     description: Analysis depth (quick, medium, thorough). Default is thorough.
     required: false
+  - name: optimize
+    description: Run /candid-optimize after generation with interactive apply
+    required: false
+  - name: auto-optimize
+    description: Run /candid-optimize after generation and apply all recommendations without prompting
+    required: false
 ---
 
 Generate a project-specific Technical.md file by analyzing your codebase.
@@ -26,4 +32,6 @@ Usage:
 /candid-init --effort medium    # Balanced analysis (~1-2 min)
 /candid-init --effort thorough  # Deep analysis (~3-5 min, default)
 /candid-init --output .claude/Technical.md  # Custom output path
+/candid-init --optimize         # Run /candid-optimize after generation (interactive)
+/candid-init --auto-optimize    # Run /candid-optimize and apply all recommendations
 ```
