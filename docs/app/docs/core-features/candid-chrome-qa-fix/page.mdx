@@ -1,0 +1,283 @@
+export const metadata = {
+  title: 'Candid Chrome QA Fix - Turn QA findings into shipped fixes',
+  description: 'Read the latest candid-chrome-qa findings JSON, pick which findings to fix, and dispatch fixes — batched PR, one PR per finding via Conductor deep links, local-only, or issues-only. Optionally files Linear issues per finding.',
+}
+
+# Candid Chrome QA Fix
+
+Take the structured findings JSON from `/candid-chrome-qa` and turn it into actual code fixes. Pick the findings you want to address, choose how to ship them, and let Candid handle the rest — including filing tracker issues if you want.
+
+## Quick Start
+
+```
+/candid-chrome-qa-fix
+```
+
+Resolves the latest findings file in `.context/findings/`, asks you which findings to fix (multi-select), and asks how to ship them.
+
+```
+/candid-chrome-qa-fix --severity P0,P1                          # Only urgent + high severity
+/candid-chrome-qa-fix --strategy issues-only                    # File Linear issues, no fixes
+/candid-chrome-qa-fix --strategy per-finding --print-links      # Emit conductor:// deep links (dry run)
+/candid-chrome-qa-fix --strategy batched --create-issues --tracker-team ENG
+```
+
+## How It Works
+
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Candid Chrome QA Fix
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Findings file: .context/findings/2026-04-25-agent-config.json
+
+Steps:
+  1. ✅ Resolve findings file (latest, --file, or pick from recent)
+  2. 🔍 Validate v2.0 schema, drop coverage receipts
+  3. ☑️  Multi-select which findings to fix
+  4. 🚀 Pick a strategy (batched / per-finding / local / issues-only)
+  5. 🎯 Optionally file tracker issues (Linear today)
+  6. 🛠️  Apply fixes — sequentially or via Conductor deep links
+  7. 📋 Open PR(s) and link issues
+  8. 📊 Final summary
+```
+
+Issue creation runs **before** any code change so issue IDs flow into commits, PR titles, PR bodies, and per-finding spawned-workspace prompts.
+
+## Selection UI
+
+The skill's selector adapts to the number of fixable findings.
+
+**≤ 15 findings — native multi-select (true checkboxes):**
+
+```
+[ ] All P0 + P1
+[ ] All fixable
+[ ] [P0] [bug] Save button does nothing on Voice tab — F-a3f29b71
+[ ] [P1] [a11y] Icon button missing label on Header — F-7c29f912
+[ ] [P2] [ux] Toast disappears too fast on mobile — F-2bff1004
+...
+```
+
+**> 15 findings — bulk presets + custom indices:**
+
+```
+1. All fixable
+2. All P0 + P1
+3. All P0 + P1 + P2
+4. Custom selection (enter indices/IDs: 1,3,5-8 or F-a3f29b71)
+5. Cancel
+```
+
+Either path confirms the resolved selection before proceeding.
+
+## Strategies
+
+### Batched PR (default for ≤ 3 findings)
+
+All selected fixes applied sequentially in your current workspace. One PR at the end.
+
+```
+/candid-chrome-qa-fix --strategy batched
+```
+
+PR title (with issues): `Fix N QA findings (ENG-1234, ENG-1235): <top finding title>`. Body lists every finding with severity, surface, URL, and tracker link.
+
+### One PR per finding — parallel via [Conductor](/docs/how-to-guides/conductor)
+
+Emits a `conductor://` deep link per selected finding and `open`s each one. Each link spawns a fresh Conductor workspace that fixes one finding and ships its own PR — fully in parallel.
+
+```
+/candid-chrome-qa-fix --strategy per-finding
+/candid-chrome-qa-fix --strategy per-finding --print-links   # dry run
+```
+
+Conductor is Mac-only — on other platforms the skill falls back to `--print-links` automatically.
+
+### Local-only
+
+Apply fixes to the working tree. No commit, no PR. Useful when you want to read the diff before deciding.
+
+```
+/candid-chrome-qa-fix --strategy local
+```
+
+### Issues-only
+
+Skip code changes entirely. File one tracker issue per selected finding. Useful for triage when you want to track findings without fixing them right away.
+
+```
+/candid-chrome-qa-fix --strategy issues-only
+```
+
+## Issue Tracker Integration
+
+When `chromeQAFix.issueTracker.enabled` is `true` (or `--create-issues` is passed), the skill files one issue per selected finding **before** any code change. Issue IDs are then embedded in commit messages, PR titles, and PR bodies so the tracker shows the PR as a linked attachment.
+
+### Linear (supported today)
+
+```json
+{
+  "chromeQAFix": {
+    "issueTracker": {
+      "enabled": true,
+      "provider": "linear",
+      "teamKey": "ENG",
+      "state": "Backlog",
+      "labels": ["qa-finding", "chrome-qa"],
+      "priorityMap": { "P0": 1, "P1": 2, "P2": 3, "P3": 3, "P4": 4, "P5": 0 },
+      "dedupe": true
+    }
+  }
+}
+```
+
+| Finding field | → Linear field |
+|---|---|
+| `title` | Issue title (prefixed with `[QA] `) |
+| `severity` | Priority (`priorityMap`; defaults: P0→Urgent, P1→High, P2/P3→Medium, P4→Low, P5→No-priority) |
+| `category` | Appended to `labels` |
+| `repro` / `expected` / `actual` / `suggestedFix` | Description (markdown) |
+| `id` | Stored in description for deduplication on re-runs |
+
+### Dedup probe
+
+When `dedupe: true`, the skill calls `mcp__claude_ai_Linear__list_issues` for each finding and reuses an existing issue if its title or description contains the finding's `F-id`. A second `/candid-chrome-qa-fix` run on the same findings file won't create duplicates — it'll reuse the prior issues.
+
+### Other providers
+
+`github`, `jira`, and `asana` are stubbed for the future. They warn with a request-support link and skip the tracker step (code fixes still proceed). Set `provider: "none"` to disable tracker integration without removing the config.
+
+## CLI Flags
+
+| Flag | Description | Default |
+|------|-------------|---------|
+| `--file <path>` | Use a specific findings file | (latest in `.context/findings/`) |
+| `--severity P0,P1` | Only consider these severities | (all) |
+| `--category bug,a11y` | Only consider these categories | (all) |
+| `--strategy <name>` | One of `batched`, `per-finding`, `local`, `issues-only` | (prompted) |
+| `--max-parallel N` | Per-finding deep-link launch batch size | `4` |
+| `--print-links` | In per-finding mode, print deep links instead of opening them | `false` |
+| `--fast` | In batched mode, hand off to `/candid-fast-ship` instead of `/candid-ship` | `false` |
+| `--create-issues` | Force-enable tracker issue creation | (config) |
+| `--no-create-issues` | Force-disable tracker issue creation | (config) |
+| `--tracker-team <KEY>` | Override `issueTracker.teamKey` for this run | (config) |
+
+## Configuration
+
+Add a `chromeQAFix` block to `.candid/config.json`:
+
+```json
+{
+  "chromeQAFix": {
+    "defaultStrategy": "batched",
+    "maxParallel": 4,
+    "testCommand": "npm test",
+    "branchPrefix": "ron-myers",
+    "conductorRepoPath": "candid-v1",
+    "issueTracker": {
+      "enabled": false,
+      "provider": "linear",
+      "teamKey": "ENG",
+      "state": "Backlog",
+      "labels": ["qa-finding", "chrome-qa"],
+      "priorityMap": { "P0": 1, "P1": 2, "P2": 3, "P3": 3, "P4": 4, "P5": 0 },
+      "dedupe": true
+    }
+  }
+}
+```
+
+| Field | Default | Description |
+|-------|---------|-------------|
+| `defaultStrategy` | `"batched"` | Used when no `--strategy` flag and selection > 3 findings |
+| `maxParallel` | `4` | Per-finding deep-link launch batch size; sleeps 2s between batches |
+| `testCommand` | `null` | Run after batched/local fixes; skipped if not set |
+| `branchPrefix` | git user | Branch prefix for spawned-workspace branches (`<prefix>/qa-fix-<slug>`) |
+| `conductorRepoPath` | derived | Value for the `path` query param of `conductor://` deep links |
+| `issueTracker.enabled` | `false` | Master switch for the create-issue step |
+| `issueTracker.provider` | `"linear"` | One of `linear`, `github`, `jira`, `asana`, `none` |
+| `issueTracker.teamKey` | none | Required for Linear when enabled |
+| `issueTracker.state` | `"Backlog"` | Initial state for new issues |
+| `issueTracker.labels` | `["qa-finding", "chrome-qa"]` | Base labels; finding's category is appended |
+| `issueTracker.priorityMap` | see schema | Severity → Linear priority |
+| `issueTracker.dedupe` | `true` | Search for existing F-id before creating |
+
+## Hard Rules
+
+The skill enforces these — it will refuse to act otherwise:
+
+1. **Never silently fix without user selection** — always present the multi-select prompt unless explicit CLI flags target a known set.
+2. **Never `open` Conductor deep links on a non-macOS host** — falls back to `--print-links` and warns.
+3. **Never write outside `evidence.filesLikelyTouched`** without explicitly noting the extra files.
+4. **Never claim a fix is shipped without a PR URL.**
+5. **Never assume v1 schema** — validates `schemaVersion === "2.0"` and stops with a clear error otherwise.
+6. **Never URL-encode the deep link incorrectly** — uses real URL-encoders, not hand-rolled string substitution.
+7. **Never spawn more than `maxParallel` Conductor workspaces in a single burst.**
+8. **Never create a Linear issue without the single-issue invariant** present in the rendered prompt.
+9. **Never silently fan out tracker creation** — confirms before creating ≥ 5 new issues.
+10. **Never proceed with `provider !== "linear"`** in v1 — warns and skips the tracker step. Code fixes still proceed.
+11. **Never embed secrets** in issue descriptions, commit messages, or deep-link prompts.
+
+## Final Summary
+
+After execution, the skill prints:
+
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Candid Chrome QA Fix — Complete
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Findings file: .context/findings/2026-04-25-agent-config.json
+Strategy:      batched
+Selected:      4
+Fixed:         3
+Failed:        1
+Skipped:       0
+Issues filed:  4 created, 0 reused, 0 failed
+
+Per finding:
+  ✓ F-a3f29b71 [P0] Save button does nothing — PR: https://github.com/.../pull/123 | Issue: ENG-1234
+  ✓ F-7c29f912 [P1] Icon button missing label — applied locally | Issue: reused ENG-1180
+  ✗ F-2bff1004 [P1] Stale state on org switch — failed (test failure: line 42) | Issue: ENG-1235
+  → F-1c00abcd [P1] Settings save loop — Conductor: ron-myers/qa-fix-settings-save-loop
+```
+
+Glyph legend: `✓` fixed/applied, `✗` failed, `◦` issues-only, `→` dispatched to Conductor.
+
+## Requirements
+
+- A `candid-chrome-qa` v2.0 findings file in `.context/findings/` (run [`/candid-chrome-qa`](/docs/core-features/candid-chrome-qa) first if you don't have one)
+- For Linear issue creation: the Linear MCP (`mcp__claude_ai_Linear__save_issue`) installed in your Claude Code environment
+- For per-finding parallel mode: macOS with [Conductor](https://conductor.build) installed (the skill falls back to `--print-links` on other platforms)
+- A writable `.context/` directory (the skill creates `.context/findings/<base>.fixes.md` to log applied fixes)
+
+## FAQ
+
+### What if no findings file exists yet?
+
+The skill prints `No findings file found in .context/findings/` with a pointer to run `/candid-chrome-qa` first. No action is taken.
+
+### Can I re-run on the same findings file safely?
+
+Yes. With `dedupe: true` (default), the Linear probe finds existing issues by `F-id` and reuses them rather than creating duplicates. The applied-fixes sidecar log (`.context/findings/<base>.fixes.md`) accumulates across runs.
+
+### What happens to findings with `severity: "P5"`?
+
+P5 is reserved by `/candid-chrome-qa` for `✓ no issues — probes ran clean` coverage receipts. The fix skill drops them automatically — they're not bugs, they're proof that probes ran.
+
+### Per-finding mode — what does each Conductor workspace do?
+
+Each spawned workspace receives the full finding JSON, the desired branch name, and step-by-step instructions: rename branch → read files → apply fix → run tests → commit → push → ship via `/candid-fast-ship`. There's no callback to the parent — check Conductor for progress.
+
+### Does the skill modify the findings file?
+
+No. The findings file is the source of truth; the fix lifecycle is the consumer's concern. The skill writes a separate sidecar log at `.context/findings/<base>.fixes.md` recording each fix applied.
+
+### Can I use this with a tracker other than Linear?
+
+Not yet — only Linear is implemented in v1. `github`, `jira`, and `asana` are recognized config values that warn-and-skip with a link to request support. The provider abstraction is documented in the skill's `WORKFLOW.md` so future implementations can plug in cleanly.
+
+### What's the difference between this and `/candid-loop`?
+
+`/candid-loop` runs `/candid-review` repeatedly until code-review issues are gone. `/candid-chrome-qa-fix` consumes a single Chrome QA findings file and routes each finding through fix + ship + (optional) tracker. They're complementary: `/candid-loop` cleans the diff, `/candid-chrome-qa-fix` closes user-observable QA loops.

@@ -11,5 +11,6 @@ export default {
   'candid-ship': 'Candid Ship',
   'candid-fast-ship': 'Candid Fast Ship',
   'candid-chrome-qa': 'Candid Chrome QA',
+  'candid-chrome-qa-fix': 'Candid Chrome QA Fix',
   'slash-commands': 'Slash Commands',
 }

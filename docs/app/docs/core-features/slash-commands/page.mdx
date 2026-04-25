@@ -152,6 +152,66 @@ Ship low-risk changes — only the steps you enable in `fastShip` config will ru
 
 Configure which steps run in `.candid/config.json` under the `fastShip` key. See [Candid Fast Ship](/docs/core-features/candid-fast-ship) for full documentation.
 
+## /candid-chrome-qa
+
+Drive a real Chrome session against your running web app and write structured findings JSON to `.context/findings/`.
+
+```
+/candid-chrome-qa
+```
+
+### Options
+
+| Flag | Description |
+|------|-------------|
+| `--url <url>` | App URL to test (skips the URL prompt) |
+| `--mobile-only` | Skip the desktop pass and run mobile-only |
+
+### Examples
+
+```
+/candid-chrome-qa
+/candid-chrome-qa --url http://localhost:3000
+/candid-chrome-qa --mobile-only
+```
+
+See [Candid Chrome QA](/docs/core-features/candid-chrome-qa) for full documentation.
+
+## /candid-chrome-qa-fix
+
+Read the latest `candid-chrome-qa` findings JSON, pick which findings to fix, and dispatch fixes — batched PR, one PR per finding via Conductor deep links, local-only, or issues-only. Optionally files Linear issues per finding.
+
+```
+/candid-chrome-qa-fix
+```
+
+### Options
+
+| Flag | Description |
+|------|-------------|
+| `--file <path>` | Use a specific findings file |
+| `--severity P0,P1` | Only consider these severities |
+| `--category bug,a11y` | Only consider these categories |
+| `--strategy <name>` | One of `batched`, `per-finding`, `local`, `issues-only` |
+| `--max-parallel N` | Per-finding deep-link launch batch size (default 4) |
+| `--print-links` | In per-finding mode, print deep links instead of opening them |
+| `--fast` | In batched mode, hand off to `/candid-fast-ship` instead of `/candid-ship` |
+| `--create-issues` | Force-enable Linear issue creation |
+| `--no-create-issues` | Force-disable Linear issue creation |
+| `--tracker-team <KEY>` | Override `issueTracker.teamKey` for this run |
+
+### Examples
+
+```
+/candid-chrome-qa-fix
+/candid-chrome-qa-fix --severity P0,P1
+/candid-chrome-qa-fix --strategy issues-only
+/candid-chrome-qa-fix --strategy per-finding --print-links
+/candid-chrome-qa-fix --strategy batched --create-issues --tracker-team ENG
+```
+
+See [Candid Chrome QA Fix](/docs/core-features/candid-chrome-qa-fix) for full documentation.
+
 ## /candid-validate-standards
 
 Check your Technical.md for issues.
