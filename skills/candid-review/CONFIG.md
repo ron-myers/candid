@@ -42,7 +42,7 @@ Valid config file format:
     "build": false,
     "tests": false,
     "issueTracker": false,
-    "autoMerge": false,
+    "autoMerge": true,
     "postMergeCommand": false,
     "targetBranch": "stable"
   }
