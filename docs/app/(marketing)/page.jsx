@@ -454,28 +454,38 @@ export default function HomePage() {
 
       <section className="faq-section scroll-animate" ref={faqRef}>
         <span className="section-badge">FREQUENTLY ASKED QUESTIONS</span>
-        <dl className="faq-list">
+        <div className="faq-list">
           <div className="faq-item">
-            <dt>Does Candid work with any language?</dt>
-            <dd>Yes, Candid reviews code in any language Claude Code supports. Your Technical.md standards can be language-specific or universal.</dd>
+            <details>
+              <summary>Does Candid work with any language?</summary>
+              <p>Yes, Candid reviews code in any language Claude Code supports. Your Technical.md standards can be language-specific or universal.</p>
+            </details>
           </div>
           <div className="faq-item">
-            <dt>How does Candid pay for Claude Code?</dt>
-            <dd>Candid uses Claude Code however you're already logged in. If you're using an API key, Candid uses that. If you're on Claude Pro or Max, Candid uses that.</dd>
+            <details>
+              <summary>How does Candid pay for Claude Code?</summary>
+              <p>Candid uses Claude Code however you're already logged in. If you're using an API key, Candid uses that. If you're on Claude Pro or Max, Candid uses that.</p>
+            </details>
           </div>
           <div className="faq-item">
-            <dt>Can I use Candid with my team?</dt>
-            <dd>Yes. Share your Technical.md and candid.config.json in your repo. Everyone gets the same standards and configuration automatically.</dd>
+            <details>
+              <summary>Can I use Candid with my team?</summary>
+              <p>Yes. Share your Technical.md and candid.config.json in your repo. Everyone gets the same standards and configuration automatically.</p>
+            </details>
           </div>
           <div className="faq-item">
-            <dt>What's the difference between Harsh and Constructive tone?</dt>
-            <dd>Harsh mode is brutally honest—great for finding issues you might miss. Constructive mode is caring but direct, based on Radical Candor principles.</dd>
+            <details>
+              <summary>What's the difference between Harsh and Constructive tone?</summary>
+              <p>Harsh mode is brutally honest—great for finding issues you might miss. Constructive mode is caring but direct, based on Radical Candor principles.</p>
+            </details>
           </div>
           <div className="faq-item">
-            <dt>What is Radical Candour?</dt>
-            <dd>Radical Candour is a management philosophy that combines caring personally with challenging directly. It's about giving honest, direct feedback while genuinely caring about the person receiving it. Candid's Constructive tone is based on these principles.</dd>
+            <details>
+              <summary>What is Radical Candour?</summary>
+              <p>Radical Candour is a management philosophy that combines caring personally with challenging directly. It's about giving honest, direct feedback while genuinely caring about the person receiving it. Candid's Constructive tone is based on these principles.</p>
+            </details>
           </div>
-        </dl>
+        </div>
       </section>
 
       <section className="cta-section scroll-animate" ref={ctaRef}>
