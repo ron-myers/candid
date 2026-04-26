@@ -611,6 +611,28 @@ header a:has(.logo):hover {
   background: transparent;
 }
 
+.hero-animation {
+  width: 100%;
+  max-width: 800px;
+  margin: 2.5rem auto 0;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: var(--shadow-elevated);
+  border: 1px solid var(--border-color);
+}
+
+@media (max-width: 768px) {
+  .hero-animation {
+    border-radius: 8px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-animation {
+    display: none;
+  }
+}
+
 /* ===== Features Section ===== */
 .features-section {
   padding: var(--spacing-section) 0;
