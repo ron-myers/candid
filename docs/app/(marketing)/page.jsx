@@ -174,6 +174,7 @@ export default function HomePage() {
         <div
           className="hero-animation"
           style={getHeroAnimationStyle(heroLoaded, 500)}
+          aria-hidden="true"
         >
           <WorkflowAnimation />
         </div>

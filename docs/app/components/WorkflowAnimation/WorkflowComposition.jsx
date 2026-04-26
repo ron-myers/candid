@@ -2,7 +2,7 @@
 
 import { AbsoluteFill, Sequence, useCurrentFrame, interpolate, spring, Easing } from 'remotion'
 
-const C = {
+const COLORS = {
   bg: '#0d1117',
   surface: '#161b22',
   border: '#30363d',
@@ -17,10 +17,6 @@ const C = {
 
 const MONO = '"JetBrains Mono", "Consolas", "Courier New", monospace'
 const SANS = 'Inter, system-ui, -apple-system, sans-serif'
-
-function clamp(v) {
-  return { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: v }
-}
 
 const EASE_OUT = Easing.out(Easing.cubic)
 
@@ -44,7 +40,7 @@ function TerminalChrome({ title = 'Terminal' }) {
       <div style={{ width: 12, height: 12, borderRadius: '50%', background: '#ff5f57' }} />
       <div style={{ width: 12, height: 12, borderRadius: '50%', background: '#febc2e' }} />
       <div style={{ width: 12, height: 12, borderRadius: '50%', background: '#28c840' }} />
-      <span style={{ color: C.muted, fontSize: 12, fontFamily: MONO, marginLeft: 'auto', marginRight: 'auto' }}>
+      <span style={{ color: COLORS.muted, fontSize: 12, fontFamily: MONO, marginLeft: 'auto', marginRight: 'auto' }}>
         {title}
       </span>
     </div>
@@ -76,19 +72,19 @@ function Scene1GitPush() {
 
   return (
     <AbsoluteFill style={{ opacity, padding: 36, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-      <div style={{ background: C.surface, borderRadius: 10, border: `1px solid ${C.border}`, overflow: 'hidden', maxWidth: 660, margin: '0 auto', width: '100%' }}>
+      <div style={{ background: COLORS.surface, borderRadius: 10, border: `1px solid ${C.border}`, overflow: 'hidden', maxWidth: 660, margin: '0 auto', width: '100%' }}>
         <TerminalChrome />
         <div style={{ padding: '20px 22px', minHeight: 160 }}>
-          <div style={{ color: C.green, fontFamily: MONO, fontSize: 13.5 }}>
+          <div style={{ color: COLORS.green, fontFamily: MONO, fontSize: 13.5 }}>
             <Typewriter text="$ git push origin feature/user-auth" startFrame={6} endFrame={30} />
           </div>
           <div style={{ marginTop: 14, opacity: responseOpacity, transform: `translateY(${responseY}px)` }}>
-            <div style={{ color: C.muted, fontFamily: MONO, fontSize: 12.5, lineHeight: 1.85 }}>
+            <div style={{ color: COLORS.muted, fontFamily: MONO, fontSize: 12.5, lineHeight: 1.85 }}>
               <div>Enumerating objects: 15, done.</div>
               <div>Counting objects: 100% (15/15), done.</div>
               <div>Writing objects: 100% (9/9), 2.41 KiB, done.</div>
             </div>
-            <div style={{ marginTop: 10, color: C.green, fontFamily: MONO, fontSize: 13.5, fontWeight: 'bold' }}>
+            <div style={{ marginTop: 10, color: COLORS.green, fontFamily: MONO, fontSize: 13.5, fontWeight: 'bold' }}>
               ✓  Pushed 3 commits to feature/user-auth
             </div>
           </div>
@@ -108,30 +104,30 @@ function Scene2CandidReview() {
 
   return (
     <AbsoluteFill style={{ opacity, padding: 36, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-      <div style={{ background: C.surface, borderRadius: 10, border: `1px solid ${C.border}`, overflow: 'hidden', maxWidth: 660, margin: '0 auto', width: '100%' }}>
+      <div style={{ background: COLORS.surface, borderRadius: 10, border: `1px solid ${C.border}`, overflow: 'hidden', maxWidth: 660, margin: '0 auto', width: '100%' }}>
         <TerminalChrome title="Claude Code" />
         <div style={{ padding: '20px 22px', minHeight: 160 }}>
-          <div style={{ color: C.accent, fontFamily: MONO, fontSize: 13.5 }}>
+          <div style={{ color: COLORS.accent, fontFamily: MONO, fontSize: 13.5 }}>
             <Typewriter text="> /candid-review" startFrame={4} endFrame={20} />
           </div>
 
           <div style={{ marginTop: 18, opacity: analysisOpacity }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
               {[0, 1, 2].map(i => (
-                <span key={i} style={{ color: dotPhase === i ? C.accent : C.border, fontSize: 20, lineHeight: 1 }}>●</span>
+                <span key={i} style={{ color: dotPhase === i ? COLORS.accent : COLORS.border, fontSize: 20, lineHeight: 1 }}>●</span>
               ))}
-              <span style={{ color: C.muted, fontFamily: MONO, fontSize: 12.5, marginLeft: 4 }}>
+              <span style={{ color: COLORS.muted, fontFamily: MONO, fontSize: 12.5, marginLeft: 4 }}>
                 Analyzing 847 lines across 12 files…
               </span>
             </div>
 
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
-                <span style={{ color: C.muted, fontFamily: MONO, fontSize: 11.5 }}>Deep review in progress</span>
-                <span style={{ color: C.accent, fontFamily: MONO, fontSize: 11.5 }}>{Math.round(progressWidth)}%</span>
+                <span style={{ color: COLORS.muted, fontFamily: MONO, fontSize: 11.5 }}>Deep review in progress</span>
+                <span style={{ color: COLORS.accent, fontFamily: MONO, fontSize: 11.5 }}>{Math.round(progressWidth)}%</span>
               </div>
-              <div style={{ height: 4, background: C.border, borderRadius: 2 }}>
-                <div style={{ height: '100%', width: `${progressWidth}%`, background: C.accent, borderRadius: 2 }} />
+              <div style={{ height: 4, background: COLORS.border, borderRadius: 2 }}>
+                <div style={{ height: '100%', width: `${progressWidth}%`, background: COLORS.accent, borderRadius: 2 }} />
               </div>
             </div>
           </div>
@@ -150,19 +146,19 @@ function Scene3ReviewResults() {
   const panelOpacity = interpolate(frame, [5, 22], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' })
 
   const comments = [
-    { label: 'Security',    line: 23, msg: 'SQL injection — user input not sanitized', color: C.red,    in: [22, 33] },
-    { label: 'Type Error',  line: 25, msg: 'user.posts may be undefined',               color: C.yellow, in: [35, 46] },
-    { label: 'Performance', line: 27, msg: 'N+1 query in loop — batch fetch instead',   color: C.blue,   in: [48, 59] },
+    { label: 'Security',    line: 23, msg: 'SQL injection — user input not sanitized', color: COLORS.red,    in: [22, 33] },
+    { label: 'Type Error',  line: 25, msg: 'user.posts may be undefined',               color: COLORS.yellow, in: [35, 46] },
+    { label: 'Performance', line: 27, msg: 'N+1 query in loop — batch fetch instead',   color: COLORS.blue,   in: [48, 59] },
   ]
 
   const code = [
     { n: 21, text: 'async function getUser(req, res) {',         hl: null },
     { n: 22, text: '  const id = req.params.id',                 hl: null },
-    { n: 23, text: '  const q = `SELECT * WHERE id=${id}`',      hl: C.red },
+    { n: 23, text: '  const q = `SELECT * WHERE id=${id}`',      hl: COLORS.red },
     { n: 24, text: '  const user = await db.raw(q)',             hl: null },
-    { n: 25, text: '  const posts = user.posts.map(p => p)',     hl: C.yellow },
+    { n: 25, text: '  const posts = user.posts.map(p => p)',     hl: COLORS.yellow },
     { n: 26, text: '  for (const tag of user.tags) {',          hl: null },
-    { n: 27, text: '    await db.query(`SELECT...`, [tag])',     hl: C.blue },
+    { n: 27, text: '    await db.query(`SELECT...`, [tag])',     hl: COLORS.blue },
     { n: 28, text: '  }',                                        hl: null },
     { n: 29, text: '  res.json({ user, posts })',                hl: null },
     { n: 30, text: '}',                                          hl: null },
@@ -173,7 +169,7 @@ function Scene3ReviewResults() {
       <div style={{ display: 'flex', gap: 14, height: '100%', alignItems: 'center', maxWidth: 760, margin: '0 auto', width: '100%' }}>
         <div style={{
           flex: '0 0 320px',
-          background: C.surface,
+          background: COLORS.surface,
           borderRadius: 10,
           border: `1px solid ${C.border}`,
           overflow: 'hidden',
@@ -189,10 +185,10 @@ function Scene3ReviewResults() {
                 background: line.hl ? `${line.hl}18` : 'transparent',
                 borderLeft: line.hl ? `3px solid ${line.hl}` : '3px solid transparent',
               }}>
-                <span style={{ color: C.border, fontFamily: MONO, fontSize: 10.5, width: 28, textAlign: 'right', paddingRight: 10, flexShrink: 0 }}>
+                <span style={{ color: COLORS.border, fontFamily: MONO, fontSize: 10.5, width: 28, textAlign: 'right', paddingRight: 10, flexShrink: 0 }}>
                   {line.n}
                 </span>
-                <span style={{ color: line.hl ?? C.text, fontFamily: MONO, fontSize: 10.5, opacity: line.hl ? 1 : 0.8 }}>
+                <span style={{ color: line.hl ?? COLORS.text, fontFamily: MONO, fontSize: 10.5, opacity: line.hl ? 1 : 0.8 }}>
                   {line.text}
                 </span>
               </div>
@@ -201,7 +197,7 @@ function Scene3ReviewResults() {
         </div>
 
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 10 }}>
-          <div style={{ color: C.text, fontFamily: SANS, fontSize: 14, fontWeight: 600, marginBottom: 2 }}>
+          <div style={{ color: COLORS.text, fontFamily: SANS, fontSize: 14, fontWeight: 600, marginBottom: 2 }}>
             3 issues found
           </div>
           {comments.map(c => {
@@ -210,7 +206,7 @@ function Scene3ReviewResults() {
             return (
               <div key={c.line} style={{
                 opacity: op, transform: `translateY(${ty}px)`,
-                background: C.surface,
+                background: COLORS.surface,
                 border: `1px solid ${c.color}40`,
                 borderLeft: `3px solid ${c.color}`,
                 borderRadius: 8,
@@ -220,9 +216,9 @@ function Scene3ReviewResults() {
                   <span style={{ background: `${c.color}22`, color: c.color, fontFamily: MONO, fontSize: 10, padding: '2px 6px', borderRadius: 4 }}>
                     {c.label}
                   </span>
-                  <span style={{ color: C.muted, fontFamily: MONO, fontSize: 10.5 }}>Line {c.line}</span>
+                  <span style={{ color: COLORS.muted, fontFamily: MONO, fontSize: 10.5 }}>Line {c.line}</span>
                 </div>
-                <div style={{ color: C.text, fontFamily: SANS, fontSize: 12.5, lineHeight: 1.4 }}>{c.msg}</div>
+                <div style={{ color: COLORS.text, fontFamily: SANS, fontSize: 12.5, lineHeight: 1.4 }}>{c.msg}</div>
               </div>
             )
           })}
@@ -238,9 +234,9 @@ function Scene4ApplyFixes() {
   const opacity = fade(frame, 0, 70, 10)
 
   const fixes = [
-    { label: 'Security',    msg: 'Parameterize SQL query',          color: C.red,    range: [10, 32] },
-    { label: 'Type Error',  msg: 'Add optional chaining ?.map()',   color: C.yellow, range: [28, 50] },
-    { label: 'Performance', msg: 'Replace loop with batchGetTags()', color: C.blue,   range: [46, 66] },
+    { label: 'Security',    msg: 'Parameterize SQL query',          color: COLORS.red,    range: [10, 32] },
+    { label: 'Type Error',  msg: 'Add optional chaining ?.map()',   color: COLORS.yellow, range: [28, 50] },
+    { label: 'Performance', msg: 'Replace loop with batchGetTags()', color: COLORS.blue,   range: [46, 66] },
   ]
 
   const labelOpacity = interpolate(frame, [4, 14], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' })
@@ -248,7 +244,7 @@ function Scene4ApplyFixes() {
   return (
     <AbsoluteFill style={{ opacity, padding: 40, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
       <div style={{ maxWidth: 540, width: '100%' }}>
-        <div style={{ color: C.accent, fontFamily: MONO, fontSize: 13, marginBottom: 20, opacity: labelOpacity }}>
+        <div style={{ color: COLORS.accent, fontFamily: MONO, fontSize: 13, marginBottom: 20, opacity: labelOpacity }}>
           Applying fixes…
         </div>
 
@@ -257,7 +253,7 @@ function Scene4ApplyFixes() {
           const done = progress >= 1
           return (
             <div key={i} style={{
-              background: C.surface,
+              background: COLORS.surface,
               border: `1px solid ${C.border}`,
               borderRadius: 8,
               padding: '13px 16px',
@@ -268,11 +264,11 @@ function Scene4ApplyFixes() {
                   <span style={{ background: `${fix.color}22`, color: fix.color, fontFamily: MONO, fontSize: 10, padding: '2px 6px', borderRadius: 4 }}>
                     {fix.label}
                   </span>
-                  <span style={{ color: C.text, fontFamily: SANS, fontSize: 13 }}>{fix.msg}</span>
+                  <span style={{ color: COLORS.text, fontFamily: SANS, fontSize: 13 }}>{fix.msg}</span>
                 </div>
                 <div style={{
                   width: 20, height: 20, borderRadius: '50%',
-                  background: done ? C.green : C.border,
+                  background: done ? COLORS.green : COLORS.border,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   flexShrink: 0,
                 }}>
@@ -283,8 +279,8 @@ function Scene4ApplyFixes() {
                   )}
                 </div>
               </div>
-              <div style={{ height: 3, background: C.border, borderRadius: 2 }}>
-                <div style={{ height: '100%', width: `${progress * 100}%`, background: done ? C.green : fix.color, borderRadius: 2 }} />
+              <div style={{ height: 3, background: COLORS.border, borderRadius: 2 }}>
+                <div style={{ height: '100%', width: `${progress * 100}%`, background: done ? COLORS.green : fix.color, borderRadius: 2 }} />
               </div>
             </div>
           )
@@ -306,10 +302,10 @@ function Scene5Ship() {
 
   return (
     <AbsoluteFill style={{ opacity, padding: 40, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
-      <div style={{ background: C.surface, borderRadius: 10, border: `1px solid ${C.border}`, overflow: 'hidden', maxWidth: 540, width: '100%' }}>
+      <div style={{ background: COLORS.surface, borderRadius: 10, border: `1px solid ${C.border}`, overflow: 'hidden', maxWidth: 540, width: '100%' }}>
         <TerminalChrome title="Claude Code" />
         <div style={{ padding: '22px 24px' }}>
-          <div style={{ color: C.accent, fontFamily: MONO, fontSize: 13.5, marginBottom: 22 }}>
+          <div style={{ color: COLORS.accent, fontFamily: MONO, fontSize: 13.5, marginBottom: 22 }}>
             <Typewriter text="> /candid-ship" startFrame={6} endFrame={24} />
           </div>
 
@@ -326,10 +322,10 @@ function Scene5Ship() {
               </svg>
             </div>
 
-            <div style={{ color: C.text, fontFamily: SANS, fontSize: 17, fontWeight: 700, marginBottom: 6 }}>
+            <div style={{ color: COLORS.text, fontFamily: SANS, fontSize: 17, fontWeight: 700, marginBottom: 6 }}>
               All issues resolved
             </div>
-            <div style={{ color: C.muted, fontFamily: SANS, fontSize: 13.5, marginBottom: 18 }}>
+            <div style={{ color: COLORS.muted, fontFamily: SANS, fontSize: 13.5, marginBottom: 18 }}>
               Shipped with confidence ✓
             </div>
 
@@ -337,7 +333,7 @@ function Scene5Ship() {
               {tags.map(tag => (
                 <span key={tag} style={{
                   background: `${C.green}1a`,
-                  color: C.green,
+                  color: COLORS.green,
                   fontFamily: MONO,
                   fontSize: 11,
                   padding: '3px 9px',
@@ -356,7 +352,7 @@ function Scene5Ship() {
 
 export default function WorkflowComposition() {
   return (
-    <AbsoluteFill style={{ background: C.bg }}>
+    <AbsoluteFill style={{ background: COLORS.bg }}>
       <Sequence from={0} durationInFrames={70}>
         <Scene1GitPush />
       </Sequence>
