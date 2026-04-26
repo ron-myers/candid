@@ -28,7 +28,7 @@ export default async function DocsLayout({ children }) {
       docsRepositoryBase="https://github.com/ron-myers/candid/tree/main/docs"
       footer={
         <Footer>
-          MIT {new Date().getFullYear()} ©{' '}
+          MIT © {new Date().getFullYear()}{' '}·{' '}
           <a href="https://www.fritterfactory.com" target="_blank" rel="noopener noreferrer">
             Fritter Factory
           </a>

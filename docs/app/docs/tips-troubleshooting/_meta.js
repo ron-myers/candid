@@ -1,4 +1,4 @@
 export default {
-  index: 'Overview',
+  index: 'Tips & Troubleshooting Overview',
   faq: 'FAQ & Known Issues',
 }

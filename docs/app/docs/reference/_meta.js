@@ -1,5 +1,5 @@
 export default {
-  index: 'Overview',
+  index: 'Reference Overview',
   'config-options': 'Config Options',
   'file-exclusions': 'File Exclusions',
   'merge-targets': 'Merge Targets',

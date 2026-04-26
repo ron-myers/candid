@@ -97,7 +97,7 @@ export default function MarketingLayout({ children }) {
       </main>
       <footer className="marketing-footer">
         <p>
-          MIT {new Date().getFullYear()} ©{' '}
+          MIT © {new Date().getFullYear()}{' '}·{' '}
           <a
             href="https://www.fritterfactory.com"
             target="_blank"

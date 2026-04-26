@@ -1,5 +1,5 @@
 export default {
-  index: 'Overview',
+  index: 'Resources Overview',
   changelog: 'Changelog',
   examples: 'Example Reviews',
 }

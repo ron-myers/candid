@@ -272,7 +272,11 @@ export default function BrandPageClient() {
             </div>
             <span className="brand-variation-label">Full Logo</span>
             <span className="brand-variation-usage">Primary usage</span>
-            <button className="brand-download-btn" onClick={() => downloadSVG('full')}>
+            <button
+              className="brand-download-btn"
+              onClick={() => downloadSVG('full')}
+              aria-label="Download full logo SVG"
+            >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
                 <polyline points="7 10 12 15 17 10"/>
@@ -289,7 +293,11 @@ export default function BrandPageClient() {
             </div>
             <span className="brand-variation-label">Icon Only</span>
             <span className="brand-variation-usage">Favicons, small spaces</span>
-            <button className="brand-download-btn" onClick={() => downloadSVG('icon')}>
+            <button
+              className="brand-download-btn"
+              onClick={() => downloadSVG('icon')}
+              aria-label="Download icon-only logo SVG"
+            >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
                 <polyline points="7 10 12 15 17 10"/>
@@ -304,7 +312,11 @@ export default function BrandPageClient() {
             </div>
             <span className="brand-variation-label">Wordmark</span>
             <span className="brand-variation-usage">Text-heavy contexts</span>
-            <button className="brand-download-btn" onClick={() => downloadSVG('wordmark')}>
+            <button
+              className="brand-download-btn"
+              onClick={() => downloadSVG('wordmark')}
+              aria-label="Download wordmark SVG"
+            >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
                 <polyline points="7 10 12 15 17 10"/>

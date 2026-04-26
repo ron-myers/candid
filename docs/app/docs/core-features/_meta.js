@@ -1,5 +1,5 @@
 export default {
-  index: 'Overview',
+  index: 'Core Features Overview',
   'tone-selection': 'Tone Selection',
   'focus-modes': 'Focus Modes',
   'technical-md': 'Technical.md',

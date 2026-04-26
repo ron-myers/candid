@@ -1,6 +1,18 @@
 export const metadata = {
-  title: 'Privacy | Candid',
+  title: 'Privacy',
   description: 'Privacy policy for candid.tools — what data is collected and how.',
+  openGraph: {
+    title: 'Privacy | Candid',
+    description: 'Privacy policy for candid.tools — what data is collected and how.',
+    url: 'https://www.candid.tools/privacy',
+    siteName: 'Candid',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary',
+    title: 'Privacy | Candid',
+    description: 'Privacy policy for candid.tools — what data is collected and how.',
+  },
 }
 
 export default function PrivacyPage() {
