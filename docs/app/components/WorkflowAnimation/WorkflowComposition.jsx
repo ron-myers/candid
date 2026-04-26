@@ -35,7 +35,7 @@ function TerminalChrome({ title = 'Terminal' }) {
       display: 'flex', alignItems: 'center', gap: 7,
       padding: '10px 16px',
       background: '#1c2128',
-      borderBottom: `1px solid ${C.border}`,
+      borderBottom: `1px solid ${COLORS.border}`,
     }}>
       <div style={{ width: 12, height: 12, borderRadius: '50%', background: '#ff5f57' }} />
       <div style={{ width: 12, height: 12, borderRadius: '50%', background: '#febc2e' }} />
@@ -72,7 +72,7 @@ function Scene1GitPush() {
 
   return (
     <AbsoluteFill style={{ opacity, padding: 36, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-      <div style={{ background: COLORS.surface, borderRadius: 10, border: `1px solid ${C.border}`, overflow: 'hidden', maxWidth: 660, margin: '0 auto', width: '100%' }}>
+      <div style={{ background: COLORS.surface, borderRadius: 10, border: `1px solid ${COLORS.border}`, overflow: 'hidden', maxWidth: 660, margin: '0 auto', width: '100%' }}>
         <TerminalChrome />
         <div style={{ padding: '20px 22px', minHeight: 160 }}>
           <div style={{ color: COLORS.green, fontFamily: MONO, fontSize: 13.5 }}>
@@ -104,7 +104,7 @@ function Scene2CandidReview() {
 
   return (
     <AbsoluteFill style={{ opacity, padding: 36, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-      <div style={{ background: COLORS.surface, borderRadius: 10, border: `1px solid ${C.border}`, overflow: 'hidden', maxWidth: 660, margin: '0 auto', width: '100%' }}>
+      <div style={{ background: COLORS.surface, borderRadius: 10, border: `1px solid ${COLORS.border}`, overflow: 'hidden', maxWidth: 660, margin: '0 auto', width: '100%' }}>
         <TerminalChrome title="Claude Code" />
         <div style={{ padding: '20px 22px', minHeight: 160 }}>
           <div style={{ color: COLORS.accent, fontFamily: MONO, fontSize: 13.5 }}>
@@ -171,7 +171,7 @@ function Scene3ReviewResults() {
           flex: '0 0 320px',
           background: COLORS.surface,
           borderRadius: 10,
-          border: `1px solid ${C.border}`,
+          border: `1px solid ${COLORS.border}`,
           overflow: 'hidden',
           transform: `translateX(${panelX}px)`,
           opacity: panelOpacity,
@@ -254,7 +254,7 @@ function Scene4ApplyFixes() {
           return (
             <div key={i} style={{
               background: COLORS.surface,
-              border: `1px solid ${C.border}`,
+              border: `1px solid ${COLORS.border}`,
               borderRadius: 8,
               padding: '13px 16px',
               marginBottom: 10,
@@ -302,7 +302,7 @@ function Scene5Ship() {
 
   return (
     <AbsoluteFill style={{ opacity, padding: 40, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
-      <div style={{ background: COLORS.surface, borderRadius: 10, border: `1px solid ${C.border}`, overflow: 'hidden', maxWidth: 540, width: '100%' }}>
+      <div style={{ background: COLORS.surface, borderRadius: 10, border: `1px solid ${COLORS.border}`, overflow: 'hidden', maxWidth: 540, width: '100%' }}>
         <TerminalChrome title="Claude Code" />
         <div style={{ padding: '22px 24px' }}>
           <div style={{ color: COLORS.accent, fontFamily: MONO, fontSize: 13.5, marginBottom: 22 }}>
@@ -312,13 +312,13 @@ function Scene5Ship() {
           <div style={{ opacity: successOpacity, transform: `scale(${successScale})`, textAlign: 'center' }}>
             <div style={{
               width: 56, height: 56, borderRadius: '50%',
-              background: `${C.green}1a`,
-              border: `2px solid ${C.green}`,
+              background: `${COLORS.green}1a`,
+              border: `2px solid ${COLORS.green}`,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               margin: '0 auto 16px',
             }}>
               <svg width="26" height="26" viewBox="0 0 26 26" fill="none">
-                <path d="M4 13L10 19L22 7" stroke={C.green} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M4 13L10 19L22 7" stroke={COLORS.green} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </div>
 
@@ -332,7 +332,7 @@ function Scene5Ship() {
             <div style={{ display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap' }}>
               {tags.map(tag => (
                 <span key={tag} style={{
-                  background: `${C.green}1a`,
+                  background: `${COLORS.green}1a`,
                   color: COLORS.green,
                   fontFamily: MONO,
                   fontSize: 11,
