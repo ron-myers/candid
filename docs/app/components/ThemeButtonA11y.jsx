@@ -10,7 +10,7 @@ export default function ThemeButtonA11y() {
           const title = btn.getAttribute('title')
           if (title === 'Change theme') {
             btn.setAttribute('aria-label', 'Switch theme')
-          } else {
+          } else if (btn.parentElement?.textContent?.includes('Copy page')) {
             btn.setAttribute('aria-label', 'Select copy format')
           }
         })
