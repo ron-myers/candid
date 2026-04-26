@@ -1,7 +1,7 @@
 import BrandPageClient from './BrandPageClient'
 
 export const metadata = {
-  title: 'Brand Guidelines | Candid',
+  title: 'Brand Guidelines',
   description: 'Official brand guidelines for Candid - logos, colors, typography, and voice.',
   robots: {
     index: false,

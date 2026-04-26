@@ -1,5 +1,5 @@
 export default {
-  index: 'Overview',
+  index: 'How-to Guides Overview',
   'team-setup': 'Setting Up for Your Team',
   conductor: 'Using with Conductor',
   'custom-standards': 'Creating Custom Standards',

@@ -1,21 +1,34 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { trackEvent } from './trackEvent'
 
 export default function Pre({ children, trackingId, ...props }) {
   const [copied, setCopied] = useState(false)
+  const [snippet, setSnippet] = useState('')
   const preRef = useRef(null)
+
+  useEffect(() => {
+    const code = preRef.current?.textContent || ''
+    const firstLine = code.split('\n').find(l => l.trim()) || ''
+    setSnippet(firstLine.trim().slice(0, 40))
+  }, [])
 
   const handleCopy = async () => {
     const code = preRef.current?.textContent || ''
     await navigator.clipboard.writeText(code)
     setCopied(true)
-    // Use trackingId if provided, otherwise use first 30 chars of code
     const identifier = trackingId || code.slice(0, 30).replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_]/g, '')
     trackEvent(`code_copy_${identifier}`)
     setTimeout(() => setCopied(false), 2000)
   }
+
+  const labelHint = trackingId || snippet
+  const ariaLabel = copied
+    ? 'Copied!'
+    : labelHint
+      ? `Copy code: ${labelHint}`
+      : 'Copy code'
 
   return (
     <div className="code-block-wrapper">
@@ -25,7 +38,7 @@ export default function Pre({ children, trackingId, ...props }) {
       <button
         className="copy-button"
         onClick={handleCopy}
-        aria-label={copied ? 'Copied!' : 'Copy code'}
+        aria-label={ariaLabel}
       >
         {copied ? (
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">

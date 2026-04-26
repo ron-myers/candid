@@ -995,6 +995,12 @@ header a:has(.logo):hover {
   opacity: 1;
 }
 
+@media (hover: none) {
+  .copy-button {
+    opacity: 1;
+  }
+}
+
 .copy-button:hover {
   background: rgba(255, 255, 255, 0.2);
   color: #1a1612;

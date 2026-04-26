@@ -1,5 +1,5 @@
 export default {
-  index: 'Overview',
+  index: 'Quickstart Overview',
   nextjs: 'Next.js',
   react: 'React',
   python: 'Python',
