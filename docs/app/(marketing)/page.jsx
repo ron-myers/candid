@@ -456,7 +456,7 @@ export default function HomePage() {
         <Link
           href="/docs/reference/ship-config"
           className="btn-secondary"
-          onClick={() => trackEvent(EVENTS.LEARN_MORE_CLICK)}
+          onClick={() => trackEvent(EVENTS.SHIP_CONFIG_CTA_CLICK)}
         >
           See the full ship-config reference <span className="btn-arrow">→</span>
         </Link>

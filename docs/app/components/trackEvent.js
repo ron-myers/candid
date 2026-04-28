@@ -16,6 +16,7 @@ export const EVENTS = {
   GET_STARTED_CLICK: 'get_started_click',
   LEARN_MORE_CLICK: 'learn_more_click',
   DOCS_CTA_CLICK: 'docs_cta_click',
+  SHIP_CONFIG_CTA_CLICK: 'ship_config_cta_click',
 
   // External links
   GITHUB_CLICK: 'github_click',

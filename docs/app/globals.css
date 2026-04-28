@@ -762,7 +762,8 @@ header a:has(.logo):hover {
   padding: 0.75rem 2.5rem 0.75rem 1rem;
   border-radius: 0.5rem;
   font-size: 0.85rem;
-  white-space: pre-line;
+  white-space: pre;
+  overflow-x: auto;
   margin: 0;
 }
 
