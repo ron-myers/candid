@@ -48,6 +48,7 @@ export default function HomePage() {
   // Refs for scroll-triggered animations
   const featuresRef = useRef(null)
   const howItWorksRef = useRef(null)
+  const configRef = useRef(null)
   const qaFlowRef = useRef(null)
   const commandsRef = useRef(null)
   const communityRef = useRef(null)
@@ -82,7 +83,7 @@ export default function HomePage() {
 
     const observer = new IntersectionObserver(observerCallback, observerOptions)
 
-    const refs = [featuresRef, howItWorksRef, qaFlowRef, commandsRef, communityRef, faqRef, ctaRef]
+    const refs = [featuresRef, howItWorksRef, configRef, qaFlowRef, commandsRef, communityRef, faqRef, ctaRef]
     refs.forEach(ref => {
       if (ref.current) {
         observer.observe(ref.current)
@@ -128,19 +129,19 @@ export default function HomePage() {
         <h1
           style={getHeroAnimationStyle(heroLoaded, 100)}
         >
-          Code Review for the AI Era
+          The full review → ship → QA → fix loop, in one plugin
         </h1>
         <p
           className="hero-subtitle"
           style={getHeroAnimationStyle(heroLoaded, 200)}
         >
-          Claude Code writes fast. Now you review faster.
+          Candid runs structured code review, ships your branch, QAs the live app in real Chrome, and turns findings into PRs — all from inside Claude Code.
         </p>
         <p
           className="hero-tagline"
           style={getHeroAnimationStyle(heroLoaded, 200)}
         >
-          And with more confidence.
+          One config. Your standards. Your tone. Your gates.
         </p>
         <div
           className="hero-cta"
@@ -151,7 +152,7 @@ export default function HomePage() {
             className="btn-primary"
             onClick={() => trackEvent(EVENTS.GET_STARTED_CLICK)}
           >
-            Get Started
+            Get Started in 5 minutes
             <svg className="btn-icon" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M6 3L11 8L6 13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
@@ -182,7 +183,7 @@ export default function HomePage() {
 
       <section className="demo-section">
         <span className="section-badge">SEE IT IN ACTION</span>
-        <h2>Candid Code Review Workflow</h2>
+        <h2>What a review actually looks like</h2>
         <div className="screenshot-grid">
           {SCREENSHOTS.map((screenshot, index) => (
             <div key={index} className="screenshot-item">
@@ -283,65 +284,75 @@ export default function HomePage() {
 
       <section className="features-section scroll-animate" ref={featuresRef}>
         <h2>Features</h2>
+
+        <h3 className="feature-group-heading">Review</h3>
         <div className="card-grid">
           <Link href="/docs/core-features/technical-md" className="card-link">
             <div className="card">
               <h3>Technical.md</h3>
-              <p>Define coding standards in markdown. Run <code>/candid-init</code> to auto-generate from your codebase, or use a template.</p>
+              <p>Write your standards in markdown. <code>/candid-init</code> generates them from your codebase.</p>
             </div>
           </Link>
           <Link href="/docs/core-features/focus-modes" className="card-link">
             <div className="card">
               <h3>Focus Modes</h3>
-              <p>Target specific review areas: <code>--focus security</code>, <code>--focus performance</code>, <code>--focus architecture</code>, or <code>--focus edge-case</code>.</p>
+              <p>Review only what matters: <code>--focus security</code>, <code>performance</code>, <code>architecture</code>, <code>edge-case</code>.</p>
             </div>
           </Link>
           <Link href="/docs/core-features/tone-selection" className="card-link">
             <div className="card">
               <h3>Tone Selection</h3>
-              <p>Choose <code>--harsh</code> for brutal honesty or <code>--constructive</code> for Radical Candor-style feedback. Set defaults in config.</p>
+              <p><code>--harsh</code> says it straight. <code>--constructive</code> cares but doesn&apos;t soften. Set the default in config.</p>
             </div>
           </Link>
           <Link href="/docs/core-features/re-review" className="card-link">
             <div className="card">
               <h3>Re-Review</h3>
-              <p>Run <code>--re-review</code> to compare against your last review. See what's fixed, what's still present, and what's new.</p>
-            </div>
-          </Link>
-          <Link href="/docs/core-features/auto-commit" className="card-link">
-            <div className="card">
-              <h3>Auto-Commit</h3>
-              <p>Add <code>--auto-commit</code> to commit applied fixes with detailed messages listing each fix location and severity.</p>
-            </div>
-          </Link>
-          <Link href="/docs/reference/config-options" className="card-link">
-            <div className="card">
-              <h3>Config Hierarchy</h3>
-              <p>CLI flags override project config (<code>.candid/config.json</code>), which overrides user config (<code>~/.candid/config.json</code>).</p>
+              <p><code>--re-review</code> diffs against your last pass. See what&apos;s fixed, what&apos;s still broken, what&apos;s new.</p>
             </div>
           </Link>
           <Link href="/docs/core-features/decision-register" className="card-link">
             <div className="card">
               <h3>Decision Register</h3>
-              <p>Track questions raised during reviews and their resolutions. Prior answers are reused automatically so the same question is never asked twice.</p>
+              <p>Answers persist. The same question never asks twice — across reviews, across sessions.</p>
+            </div>
+          </Link>
+        </div>
+
+        <h3 className="feature-group-heading">Ship</h3>
+        <div className="card-grid">
+          <Link href="/docs/core-features/auto-commit" className="card-link">
+            <div className="card">
+              <h3>Auto-Commit</h3>
+              <p><code>--auto-commit</code> commits applied fixes with messages that list every change and its severity.</p>
+            </div>
+          </Link>
+          <Link href="/docs/reference/ship-config" className="card-link">
+            <div className="card">
+              <h3>Configurable Ship Pipeline</h3>
+              <p>Install, build, test, review, PR, auto-merge, deploy hook — every step is opt-in via <code>.candid/config.json</code>.</p>
             </div>
           </Link>
           <Link href="/docs/core-features/candid-ship#issue-tracker-integration" className="card-link">
             <div className="card">
-              <h3>Issue Tracker Integration</h3>
-              <p>Ship a branch and <code>/candid-ship</code> automatically moves the linked issue (Linear today, more soon) to <code>In Review</code>. Provider, state, and prompt are configurable.</p>
+              <h3>Linear Integration</h3>
+              <p><code>/candid-ship</code> moves the linked Linear issue to <code>In Review</code> on PR open. State, prompt, and team prefixes are yours.</p>
             </div>
           </Link>
+        </div>
+
+        <h3 className="feature-group-heading">QA</h3>
+        <div className="card-grid">
           <Link href="/docs/core-features/candid-chrome-qa" className="card-link">
             <div className="card">
               <h3>Chrome QA</h3>
-              <p>Drive a real Chrome session with <code>/candid-chrome-qa</code>. Walks your app like a real user across desktop and mobile, writes structured findings JSON for triage.</p>
+              <p><code>/candid-chrome-qa</code> drives real Chrome — desktop and mobile — and writes findings as structured JSON.</p>
             </div>
           </Link>
           <Link href="/docs/core-features/candid-chrome-qa-fix" className="card-link">
             <div className="card">
               <h3>Chrome QA Fix</h3>
-              <p>Pick which QA findings to fix with <code>/candid-chrome-qa-fix</code>. Batched PR, one PR per finding via Conductor, or file Linear issues — your choice.</p>
+              <p>Pick findings to fix. Batched PR, one PR per finding via Conductor, or file Linear issues — your call.</p>
             </div>
           </Link>
         </div>
@@ -349,68 +360,145 @@ export default function HomePage() {
 
       <section className="how-it-works scroll-animate" ref={howItWorksRef}>
         <span className="section-badge">HOW IT WORKS</span>
+        <h2>The loop</h2>
+        <p className="hero-tagline">
+          Install once. Then run the four commands that take a branch from review to shipped.
+        </p>
         <ol className="steps-list">
           <li>
             <div className="step-content">
-              <strong>Install Candid.</strong>
-              <span>Add Candid to Claude Code with two commands from your terminal.</span>
+              <strong>Install + init.</strong>
+              <span>Add Candid to Claude Code, then generate a <code>Technical.md</code> tuned to your codebase.</span>
               <Pre className="step-code" trackingId="step_install">
-                <code>{`npx skills add https://github.com/ron-myers/candid`}</code>
-              </Pre>
-            </div>
-          </li>
-          <li>
-            <div className="step-content">
-              <strong>Initialize your Project.</strong>
-              <span>Generate a Technical.md for your codebase.</span>
-              <Pre className="step-code" trackingId="step_init">
-                <code>/candid-init</code>
+                <code>{`npx skills add https://github.com/ron-myers/candid
+/candid-init`}</code>
               </Pre>
             </div>
           </li>
           <li>
             <div className="step-content">
               <strong>Review.</strong>
-              <span>Run the command to analyze your changes.</span>
+              <span>Tell Candid <em>what kind</em> of review you want — flags pick tone and focus, freeform text after sets the lens.</span>
               <Pre className="step-code" trackingId="step_review">
-                <code>/candid-review</code>
+                <code>{`/candid-review --harsh review this branch like a
+  skeptical CTO — what would block a launch?`}</code>
+              </Pre>
+            </div>
+          </li>
+          <li>
+            <div className="step-content">
+              <strong>Ship.</strong>
+              <span>Pipeline runs from <code>.candid/config.json</code>. Add intent for the review pass that gates the PR.</span>
+              <Pre className="step-code" trackingId="step_ship">
+                <code>{`/candid-ship double-check no secrets, no
+  console.logs, no commented-out code before opening PR`}</code>
+              </Pre>
+            </div>
+          </li>
+          <li>
+            <div className="step-content">
+              <strong>QA + fix.</strong>
+              <span>Drive real Chrome with a goal in plain English. Then pick findings to ship — batched PR, one PR per finding, or Linear issues.</span>
+              <Pre className="step-code" trackingId="step_qa">
+                <code>{`/candid-chrome-qa --goal "first-time signup flow" \\
+  --prompt "where would a new user get stuck?"
+
+/candid-chrome-qa-fix --strategy batched fix the
+  P0/P1 blockers, file the rest as Linear issues`}</code>
               </Pre>
             </div>
           </li>
         </ol>
       </section>
 
+      <section className="config-showcase scroll-animate" ref={configRef}>
+        <span className="section-badge">CONFIG</span>
+        <h2>One config file. Your whole pipeline.</h2>
+        <p className="hero-tagline">
+          Tone, focus, ship steps, fast-ship toggles, Linear — all in <code>.candid/config.json</code>. No CLI flag hunting.
+        </p>
+        <div className="config-showcase-grid">
+          <Pre className="config-snippet" trackingId="config_showcase">
+            <code>{`{
+  "tone": "harsh",
+  "focus": "security",
+  "exclude": ["*.generated.ts"],
+  "ship": {
+    "installCommand": "pnpm install",
+    "buildCommand": "pnpm build",
+    "testCommand": "pnpm test",
+    "targetBranch": "stable",
+    "autoMerge": true,
+    "postMergeCommand": "curl -X POST $DEPLOY_HOOK",
+    "issueTracker": {
+      "provider": "linear",
+      "enabled": true,
+      "teamPrefixes": ["ENG"],
+      "state": "In Review"
+    }
+  },
+  "fastShip": {
+    "build": true,
+    "autoMerge": true
+  }
+}`}</code>
+          </Pre>
+          <ul className="config-annotations">
+            <li><code>tone: &quot;harsh&quot;</code> — every <code>/candid-review</code> uses brutal honesty by default.</li>
+            <li><code>focus: &quot;security&quot;</code> — reviews target security unless you override per-run.</li>
+            <li><code>ship.installCommand</code> — runs before build on every <code>/candid-ship</code>.</li>
+            <li><code>ship.autoMerge: true</code> — PR auto-merges once checks pass.</li>
+            <li><code>ship.postMergeCommand</code> — deploy webhook fires after merge.</li>
+            <li><code>ship.issueTracker.enabled</code> — Linear issue moves to <code>In Review</code> on PR open.</li>
+            <li><code>fastShip.build + autoMerge</code> — <code>/candid-fast-ship</code> skips review and tests for trivial PRs.</li>
+          </ul>
+        </div>
+        <Link
+          href="/docs/reference/ship-config"
+          className="btn-secondary"
+          onClick={() => trackEvent(EVENTS.SHIP_CONFIG_CTA_CLICK)}
+        >
+          See the full ship-config reference <span className="btn-arrow">→</span>
+        </Link>
+      </section>
+
       <section className="how-it-works scroll-animate" ref={qaFlowRef}>
         <span className="section-badge">CHROME QA FLOW</span>
-        <h2>From bugs found to bugs fixed</h2>
+        <h2>Find the bug. Fix the bug. Ship the bug fix.</h2>
         <p className="hero-tagline">
           QA your running app, then turn findings into shipped fixes — without leaving Claude Code.
         </p>
         <ol className="steps-list">
           <li>
             <div className="step-content">
-              <strong>QA your app.</strong>
-              <span>Drive a real Chrome session, walk every target across desktop and mobile, and write structured findings to JSON.</span>
+              <strong>QA your app — as a frustrated first-time user.</strong>
+              <span>Tell Candid <em>who</em> is walking the app. The persona shapes what counts as a finding — confused user, paranoid security engineer, fussy designer.</span>
               <Pre className="step-code" trackingId="qa_step_chrome_qa">
-                <code>/candid-chrome-qa</code>
+                <code>{`/candid-chrome-qa --goal "signup → first action" \\
+  --prompt "walk this as a frustrated first-time user
+  who has never seen the product. Where do you bounce?"`}</code>
               </Pre>
             </div>
           </li>
           <li>
             <div className="step-content">
-              <strong>Pick what to fix.</strong>
-              <span>Multi-select findings by severity or category. Choose batched PR, parallel PRs via Conductor deep links, local-only, or issues-only.</span>
+              <strong>Pick what to fix — as the engineer on call.</strong>
+              <span>Filter by severity, category, or persona. Pick the strategy: batched PR, one PR per finding, local-only, or issues-only.</span>
               <Pre className="step-code" trackingId="qa_step_chrome_qa_fix">
-                <code>/candid-chrome-qa-fix</code>
+                <code>{`/candid-chrome-qa-fix --severity P0,P1 fix the
+  blockers like an engineer on call — minimal diffs,
+  no refactors, ship fast`}</code>
               </Pre>
             </div>
           </li>
           <li>
             <div className="step-content">
-              <strong>Ship it — with issues linked.</strong>
-              <span>Files one Linear issue per finding before any code change, then opens PRs that link back to the tracker. Re-runs are safe — findings are deduplicated by ID.</span>
+              <strong>Ship it — as the PM filing the backlog.</strong>
+              <span>File a Linear issue per finding before touching code, then ship the PRs that link back. Re-runs dedup by ID.</span>
               <Pre className="step-code" trackingId="qa_step_ship">
-                <code>/candid-chrome-qa-fix --create-issues --strategy batched</code>
+                <code>{`/candid-chrome-qa-fix --create-issues --strategy batched
+  triage like a PM — group related findings, write
+  user-facing titles, link back to the QA pass`}</code>
               </Pre>
             </div>
           </li>
@@ -421,24 +509,32 @@ export default function HomePage() {
         <span className="section-badge">SLASH COMMANDS</span>
         <ul className="commands-list">
           <li>
-            <code>/candid-review</code>
-            <span>Run a code review on your changes with configurable tone and focus areas.</span>
+            <code>/candid-init</code>
+            <span>Generate <code>Technical.md</code> + <code>.candid/config.json</code> from your codebase.</span>
           </li>
           <li>
-            <code>/candid-init</code>
-            <span>Generate a Technical.md file by analyzing your codebase structure.</span>
+            <code>/candid-review</code>
+            <span>Review your changes. Pick tone (<code>--harsh</code>/<code>--constructive</code>) and focus area.</span>
+          </li>
+          <li>
+            <code>/candid-ship</code>
+            <span>Run install/build/test, open the PR, optionally auto-merge and update Linear.</span>
+          </li>
+          <li>
+            <code>/candid-fast-ship</code>
+            <span>Minimal ship — only steps you opted into in <code>fastShip</code> config run.</span>
           </li>
           <li>
             <code>/candid-chrome-qa</code>
-            <span>Drive a real Chrome session against your running web app and write structured findings JSON.</span>
+            <span>Walk your running app in real Chrome (desktop + mobile). Filter by route, severity, viewport.</span>
           </li>
           <li>
             <code>/candid-chrome-qa-fix</code>
-            <span>Pick QA findings to fix and ship them — batched PR, parallel PRs via Conductor, or Linear issues only.</span>
+            <span>Pick findings to fix. Batched PR, one PR per finding via Conductor, or Linear issues only.</span>
           </li>
           <li>
             <code>/candid-validate-standards</code>
-            <span>Check your Technical.md for vague rules and linter overlaps.</span>
+            <span>Lint your <code>Technical.md</code> for vague rules and linter overlaps.</span>
           </li>
         </ul>
       </section>
@@ -466,31 +562,37 @@ export default function HomePage() {
           <div className="faq-item">
             <details>
               <summary>Does Candid work with any language?</summary>
-              <p>Yes, Candid reviews code in any language Claude Code supports. Your Technical.md standards can be language-specific or universal.</p>
+              <p>Any language Claude Code reads. Your Technical.md standards can be language-specific or universal.</p>
             </details>
           </div>
           <div className="faq-item">
             <details>
               <summary>How does Candid pay for Claude Code?</summary>
-              <p>Candid uses Claude Code however you're already logged in. If you're using an API key, Candid uses that. If you're on Claude Pro or Max, Candid uses that.</p>
+              <p>It uses whatever Claude Code is already logged into — your API key, Pro, or Max plan. No separate billing.</p>
             </details>
           </div>
           <div className="faq-item">
             <details>
-              <summary>Can I use Candid with my team?</summary>
-              <p>Yes. Share your Technical.md and candid.config.json in your repo. Everyone gets the same standards and configuration automatically.</p>
+              <summary>Can my team share a config?</summary>
+              <p>Commit <code>Technical.md</code> and <code>.candid/config.json</code> to your repo. Every teammate gets the same standards, tone, and ship pipeline automatically.</p>
             </details>
           </div>
           <div className="faq-item">
             <details>
-              <summary>What's the difference between Harsh and Constructive tone?</summary>
-              <p>Harsh mode is brutally honest—great for finding issues you might miss. Constructive mode is caring but direct, based on Radical Candor principles.</p>
+              <summary>Harsh vs. Constructive — what&apos;s the difference?</summary>
+              <p>Harsh is brutally honest — best for catching what you&apos;d defend if asked nicely. Constructive is direct but caring, based on Radical Candor principles.</p>
             </details>
           </div>
           <div className="faq-item">
             <details>
               <summary>What is Radical Candor?</summary>
-              <p>Radical Candor is a management philosophy that combines caring personally with challenging directly. It's about giving honest, direct feedback while genuinely caring about the person receiving it. Candid's Constructive tone is based on these principles.</p>
+              <p>A management philosophy that combines caring personally with challenging directly. Candid&apos;s constructive tone is based on it.</p>
+            </details>
+          </div>
+          <div className="faq-item">
+            <details>
+              <summary>What does <code>.candid/config.json</code> control?</summary>
+              <p>Tone, focus, file exclusions, the ship pipeline (install/build/test/auto-merge/post-merge hook), fast-ship toggles, and Linear integration. See the <Link href="/docs/reference/ship-config">ship-config reference</Link>.</p>
             </details>
           </div>
         </div>

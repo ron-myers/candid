@@ -762,12 +762,118 @@ header a:has(.logo):hover {
   padding: 0.75rem 2.5rem 0.75rem 1rem;
   border-radius: 0.5rem;
   font-size: 0.85rem;
-  white-space: pre-line;
+  white-space: pre;
+  overflow-x: auto;
   margin: 0;
 }
 
 .step-code code {
   background: transparent;
+}
+
+/* ===== Config Showcase Section ===== */
+.config-showcase {
+  padding: var(--spacing-section) 0;
+  max-width: 72rem;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.config-showcase h2 {
+  font-family: var(--font-display);
+  font-size: var(--text-section);
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: 1rem;
+  letter-spacing: -0.02em;
+}
+
+.config-showcase .hero-tagline {
+  margin: 0 auto 3rem auto;
+  max-width: 48rem;
+}
+
+.config-showcase-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  gap: 2rem;
+  align-items: start;
+  text-align: left;
+  margin-bottom: 2.5rem;
+}
+
+.config-snippet {
+  margin: 0;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: var(--shadow-elevated);
+}
+
+.config-snippet pre {
+  margin: 0;
+  background: #1a1a1a;
+  color: #e5e5e5;
+  padding: 1.5rem;
+  font-size: 0.85rem;
+  line-height: 1.6;
+  overflow-x: auto;
+}
+
+.config-snippet code {
+  background: transparent;
+  font-family: var(--font-mono);
+}
+
+.config-annotations {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+}
+
+.config-annotations li {
+  background: var(--surface-light);
+  border: 2px solid var(--border-light);
+  border-radius: 10px;
+  padding: 0.875rem 1rem;
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  line-height: 1.55;
+  box-shadow: var(--shadow-subtle);
+}
+
+.config-annotations li code {
+  font-family: var(--font-mono);
+  font-size: 0.825rem;
+  background: #f0f0f0;
+  color: var(--text-primary);
+  padding: 0.1rem 0.35rem;
+  border-radius: 0.25rem;
+}
+
+@media (max-width: 768px) {
+  .config-showcase-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+}
+
+/* ===== Feature group headings (Review / Ship / QA) ===== */
+.feature-group-heading {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-secondary);
+  margin: 2.5rem 0 1rem 0;
+  text-align: center;
+}
+
+.feature-group-heading:first-of-type {
+  margin-top: 0;
 }
 
 /* ===== Commands Section ===== */
@@ -1241,6 +1347,29 @@ html.dark .install-command {
 
 html.dark .cta-section {
   background: linear-gradient(to bottom, rgba(212, 162, 127, 0.08) 0%, rgba(212, 162, 127, 0.03) 100%);
+}
+
+html.dark .config-showcase h2 {
+  color: var(--text-primary-dark);
+}
+
+html.dark .config-showcase .hero-tagline {
+  color: var(--text-secondary-dark);
+}
+
+html.dark .config-annotations li {
+  background: var(--surface-dark);
+  border-color: var(--border-light-dark);
+  color: var(--text-secondary-dark);
+}
+
+html.dark .config-annotations li code {
+  background: #2a2a2a;
+  color: var(--text-primary-dark);
+}
+
+html.dark .feature-group-heading {
+  color: var(--text-secondary-dark);
 }
 
 html.dark .commands-list li {

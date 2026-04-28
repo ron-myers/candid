@@ -1,0 +1,278 @@
+# Ship Configuration
+
+Everything `/candid-ship` and `/candid-fast-ship` read, organized as recipes you can paste into `.candid/config.json`.
+
+For the bare schema (every key, every type), see [Config Options](/docs/reference/config-options). For the full skill behavior, see [Candid Ship](/docs/core-features/candid-ship) and [Candid Fast Ship](/docs/core-features/candid-fast-ship).
+
+## Quickstart: a working config in 30 seconds
+
+```json
+{
+  "tone": "harsh",
+  "ship": {
+    "buildCommand": "npm run build",
+    "testCommand": "npm test",
+    "targetBranch": "main"
+  }
+}
+```
+
+What this unlocks:
+
+- `/candid-review` defaults to harsh tone — no per-run flag needed.
+- `/candid-ship` runs `npm run build`, then `npm test`, then opens a PR against `main`.
+- `/candid-fast-ship` is available but does nothing extra until you opt in via the `fastShip` block (see Recipe 4).
+
+## Recipes
+
+Each recipe is a real `.candid/config.json` snippet, when to use it, and what runs when you invoke `/candid-ship` (or `/candid-fast-ship`) with it.
+
+### 1. Minimal — just create the PR
+
+**Use when:** you want Candid to open the PR but skip every check (CI handles them).
+
+```json
+{
+  "ship": {
+    "targetBranch": "main"
+  }
+}
+```
+
+**What `/candid-ship` runs:**
+1. Detects target branch (`main`).
+2. Commits any pending changes.
+3. Opens the PR via `gh pr create`.
+
+No install, build, test, review, auto-merge, or post-merge — they're all unconfigured and skipped.
+
+### 2. Full pipeline — install → build → test → review → ship
+
+**Use when:** you want every gate before code lands. Best for solo work or pre-CI environments.
+
+```json
+{
+  "tone": "constructive",
+  "ship": {
+    "installCommand": "pnpm install",
+    "buildCommand": "pnpm build",
+    "testCommand": "pnpm test",
+    "additionalPrompt": "Pay extra attention to error handling in async code paths.",
+    "targetBranch": "main"
+  }
+}
+```
+
+**What `/candid-ship` runs:**
+1. `/candid-loop` review using constructive tone, with the additionalPrompt appended.
+2. `pnpm install`.
+3. `pnpm build`.
+4. `pnpm test`.
+5. Commit any review fixes.
+6. Open the PR against `main`.
+
+If any step fails, ship stops and surfaces the failure. The PR is not created.
+
+### 3. Hands-off — review + auto-merge + Linear update
+
+**Use when:** the branch is named after a Linear issue (e.g. `eng/ENG-123-fix-login`) and you want fully automated landing once review passes.
+
+```json
+{
+  "tone": "harsh",
+  "ship": {
+    "buildCommand": "npm run build",
+    "testCommand": "npm test",
+    "targetBranch": "main",
+    "autoMerge": true,
+    "postMergeCommand": "curl -X POST $DEPLOY_HOOK",
+    "issueTracker": {
+      "provider": "linear",
+      "enabled": true,
+      "teamPrefixes": ["ENG"],
+      "state": "In Review"
+    }
+  }
+}
+```
+
+**What `/candid-ship` runs:**
+1. Review (harsh).
+2. Build + test.
+3. Open the PR against `main`.
+4. Move Linear issue `ENG-123` from current state → `In Review`.
+5. Mark PR with `gh pr merge --squash --auto`.
+6. After auto-merge succeeds, fire the deploy webhook.
+
+If the branch name doesn't match a `teamPrefixes` entry, the Linear step skips silently — the rest still runs.
+
+### 4. Fast-ship for trivial PRs (config-driven, no review)
+
+**Use when:** typo fixes, dependency bumps, doc tweaks. You want a build check and PR creation but no review and no tests.
+
+```json
+{
+  "ship": {
+    "installCommand": "pnpm install",
+    "buildCommand": "pnpm build",
+    "testCommand": "pnpm test",
+    "targetBranch": "main"
+  },
+  "fastShip": {
+    "build": true,
+    "autoMerge": true
+  }
+}
+```
+
+**What `/candid-fast-ship` runs:**
+1. `pnpm build` (because `fastShip.build: true`).
+2. Open the PR.
+3. Auto-merge once checks pass.
+
+Notice: `install`, `tests`, `review`, `issueTracker`, and `postMergeCommand` are all `false`/unset in `fastShip`, so they don't run — even though the `ship` block has commands for them. **`fastShip` is opt-in for every step.**
+
+### 5. Mixed — full ship for features, fast-ship for chores
+
+**Use when:** one repo, two velocities. Features get the full gauntlet; chores fly through.
+
+```json
+{
+  "tone": "harsh",
+  "ship": {
+    "installCommand": "pnpm install",
+    "buildCommand": "pnpm build",
+    "testCommand": "pnpm test",
+    "targetBranch": "main",
+    "issueTracker": {
+      "provider": "linear",
+      "enabled": true,
+      "teamPrefixes": ["ENG"],
+      "state": "In Review"
+    }
+  },
+  "fastShip": {
+    "build": true,
+    "autoMerge": true
+  }
+}
+```
+
+**Workflow:**
+- Feature branch → `/candid-ship` → review + install + build + test + Linear → PR.
+- Chore branch (`chore/bump-typescript`) → `/candid-fast-ship` → build only → PR → auto-merge.
+
+Same config. Two commands. Two paces.
+
+### 6. Linear integration only
+
+**Use when:** you already have CI handling install/build/test, but want Candid to touch Linear on PR open.
+
+```json
+{
+  "ship": {
+    "targetBranch": "main",
+    "issueTracker": {
+      "provider": "linear",
+      "enabled": true,
+      "teamPrefixes": ["ENG", "DESIGN"],
+      "state": "Code Review",
+      "prompt": "Update issue {issueId}: set its state to \"{state}\". Update only this one issue and only its state — do not modify any other issues, fields, or properties. If the issue is already in \"{state}\", report success without action. If the issue is missing or inaccessible, report the error and stop."
+    }
+  }
+}
+```
+
+**What `/candid-ship` runs:**
+1. Open the PR.
+2. Match branch prefix (`ENG-` or `DESIGN-`) to extract issue ID.
+3. Move the issue to `Code Review` (the state name in your tracker — case-sensitive).
+
+Custom `prompt` overrides the default. **Must keep the four single-issue invariants** (single issue, single field, idempotent, no fallback search) or `/candid-ship` will reject it.
+
+### 7. Post-merge deploy hook
+
+**Use when:** auto-merge is enabled and you want a deploy command to fire automatically after the PR lands.
+
+```json
+{
+  "ship": {
+    "buildCommand": "npm run build",
+    "testCommand": "npm test",
+    "targetBranch": "main",
+    "autoMerge": true,
+    "postMergeCommand": "fly deploy --remote-only --app my-app"
+  }
+}
+```
+
+**What `/candid-ship` runs:**
+1. Build + test.
+2. PR + auto-merge.
+3. After merge succeeds: `fly deploy --remote-only --app my-app`.
+
+If `autoMerge` is `false` or the merge fails, the post-merge command **does not run**. If the post-merge command fails, ship warns but doesn't roll back the merge.
+
+---
+
+## All `ship.*` keys
+
+| Field | Type | Default | Description |
+|---|---|---|---|
+| `installCommand` | string | — | Shell command to install dependencies before build. Skipped if not set. |
+| `buildCommand` | string | — | Shell command for build verification before PR. Skipped if not set. |
+| `testCommand` | string | — | Shell command for tests before PR. Skipped if not set. |
+| `targetBranch` | string | first `mergeTargetBranches` or `"main"` | PR target branch. |
+| `autoMerge` | boolean | `false` | Auto-merge PR via `gh pr merge --squash --auto`. |
+| `additionalPrompt` | string | — | Extra context appended to the review step. |
+| `postMergeCommand` | string | — | Shell command after auto-merge succeeds. Skipped if `autoMerge` is `false` or merge failed. |
+| `issueTracker` | object | — | See [issueTracker block](#shipissuetracker). |
+
+See [Candid Ship](/docs/core-features/candid-ship) for behavior details.
+
+### `ship.issueTracker`
+
+| Field | Type | Default | Description |
+|---|---|---|---|
+| `provider` | string | `"linear"` | Issue tracker. Only `"linear"` today. |
+| `enabled` | boolean | `false` | Opt-in toggle. |
+| `teamPrefixes` | string[] | `["DIS", "ENG", "DISC"]` | Branch-name prefixes to match for issue ID extraction. **Edit to your team keys.** |
+| `state` | string | `"In Review"` | State name to transition to. Case-sensitive. |
+| `prompt` | string | (default with 4 invariants) | Customizable MCP prompt. Must restrict the action to a single issue. |
+
+See [Candid Ship — Issue Tracker Integration](/docs/core-features/candid-ship#issue-tracker-integration) for setup.
+
+## All `fastShip.*` keys
+
+Every key is a boolean toggle (default `false`) — except `targetBranch` (string). Commands and provider config come from the `ship` block.
+
+| Field | Type | Default | Description |
+|---|---|---|---|
+| `review` | boolean | `false` | Run candid-loop review. |
+| `install` | boolean | `false` | Run `ship.installCommand`. |
+| `build` | boolean | `false` | Run `ship.buildCommand`. |
+| `tests` | boolean | `false` | Run `ship.testCommand`. |
+| `issueTracker` | boolean | `false` | Update issue tracker per `ship.issueTracker`. |
+| `autoMerge` | boolean | `false` | Auto-merge PR. |
+| `postMergeCommand` | boolean | `false` | Run `ship.postMergeCommand` after auto-merge. |
+| `targetBranch` | string | inherits from `ship.targetBranch` | Override PR target branch. |
+
+A toggle is silently skipped if its dependency is missing — `fastShip.build: true` with no `ship.buildCommand` does nothing, no error.
+
+See [Candid Fast Ship](/docs/core-features/candid-fast-ship) for behavior details.
+
+## Precedence
+
+When the same setting appears in multiple places, this is the order (first wins):
+
+1. CLI flags (e.g. `--auto-merge`, `--no-auto-merge`)
+2. Project config (`.candid/config.json`)
+3. User config (`~/.candid/config.json`)
+4. Built-in defaults
+
+## See also
+
+- [Config Options](/docs/reference/config-options) — full schema for every Candid key.
+- [Candid Ship](/docs/core-features/candid-ship) — full skill behavior.
+- [Candid Fast Ship](/docs/core-features/candid-fast-ship) — fast-ship behavior + use cases.
+- [Workflow Examples](/docs/reference/workflow-examples) — git-flow / github-flow / trunk-based variants.

@@ -12,13 +12,25 @@ This is a **technique skill**. Follow the order. The schema is non-negotiable.
 ## Inputs
 
 When invoked, the user provides (or you confirm):
-- **goal** — surface to test, e.g. "Agent Config / AI Setup, all 16 tabs"
-- **prompt** — free-form QA plan (what to exercise, edge cases, hot spots)
+- **goal** — surface to test, e.g. "Agent Config / AI Setup, all 16 tabs". Skipped if `--goal "<text>"` is passed.
+- **prompt** — free-form QA plan (what to exercise, edge cases, hot spots). Skipped if `--prompt "<text>"` is passed.
 - **app URL** — usually `http://localhost:<port>`. Verify before you start. Skipped if the user passes `--url` or `chromeQA.defaultUrl` is set in `.candid/config.json`.
 
-CLI flags:
-- `--url <url>` — provide the app URL up front, skipping the prompt.
-- `--mobile-only` — explicit opt-out from the desktop pass. Runs **only** the mobile pass (390x844). Documented exception to Hard Rule 6.
+CLI flags (full set):
+
+| Flag | Purpose |
+|---|---|
+| `--url <url>` | Provide the app URL up front, skipping the prompt. |
+| `--goal "<text>"` | Pre-fill the goal prompt. Skip the interactive ask. |
+| `--prompt "<text>"` | Pre-fill the QA-plan prompt. Skip the interactive ask. |
+| `--routes "/p1,/p2"` | Comma-separated list of routes to walk. Each becomes one target, bypassing goal-derived target inference. |
+| `--severity-floor P3` | Persist only findings at or above this severity (`P0` highest, `P5` lowest). Default `P5` (all). Findings below the floor are still walked and counted toward the `summary` block — they're just not appended to the file. |
+| `--viewports "1440x900,390x844"` | Override `chromeQA.desktopViewport` / `chromeQA.mobileViewport` from config. First value = desktop, second = mobile. |
+| `--findings-dir <path>` | Override findings output directory (default `.context/findings`). The directory is `mkdir -p`'d on each pass. |
+| `--mobile-only` | Explicit opt-out from the desktop pass. Runs **only** the mobile pass. Documented exception to Hard Rule 6. |
+| `--desktop-only` | Explicit opt-out from the mobile pass. Runs **only** the desktop pass. Second documented exception to Hard Rule 6. |
+
+`--mobile-only` and `--desktop-only` are mutually exclusive — if both are passed, error out and ask the user which one they meant.
 
 If any required input is missing after flags + config, ask. Don't guess.
 
@@ -61,6 +73,8 @@ ToolSearch query: "select:mcp__claude-in-chrome__tabs_context_mcp,mcp__claude-in
 
   All fields optional. Defaults: URL prompted, `apiPathPattern: "/api/"`, viewports as shown.
 
+  **Precedence:** `--viewports` CLI flag > `chromeQA.desktopViewport`/`chromeQA.mobileViewport` config > built-in defaults. `--findings-dir` CLI flag overrides the built-in `.context/findings` path. Record the resolved viewports and output directory in `context.environment` of the findings file so re-runs are reproducible.
+
 ### 2. Verify the dev server
 
 `curl -s -o /dev/null -w "%{http_code}" <url>`. Anything other than 2xx/3xx → ask the user to start it. The HTTP code is the source of truth — don't run `lsof` or process probes.
@@ -100,14 +114,18 @@ If the goal touches lists/details that need seeded data and the account is empty
 
 ### 9. Open the findings file
 
-1. **Make the directory:** `mkdir -p .context/findings`
+1. **Resolve the output directory:** `--findings-dir <path>` if passed, else `.context/findings`. **Make the directory:** `mkdir -p <dir>`.
 2. **Generate the slug** from `goal`: lowercase the first 4 words, replace non-alphanumerics with `-`, collapse repeated `-`, trim trailing `-`, truncate to 40 chars. Example: goal `"Agent Config / AI Setup, all 16 tabs"` → `agent-config-ai-setup`.
-3. **Choose the filename:** `.context/findings/<YYYY-MM-DD>-<slug>.json`. If that file already exists, switch to `<YYYY-MM-DD>-<HHmm>-<slug>.json` (current local time, 24h). Never overwrite a prior pass.
+3. **Choose the filename:** `<dir>/<YYYY-MM-DD>-<slug>.json`. If that file already exists, switch to `<YYYY-MM-DD>-<HHmm>-<slug>.json` (current local time, 24h). Never overwrite a prior pass.
 4. **Write the initial schema** with `findings: []`, the `context` block populated, and `summary` omitted (it's added at end-of-pass). Append findings to disk after each one — never batch-write at the end.
 
 ## Per-target loop (one route or one tab at a time)
 
-For each target identified in `goal` + `prompt`, use the **flush-capture cycle** so each step's telemetry is clean:
+**Target selection:**
+- If `--routes "/p1,/p2,/p3"` was passed, the target list is exactly those routes (each one a target). Bypasses goal-derived routing.
+- Otherwise, derive targets from `goal` + `prompt` as today (sidebar nav inferred from `read_page interactive` plus user-named surfaces).
+
+For each target, use the **flush-capture cycle** so each step's telemetry is clean:
 
 1. **Navigate / click into target.** Use sidebar buttons rather than direct URL when the app has client-side routing.
 2. **Flush telemetry.** `read_network_requests({clear: true})` and `read_console_messages({pattern: ".", clear: true})` — discard prior chatter.
@@ -118,7 +136,7 @@ For each target identified in `goal` + `prompt`, use the **flush-capture cycle**
    - `read_console_messages({pattern: "error|warn|fail|hydration|nested|aria|deprecat|key"})` — apply console triage table below.
    - `read_network_requests({urlPattern: "<chromeQA.apiPathPattern>"})` (default `/api/`; or `supabase`, or whatever Technical.md / config indicates) — apply network health thresholds below.
    - **Fallback if entries are redacted** (`[BLOCKED: Cookie/query string data]`): run `javascript_tool` with `performance.getEntriesByType('resource').filter(r => r.responseStatus >= 400 || r.responseStatus === 0).map(r => ({url: r.name, status: r.responseStatus, type: r.initiatorType}))` to recover full URLs from inside the page.
-7. **Append findings.** Each finding written to disk immediately, not buffered.
+7. **Append findings.** Each finding written to disk immediately, not buffered. **Severity floor:** if `--severity-floor <P>` was passed (default `P5` = all), drop findings whose severity is **below** the floor at this step. Severity order, highest first: `P0` > `P1` > `P2` > `P3` > `P4` > `P5`. Findings dropped at this step are still counted in the end-of-pass `summary` block — they just don't land in the `findings` array. This keeps the summary honest about what was walked.
 8. **Reset state** if you mutated something that affects subsequent targets (escape dirty-form modals via Discard, etc.).
 
 If a target produces no findings, append a single `confidence: "definite"`, `severity: "P5"`, `title: "✓ no issues — probes ran clean"` finding so coverage is provable.
@@ -198,6 +216,10 @@ After desktop pass:
 **Resize ceiling fallback:** Chrome may enforce a minimum content width of ~1075 px on the active tab depending on UI chrome. If `resize_window` to 390 wide doesn't take effect, try the smallest you can reach (often ~500 px) — the mobile breakpoint still triggers, the desktop sidebar still hides, and the hamburger drawer still appears. Note the actual width reached in the finding's `evidence`.
 
 **`--mobile-only` flag** inverts the default: skip the desktop pass entirely and run only the mobile sequence above. This is an **explicit opt-out** of Hard Rule 6 (which forbids running mobile without desktop). Use sparingly — most QA passes need both.
+
+**`--desktop-only` flag** skips the mobile pass entirely. Use when the surface is admin-only, internal tooling, or otherwise has no mobile contract to honor. Like `--mobile-only`, it's an explicit opt-out — without the flag, mobile is required.
+
+**`--mobile-only` + `--desktop-only` are mutually exclusive.** If both are passed, error and ask the user which one they meant. Don't silently pick one.
 
 ## Hot-spot stress — when the user provides recent commits or known weak points
 
@@ -346,7 +368,7 @@ The JSON file is always the source of truth — stdout is a courtesy for users w
 3. **Never invent the schema.** Use the v2.0 schema above byte-for-byte. Downstream consumers depend on it.
 4. **Never batch-write findings at the end.** Append per-finding. Context can exhaust mid-pass.
 5. **Never claim "no issues" without running the cross-cutting probes.** A `✓ no issues — probes ran clean` finding is fine; skipping the probes is not.
-6. **Never resize to mobile without first finishing desktop.** Mobile is additive, not a substitute. **Exception:** the `--mobile-only` flag explicitly opts out of this rule — when the flag is passed, skip the desktop pass entirely.
+6. **Never resize to mobile without first finishing desktop.** Mobile is additive, not a substitute. **Exceptions:** `--mobile-only` skips the desktop pass entirely; `--desktop-only` skips the mobile pass entirely. Both are explicit opt-outs — without one, run both. Passing both flags is an error — ask the user which they meant.
 7. **Never use a stale tab.** Always `tabs_context_mcp` first. If reusing a tab, confirm with the user.
 8. **Never proceed without verifying Claude in Chrome is loaded** (Pre-flight step 0). Without it, every subsequent tool call fails opaquely.
 
@@ -378,6 +400,9 @@ If you hit a hard blocker (server down mid-pass, dirty-state trap, unrecoverable
 | "I'll skip the stdout summary, the JSON has the data" | The summary is the pass's headline. Users without a triage tool need it. |
 | "I'll use `'P0\|P1\|P2'` as the severity since the schema example showed it" | The schema example shows real values like `"P0"`. Pipe-delimited strings are TypeScript-style enum docs, not JSON values. Use one exact string. |
 | "I don't need `mkdir -p` — the directory probably exists" | It probably doesn't. Make it explicitly. |
+| "User passed `--severity-floor P0` so I'll skip walking the lower-severity stuff" | Wrong layer. Walk everything; drop only at the persist step (#7). The `summary` block must reflect the full walk, otherwise `Top issues: none` becomes a lie when there were P3s you skipped. |
+| "I'll silently override `--viewports` if the second value won't fit" | Use the resize-ceiling fallback (mobile-pass section) and record the actual width reached in the finding's `evidence`. Never silently change user-provided viewports. |
+| "User passed `--routes` so I'll skip the cross-cutting probes" | Cross-cutting probes still run once per pass. `--routes` narrows the per-target loop, not the probes. |
 
 ## Red flags — STOP and re-read this skill
 
