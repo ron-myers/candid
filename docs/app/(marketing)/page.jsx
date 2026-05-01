@@ -362,7 +362,7 @@ export default function HomePage() {
         <span className="section-badge">HOW IT WORKS</span>
         <h2>The loop</h2>
         <p className="hero-tagline">
-          Install once. Then run the four commands that take a branch from review to shipped.
+          Install once. Then run the five commands that take a branch from review to shipped.
         </p>
         <ol className="steps-list">
           <li>
@@ -382,6 +382,17 @@ export default function HomePage() {
               <Pre className="step-code" trackingId="step_review">
                 <code>{`/candid-review --harsh review this branch like a
   skeptical CTO — what would block a launch?`}</code>
+              </Pre>
+            </div>
+          </li>
+          <li>
+            <div className="step-content">
+              <strong>Improve.</strong>
+              <span>Where <code>/candid-review</code> asks <em>&quot;what&apos;s wrong or risky?&quot;</em>, this asks <em>&quot;the code works — what would the next version look like if we built it again with what we know now?&quot;</em></span>
+              <Pre className="step-code" trackingId="step_improve">
+                <code>{`/candid-improve-implementation --focus clarity
+  rename anything ambiguous, collapse the helpers
+  that are only used once`}</code>
               </Pre>
             </div>
           </li>
