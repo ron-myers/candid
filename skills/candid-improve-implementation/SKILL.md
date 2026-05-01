@@ -24,7 +24,7 @@ The signal you ARE hunting:
 2. **🔍 Clarity** — Names that mislead or under-describe. Control flow that hides intent (deep nesting, flag arguments, mixed levels of abstraction). Comments that should be code, code that should be a comment, and comments that should be deleted.
 3. **✨ Quality** — Idiomatic fit with the language/framework. Dead code, unused branches, leftover scaffolding. Testability friction (hard-to-mock seams, hidden dependencies). Cheap performance wins that don't trade off clarity.
 
-Quality over quantity. Cap output at **7 high-signal opportunities**. Drop low-impact suggestions even if technically valid.
+Quality over quantity. Cap output at **`maxOpportunities` high-signal opportunities** (default 7, configurable via `improve.maxOpportunities` — see Step 3). Drop low-impact suggestions even if technically valid.
 
 ---
 
@@ -92,9 +92,13 @@ Check CLI arguments for review options.
 
 **Focus Precedence (highest to lowest):**
 1. CLI flag (`--focus approach`)
-2. Project config (`.candid/config.json` → `focus` field)
-3. User config (`~/.candid/config.json` → `focus` field)
+2. Project config (`.candid/config.json` → `improve.focus` field — extract via `jq -r '.improve.focus // "none"'`)
+3. User config (`~/.candid/config.json` → `improve.focus` field — same path)
 4. No focus (review all three categories)
+
+**Important:** the path is `improve.focus` (nested), not the top-level `focus` field. Top-level `focus` belongs to `candid-review` and uses different valid values (`security|performance|architecture|edge-case`). Reading the wrong field cross-contaminates the two skills.
+
+Valid values for `improve.focus`: `"approach"`, `"clarity"`, or `"quality"` (case-sensitive). Invalid values show a warning and are ignored.
 
 | Focus Area | Categories Surfaced |
 |------------|---------------------|
@@ -110,7 +114,22 @@ Same behavior as `candid-review`: merge CLI exclusions with config exclusions, a
 
 #### Bugs Section (`--no-bugs`)
 
-If `--no-bugs` is provided OR config sets `noBugs: true`, suppress the 🐛 Bugs section entirely. Do not flag any defects. Default = include bugs section (one-line each, route to candid-review).
+**Precedence (highest to lowest):**
+1. CLI flag `--no-bugs` (suppress)
+2. Project config (`.candid/config.json` → `improve.noBugs` boolean — extract via `jq -r '.improve.noBugs // null'`)
+3. User config (`~/.candid/config.json` → `improve.noBugs` boolean — same path)
+4. Default `false` (bugs section included)
+
+If suppression is active from any source, do not flag any defects in the 🐛 Bugs section. Otherwise emit one-line each, route to `/candid-review`. Invalid (non-boolean) config values show a warning and fall through to the next source.
+
+#### Max Opportunities (`improve.maxOpportunities`)
+
+**Precedence (highest to lowest):**
+1. Project config (`.candid/config.json` → `improve.maxOpportunities` integer — extract via `jq -r '.improve.maxOpportunities // null'`)
+2. User config (`~/.candid/config.json` → `improve.maxOpportunities` integer — same path)
+3. Default `7`
+
+Validate: must be a positive integer in range 1-50. Out-of-range or non-integer values show a warning and fall through. Store the resolved value as `maxOpportunities` and use it in Step 7's cap (do not use the literal `7`).
 
 #### Auto-Commit (`--auto-commit`)
 
@@ -185,14 +204,14 @@ If you genuinely see a real defect (not edge-case speculation), surface it as on
 
 ### Step 7: Rank & Cap
 
-Across all three categories, you may have surfaced 10-20 candidates. **Cap the final list at 7 opportunities.** Selection criteria, in order:
+Across all three categories, you may have surfaced 10-20 candidates. **Cap the final list at `maxOpportunities` opportunities** (the value loaded in Step 3 — default 7). Selection criteria, in order:
 
 1. **Highest leverage** — fixes a structural choice that propagates through the rest of the file
 2. **Highest reuse signal** — opportunities that cite an existing util/pattern in the codebase (Approach category)
 3. **Lowest cost-to-apply** — Safe ✓ items that strictly improve clarity with no behavior change
 4. **Drop everything else.** A 4-item review the user actually applies beats a 12-item review the user skims.
 
-If the diff is small enough that 7 is overkill, surface fewer. Truth-telling matters more than checklist completeness.
+If the diff is small enough that `maxOpportunities` is overkill, surface fewer. Truth-telling matters more than checklist completeness.
 
 ### Step 8: Present Opportunities
 
