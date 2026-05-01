@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.18.0] - 2026-04-30
+
+### Added
+
+- **Candid Improve Implementation** (`/candid-improve-implementation`): A new skill that runs an improvement-lens pass on the current implementation — distinct from `candid-review`'s defect hunt. Where `/candid-review` asks *"what's wrong or risky?"*, this skill asks *"the code works — what would the next version look like if we built it again with what we know now?"*
+  - **Three signal categories** with explicit checklists: 🧭 **Approach** (existing util/pattern reuse, simpler decomposition, premature/missing abstractions, data-shape changes), 🔍 **Clarity** (misleading names, control flow hiding intent, mixed abstraction levels, comments that should be code or deleted), ✨ **Quality** (idiomatic fit, dead code, leftover scaffolding, testability friction, cheap perf wins that don't trade clarity)
+  - **Optional 🐛 Bugs section** — if the reviewer happens to spot real defects while scanning, they're surfaced as one-liners with a pointer to `/candid-review`. Capped at 3. Suppress entirely with `--no-bugs`
+  - **Quality over quantity**: ranks all candidates and caps the final list at 7 high-signal opportunities (configurable via `improve.maxOpportunities`). Drops low-impact suggestions even if technically valid — a 4-item review the user actually applies beats a 12-item review the user skims
+  - **Per-opportunity structured format**: `Current` snippet, `Suggested` before/after, `Why it's better` (specific property gained), `Tradeoff` (what's given up, or "None — strictly better"), and `Confidence` level (Safe ✓ / Verify ⚡ / Careful ⚠️)
+  - **Scope ladder**: unstaged changes first; if none, branch diff vs configured merge target. Skips the staged-only check that `candid-review` starts with — improvement passes target work-in-progress or branch-level deltas, not commits about to be made
+  - **Three-phase fix selection** (mirrors `candid-review` Step 8): bulk action choice (apply all / apply Safe ✓ only / review individually / track as todos) → optional per-item review → confirmation summary. Mandatory step — never auto-applies without explicit user confirmation
+  - **Tone preference** mirrors `candid-review`'s harsh/constructive split with the same precedence loader (CLI flag → project config → user config → interactive prompt)
+  - **Flags**: `--harsh` / `--constructive` (tone), `--focus approach|clarity|quality` (single-category mode), `--exclude <pattern>` (skip files), `--no-bugs` (suppress bugs section), `--auto-commit` (commit applied suggestions)
+  - **Config block** under `improve.*` in `.candid/config.json`: `improve.focus` (default focus area), `improve.noBugs` (default suppress bugs), `improve.maxOpportunities` (cap, default 7). Shared fields (`tone`, `exclude`, `mergeTargetBranches`, `autoCommit`) coexist with `candid-review`'s top-level keys without interference — `focus: "security"` applies to `/candid-review` while `improve.focus: "clarity"` applies to `/candid-improve-implementation`
+  - **State persistence**: writes `.candid/last-improve.json` (separate from `.candid/last-review.json`) for future comparisons
+  - **Explicit non-overlap clause** at the top of the skill: not a defect hunter, not a feature suggester, not a linter. If multiple findings would belong in `/candid-review`, surface them briefly under 🐛 Bugs and route the user there for proper triage
+  - **Comprehensive docs**: dedicated `/docs/core-features/candid-improve-implementation` page with categories, flags table, examples, and a full diff-vs-`candid-review` table
+  - **Homepage**: new "Improve" step inserted between Review and Ship in the marketing-page workflow list
+
 ## [1.16.0] - 2026-04-25
 
 ### Added

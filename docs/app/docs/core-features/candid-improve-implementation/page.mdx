@@ -1,0 +1,139 @@
+export const metadata = {
+  title: 'Candid Improve Implementation - The Next Version of Working Code',
+  description: 'Use candid-improve-implementation to surface opportunities to improve approach, clarity, and quality - distinct from candid-review\'s defect hunt. Concrete before/after, why it\'s better, and what\'s traded off.',
+}
+
+# Candid Improve Implementation
+
+Where `/candid-review` asks *"what's wrong or risky?"*, this skill asks *"the code works — what would the next version look like if we built it again with what we know now?"*
+
+## Quick Start
+
+```
+/candid-improve-implementation
+```
+
+Runs an improvement-lens pass on your unstaged changes (or branch diff if no unstaged). Surfaces a ranked list — capped at 7 — of opportunities to improve approach, clarity, and quality. Each opportunity comes with a concrete before/after, why it's better, what's traded off, and a confidence level.
+
+## When to Use It
+
+- After a feature works but before `/candid-ship` — a quality second pass on shipping code
+- During a cleanup PR or a refactor branch
+- When you're returning to code you wrote a month ago and want a sharper version
+- After a `/candid-review` cleanup — once defects are gone, this surfaces what's left
+
+Not the right tool for: defect hunting (use `/candid-review`), feature design (use planning skills), or style nits a linter would catch.
+
+## Categories
+
+Three signal categories. Mixed by default; isolate one with `--focus`.
+
+### 🧭 Approach / design
+
+- Existing utility/pattern in this codebase the new code should reuse
+- A meaningfully simpler structure or different decomposition
+- Premature abstraction to collapse, or a missing one to introduce
+- Data-shape changes that simplify multiple consumers
+
+### 🔍 Clarity
+
+- Names that mislead or under-describe
+- Control flow hiding intent (deep nesting, flag arguments, mixed abstraction levels)
+- Comments that should be code, code that should be a comment, comments that should be deleted
+
+### ✨ Quality
+
+- Idiomatic fit — language/framework features being re-implemented
+- Dead code, unused branches, leftover scaffolding
+- Testability friction (hard-to-mock seams, hidden dependencies)
+- Cheap performance wins that don't trade off clarity
+
+### 🐛 Bugs (optional)
+
+If the reviewer happens to spot real bugs while scanning, they're surfaced as one-liners with a pointer to `/candid-review`. Capped at 3. Suppress entirely with `--no-bugs`.
+
+## Flags
+
+| Flag | Description | Default |
+|------|-------------|---------|
+| `--harsh` | Brutal honesty, no hedging | Interactive prompt |
+| `--constructive` | Same honesty, more scaffolding | Interactive prompt |
+| `--focus <area>` | Limit to one category: `approach`, `clarity`, `quality` | All three |
+| `--exclude <pattern>` | Skip files matching glob (repeatable) | None |
+| `--no-bugs` | Suppress the 🐛 Bugs section entirely | Bugs included |
+| `--auto-commit` | Commit applied suggestions automatically | Off |
+
+## How It Works
+
+1. **Detect changes** — unstaged first; if none, branch diff vs merge target. (No staged-only check — that's `/candid-review`'s lane.)
+2. **Load standards** — reads `Technical.md` if present; cites alignment or contradiction in suggestions.
+3. **Read full files** — improvement signal needs surrounding context, not just the diff.
+4. **Identify opportunities** — walks Approach / Clarity / Quality checklists.
+5. **Rank and cap at 7** — drops low-impact items even if technically valid. Quality over quantity.
+6. **Present each opportunity** — with `Current` snippet, `Suggested` before/after, `Why it's better`, `Tradeoff`, and `Confidence` (Safe ✓ / Verify ⚡ / Careful ⚠️).
+7. **Three-phase fix selection** — apply all / apply Safe ✓ only / review individually / track as todos.
+8. **Apply or todo** — Edits files for selected items; TodoWrite for the rest.
+9. **Optional commit** — `--auto-commit` creates a single commit listing every applied item.
+10. **Save state** — writes `.candid/last-improve.json` for future comparisons.
+
+## Difference vs `/candid-review`
+
+| Lens | `/candid-review` | `/candid-improve-implementation` |
+|------|------------------|----------------------------------|
+| Question asked | "What's wrong or risky?" | "What would the next version look like?" |
+| Targets | Defects, security, edge cases, smells | Approach, clarity, quality |
+| Scope ladder | Staged → unstaged → branch diff | Unstaged → branch diff |
+| Output | Issues with severity (🔥 ⚠️ 📜 etc.) | Opportunities with confidence (✓ ⚡ ⚠️) |
+| Cap | None — every issue surfaces | 7 (configurable via `improve.maxOpportunities`) |
+| Bugs | Primary purpose | Side-effect, capped at 3, opt-out via `--no-bugs` |
+| When to run | Pre-commit, pre-PR, defect hunt | Post-feature-works, cleanup PRs, refactor |
+
+Run them together: `/candid-review` first to clean defects, then `/candid-improve-implementation` to sharpen what's left. Or use both lenses on the same diff in either order — they don't conflict.
+
+## Examples
+
+```bash
+# Default: interactive tone, all three categories, bugs included
+/candid-improve-implementation
+
+# Harsh tone, focus only on approach (design / decomposition)
+/candid-improve-implementation --harsh --focus approach
+
+# Quick clarity-only pass, ignore generated files
+/candid-improve-implementation --focus clarity --exclude "*.generated.ts"
+
+# Suppress the bugs section (you've already run candid-review)
+/candid-improve-implementation --no-bugs
+
+# Apply automatically with a commit
+/candid-improve-implementation --auto-commit
+```
+
+## Configuration
+
+Add to `.candid/config.json`:
+
+```json
+{
+  "tone": "constructive",
+  "improve": {
+    "focus": "approach",
+    "noBugs": false,
+    "maxOpportunities": 7
+  }
+}
+```
+
+| Field | Type | Description | Default |
+|-------|------|-------------|---------|
+| `improve.focus` | `"approach" \| "clarity" \| "quality"` | Default focus area | None (all three) |
+| `improve.noBugs` | boolean | Suppress 🐛 Bugs section | `false` |
+| `improve.maxOpportunities` | integer (1-50) | Cap on opportunities surfaced | `7` |
+
+`tone`, `exclude`, `mergeTargetBranches`, and `autoCommit` are shared with `/candid-review`. See the [Candid Review docs](/docs/core-features/candid-review) or the full config reference for those.
+
+## See Also
+
+- [Candid Review](/docs/core-features/candid-review) — defect / risk / security review (run first)
+- [Candid Loop](/docs/core-features/candid-loop) — fix-review-fix until clean
+- [Candid Ship](/docs/core-features/candid-ship) — full shipping workflow once code is sharp
