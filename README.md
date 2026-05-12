@@ -4,7 +4,7 @@
 
 # Candid
 
-A Claude Code plugin for configurable code reviews that combine thoroughness with actionable feedback. Based on Kim Scott's Radical Candor framework: **Care Personally + Challenge Directly**.
+A coding-agent plugin for configurable code reviews that combine thoroughness with actionable feedback. Runs on **Claude Code** and **Codex CLI** from the same install. Based on Kim Scott's Radical Candor framework: **Care Personally + Challenge Directly**.
 
 ## Overview
 
@@ -36,11 +36,23 @@ The review process follows these steps:
 
 ## Installation
 
+### Claude Code
+
 ```bash
 npx skills add https://github.com/ron-myers/candid
 ```
 
 Then restart Claude Code.
+
+### Codex CLI
+
+In an interactive Codex session:
+
+```
+/plugins
+```
+
+Add the marketplace via GitHub shorthand (`ron-myers/candid`), install `candid`, then verify with `/skills`. Invoke skills via `$skill-name` mention syntax (e.g., `$candid-review --harsh`). See [docs/codex/install.md](docs/codex/install.md) for the full command-to-skill mapping.
 
 ## Quick Start
 

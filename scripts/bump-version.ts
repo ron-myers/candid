@@ -8,6 +8,8 @@ type BumpType = 'major' | 'minor' | 'patch';
 
 const PLUGIN_JSON_PATH = '../.claude-plugin/plugin.json';
 const MARKETPLACE_JSON_PATH = '../.claude-plugin/marketplace.json';
+const CODEX_PLUGIN_JSON_PATH = '../.codex-plugin/plugin.json';
+const CODEX_MARKETPLACE_JSON_PATH = '../.agents/plugins/marketplace.json';
 const CHANGELOG_PATH = '../CHANGELOG.md';
 const TARGET_BRANCH = 'stable';
 
@@ -128,6 +130,45 @@ async function updateMarketplaceJson(newVersion: string): Promise<void> {
 }
 
 /**
+ * Update version in .codex-plugin/plugin.json
+ */
+async function updateCodexPluginJson(newVersion: string): Promise<void> {
+  try {
+    const content = await readFile(CODEX_PLUGIN_JSON_PATH, 'utf-8');
+    const json = JSON.parse(content);
+    json.version = newVersion;
+
+    await writeFile(CODEX_PLUGIN_JSON_PATH, JSON.stringify(json, null, 2) + '\n');
+    console.log(`✅ Updated ${CODEX_PLUGIN_JSON_PATH}`);
+  } catch (error) {
+    console.error(`❌ Failed to update ${CODEX_PLUGIN_JSON_PATH}`);
+    throw error;
+  }
+}
+
+/**
+ * Update version in .agents/plugins/marketplace.json (Codex marketplace)
+ */
+async function updateCodexMarketplaceJson(newVersion: string): Promise<void> {
+  try {
+    const content = await readFile(CODEX_MARKETPLACE_JSON_PATH, 'utf-8');
+    const json = JSON.parse(content);
+
+    if (!json.plugins || !Array.isArray(json.plugins) || json.plugins.length === 0) {
+      throw new Error('Invalid Codex marketplace.json structure: missing plugins array');
+    }
+
+    json.plugins[0].version = newVersion;
+
+    await writeFile(CODEX_MARKETPLACE_JSON_PATH, JSON.stringify(json, null, 2) + '\n');
+    console.log(`✅ Updated ${CODEX_MARKETPLACE_JSON_PATH}`);
+  } catch (error) {
+    console.error(`❌ Failed to update ${CODEX_MARKETPLACE_JSON_PATH}`);
+    throw error;
+  }
+}
+
+/**
  * Update CHANGELOG.md with new version header
  */
 async function updateChangelog(newVersion: string): Promise<void> {
@@ -178,7 +219,9 @@ async function updateChangelog(newVersion: string): Promise<void> {
 function gitCommitAndTag(version: string): void {
   try {
     // Stage the updated files
-    exec(`git add ${PLUGIN_JSON_PATH} ${MARKETPLACE_JSON_PATH} ${CHANGELOG_PATH}`);
+    exec(
+      `git add ${PLUGIN_JSON_PATH} ${MARKETPLACE_JSON_PATH} ${CODEX_PLUGIN_JSON_PATH} ${CODEX_MARKETPLACE_JSON_PATH} ${CHANGELOG_PATH}`
+    );
 
     // Create commit with co-author
     const commitMessage = `Bump plugin version to ${version}\n\nCo-authored-by: Claude Sonnet 4.5 <noreply@anthropic.com>`;
@@ -247,6 +290,8 @@ async function main(): Promise<void> {
   console.log('Updating files...');
   await updatePluginJson(newVersion);
   await updateMarketplaceJson(newVersion);
+  await updateCodexPluginJson(newVersion);
+  await updateCodexMarketplaceJson(newVersion);
   await updateChangelog(newVersion);
   console.log('');
 
