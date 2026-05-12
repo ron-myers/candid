@@ -30,7 +30,7 @@ Bundled skills become available immediately. Confirm with:
 
 ## Invoke
 
-Codex has no first-class slash commands like Claude Code, so candid skills are invoked via the `$skill-name` mention syntax (or selected from the `/skills` browser).
+Codex has built-in slash commands (`/plugins`, `/skills`, `/model`, etc.) but no user-definable custom slash commands like Claude Code's `commands/*.md` system. Candid skills are invoked via the `$skill-name` mention syntax or selected from the `/skills` browser.
 
 ### Command-to-skill mapping
 
