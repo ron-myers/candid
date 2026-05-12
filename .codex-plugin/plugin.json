@@ -23,5 +23,14 @@
     "chrome",
     "a11y",
     "accessibility"
-  ]
+  ],
+  "skills": "./skills",
+  "interface": {
+    "displayName": "Candid",
+    "shortDescription": "Radical candor code reviews",
+    "longDescription": "Configurable code review with radical candor - choose between harsh direct feedback or constructive caring criticism. Includes Technical.md project standards, architectural context analysis, actionable fixes, decision register, todo integration, and live Chrome-based UI/UX QA.",
+    "developerName": "Ron Myers",
+    "category": "code-quality",
+    "websiteURL": "https://github.com/ron-myers/candid"
+  }
 }

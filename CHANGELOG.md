@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.19.0] - 2026-05-12
+
+### Added
+
+- **Codex CLI support** ([#73](https://github.com/ron-myers/candid/issues/73)): Candid now installs and runs on the OpenAI Codex CLI alongside Claude Code from the same repo. Skills are the single source of truth — both hosts share `skills/`, no fork, no duplication.
+  - New `.codex-plugin/plugin.json` Codex plugin manifest mirroring `.claude-plugin/plugin.json`
+  - New `.agents/plugins/marketplace.json` Codex marketplace manifest
+  - New `docs/codex/install.md` with install instructions and a full command-to-skill mapping (`/candid-review --harsh` → `$candid-review --harsh`, etc.)
+  - `scripts/bump-version.ts` updates all four manifests in lockstep so Claude and Codex versions never drift
+  - New `scripts/validate-manifests.ts` (`npm run validate-manifests`) enforces version lockstep + required-key shape across all four manifest files
+  - Codex has no `/commands/` first-class concept — users invoke skills via `$skill-name` mention syntax or the `/skills` browser; arg flags (`--harsh`, `--focus security`, etc.) are identical across hosts because the skill body parses them
+  - Subagent dispatch (`agents/code-reviewer.md`) remains a Claude Code optimization for now; Codex runs the review inline (single-threaded). Configure `[agents.code-reviewer]` in your Codex `config.toml` if you want parallel review threads on large diffs.
+
 ## [1.18.0] - 2026-04-30
 
 ### Added

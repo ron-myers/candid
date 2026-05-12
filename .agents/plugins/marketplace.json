@@ -7,10 +7,7 @@
   "plugins": [
     {
       "name": "candid",
-      "source": {
-        "source": "url",
-        "url": "https://github.com/ron-myers/candid.git"
-      },
+      "source": "./.codex-plugin",
       "description": "Configurable code reviews with radical candor - choose between harsh or constructive tone. Features Technical.md for project standards, architectural context analysis, actionable fixes, decision register for tracking review decisions, seamless todo integration, and live browser QA via Chrome.",
       "version": "1.19.0",
       "author": {
@@ -20,6 +17,9 @@
       "homepage": "https://github.com/ron-myers/candid",
       "repository": "https://github.com/ron-myers/candid",
       "license": "MIT",
+      "category": "code-quality",
+      "install": "AVAILABLE",
+      "auth": "ON_FIRST_USE",
       "keywords": [
         "code-review",
         "radical-candor",

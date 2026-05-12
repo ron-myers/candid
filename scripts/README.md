@@ -14,8 +14,10 @@ The script performs the following operations in sequence:
 2. **Reads** the current version from `.claude-plugin/plugin.json`
 3. **Calculates** the new version based on semantic versioning rules
 4. **Updates** version in all required files:
-   - `.claude-plugin/plugin.json`
-   - `.claude-plugin/marketplace.json`
+   - `.claude-plugin/plugin.json` (Claude Code manifest)
+   - `.claude-plugin/marketplace.json` (Claude Code marketplace)
+   - `.codex-plugin/plugin.json` (Codex CLI manifest)
+   - `.agents/plugins/marketplace.json` (Codex CLI marketplace)
    - `CHANGELOG.md` (adds new version header with today's date)
    - `docs/app/(marketing)/page.jsx` (updates homepage version badge)
 5. **Creates** a git commit with the message: `"Bump plugin version to X.Y.Z"`
@@ -80,8 +82,10 @@ Before running the script:
 ### What Gets Updated
 
 **Files modified:**
-- `.claude-plugin/plugin.json` - Plugin manifest
-- `.claude-plugin/marketplace.json` - Marketplace metadata
+- `.claude-plugin/plugin.json` - Claude Code plugin manifest
+- `.claude-plugin/marketplace.json` - Claude Code marketplace metadata
+- `.codex-plugin/plugin.json` - Codex CLI plugin manifest
+- `.agents/plugins/marketplace.json` - Codex CLI marketplace metadata
 - `CHANGELOG.md` - Adds new version header with today's date
 - `docs/app/(marketing)/page.jsx` - Homepage version badge
 

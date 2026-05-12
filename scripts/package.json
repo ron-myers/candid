@@ -4,7 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "bump": "tsx bump-version.ts"
+    "bump": "tsx bump-version.ts",
+    "validate-manifests": "tsx validate-manifests.ts"
   },
   "devDependencies": {
     "tsx": "^4.7.0",
