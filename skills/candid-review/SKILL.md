@@ -7,6 +7,13 @@ description: Use when reviewing code changes before commit or PR — configurabl
 
 You are a full-stack architect conducting a code review. Your approach is based on Radical Candor: **Care Personally + Challenge Directly**. You catch real issues, provide actionable fixes, and make it easy to track what needs to be addressed.
 
+## Hard Rules — do not violate
+
+1. **Never flag a line you haven't read in context.** Before reporting, Read the full enclosing function and Grep its callers. If an upstream guard already handles the case, do not report it.
+2. **Every issue needs evidence:** file:line, the offending code quoted verbatim, and a concrete trigger (the input/state/sequence that causes the failure). No trigger → downgrade to 🤔 or drop.
+3. **Never report an issue in code the diff didn't touch** — unless the diff breaks it (changed signature, removed guard); then cite both sites.
+4. **Never skip Step 8 or auto-select fixes** when issues exist (sole exception: candid-loop auto mode, see Step 8).
+
 ## Workflow
 
 Execute these steps in order:
@@ -57,20 +64,26 @@ If this fails, inform user: "This directory is not a git repository. I need a gi
 
 **2. Check for changes in priority order:**
 ```bash
-# Check for staged changes first
-git diff --cached --stat
+# Get the full working-tree state (staged, unstaged, untracked)
+git status --porcelain
+
+# Check for staged changes first (-M detects renames)
+git diff --cached -M --stat
 
 # Then unstaged changes
-git diff --stat
+git diff -M --stat
 
 # Compare to merge target per Runtime Branch Selection in Step 2.5
 ```
 
 **3. Decide what to review:**
-- If staged changes exist → review with `git diff --cached`
-- Else if unstaged changes exist → review with `git diff`
-- Else if branch differs from merge target → review with `git diff <branch>...HEAD` (using first successful branch from mergeTargetBranches)
+- If staged changes exist → review with `git diff --cached -M`
+- Else if unstaged changes exist → review with `git diff -M`
+- Else if branch differs from merge target → review with `git diff -M <branch>...HEAD` (using first successful branch from mergeTargetBranches)
 - Else → inform user: "No changes detected to review"
+- **Untracked source files** (`git ls-files --others --exclude-standard`, minus excludes) are part of the change: Read and review them in full. New files hide the most issues because they have no diff to anchor on.
+- If BOTH staged and unstaged changes exist → review staged, then warn: `[N] file(s) also have unstaged changes excluded from this review: [list]`.
+- Use `-M` so renamed files review as edits to the rename, not as a whole-file addition.
 
 **4. Handle special cases:**
 - Skip binary files (note them but don't review content)
@@ -250,6 +263,7 @@ Use the Task tool with the code-reviewer agent. Provide:
 - Technical.md content (if loaded)
 - List of files assigned to the subagent
 - Specific focus area (security, performance, architecture)
+- The diff hunks / changed line ranges for the subagent's files — required so the subagent can anchor findings in changed code.
 
 **Merging results:**
 The subagent returns JSON. Convert each issue to the markdown format in Step 6:
@@ -275,6 +289,8 @@ Analyze every change with the chosen tone. Categorize issues by severity:
 | 5 | Edge Case | 🤔 | Unhandled scenarios: null, empty, concurrent, timeout |
 | 6 | Architectural | 💭 | Design concerns: coupling, SRP violations, patterns |
 | 7 | Clarification Needed | ? | Question for the author — cannot determine correct action from code alone |
+
+**Boundary test:** an issue is 🔥 Critical only if you can state the concrete trigger — the input, state, or call sequence on a reachable path — that causes the crash/exploit/data loss, and quote the code that fails. Reachable but requires unusual-yet-legal input → ⚠️ Major. Cannot name a trigger at all → 🤔 Edge Case or drop. Never inflate severity for attention; miscategorized findings train users to ignore 🔥.
 
 ### Clarification Needed ? (Decision Register)
 
@@ -504,7 +520,7 @@ Before applying fixes, show a summary and get final confirmation:
      - "Yes, apply all selected" - Proceed to Step 9 with selectedFixes
      - "No, let me review again" - Return to Phase 8a and start over
 
-**Enforcement:** Do not auto-select fixes or assume user intent — the user must choose through one of these paths.
+**Enforcement:** Do not auto-select fixes or assume user intent — the user must choose through one of these paths. **Sole exception:** when invoked by candid-loop with `--mode auto`, the user's mode choice IS the selection: select "Apply all fixes" (post-filtering per loop config) without prompting, and note `Auto-applied under candid-loop auto mode` in the output.
 
 ### Step 9: Apply Fixes or Create Todos
 

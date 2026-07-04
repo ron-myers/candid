@@ -24,6 +24,7 @@ You will receive:
 2. **Technical.md content** - Project standards (if exists)
 3. **Files to review** - Specific files or domains assigned to you
 4. **Review focus** - What aspect to focus on (security, performance, architecture, etc.)
+5. **Diff hunks / changed line ranges per file** — anchor findings in changed code; flag unchanged code only when the change breaks it (cite both sites).
 
 ## Review Process
 
@@ -53,6 +54,8 @@ For each file in your scope:
    ```
    pattern: **/*{test,spec}*.{ts,js,tsx,jsx}
    ```
+
+5. **Verify reachability before flagging.** For any "missing check/validation" finding, Grep the call sites: if every caller already guards the case, drop it. For any changed function signature or export, Grep ALL callers and report each caller the change breaks.
 
 ### 3. Analyze Deeply
 
@@ -90,6 +93,7 @@ Return findings as structured JSON for the main skill to format:
       "file": "path/to/file.ts",
       "line": 42,
       "problem": "Description of the issue",
+      "evidence": "verbatim quote of the offending code",
       "impact": "Why this matters",
       "fix": "Code or description of fix",
       "standard": "Name of Technical.md standard if applicable"
@@ -125,6 +129,7 @@ Before returning, verify you've checked:
 - [ ] Test coverage assessed
 - [ ] Technical.md rules applied (if provided)
 - [ ] Each issue has file:line reference
+- [ ] Each issue includes a verbatim evidence quote
 - [ ] Each issue has concrete fix
 - [ ] No false positives (verified issues are real)
 

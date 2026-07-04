@@ -143,7 +143,9 @@ Step [N]/[totalSteps]: Running tests...
 $ [testCommand]
 ```
 
-Execute. On non-zero exit: `Tests failed. Ship aborted.` Show output and abort. On success: `Tests passed.`
+Execute. On non-zero exit: `Tests failed. Ship aborted.` Show output and abort.
+
+On success, verify before declaring: extract the runner's own counts from the output (e.g. "Tests: 42 passed", "12 passing") and report `Tests passed (<N> tests, exit 0).` If the exit code is 0 but the output shows zero tests executed ("No tests found", "0 passed", empty match pattern), treat it as a FAILURE: `Test command matched zero tests — nothing was verified. Ship aborted.` Never print `Tests passed.` without the count and exit code from the run you just executed.
 
 ---
 

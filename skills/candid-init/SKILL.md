@@ -288,6 +288,8 @@ After all generation agents complete, collect all sections and combine into one 
 For medium mode: Generate ~150 lines (condensed version of above)
 For quick mode: Generate ~50 lines (essential rules only)
 
+Tag each rule `[observed N/M]` (count via grep) or `[recommended]`, with known exceptions listed.
+
 ### Rule Quality Standards
 
 **Every rule MUST:**
@@ -307,6 +309,14 @@ For quick mode: Generate ~50 lines (essential rules only)
 4. **Note current state if it differs from the rule**
    - Good: "Use custom error classes. (Currently not implemented - see gaps section)"
    - Bad: "Use custom error classes"
+
+5. **Tag provenance and adherence**
+   - `[observed 12/14]` — convention followed by 12 of 14 relevant files. List the 2
+     violating files as `Known exceptions: path1, path2` so reviews flag only NEW violations,
+     not pre-existing code.
+   - `[recommended]` — best practice not yet present in this codebase. Must also appear in
+     the Gaps table; reviews should surface these as suggestions, never as hard violations.
+   - A rule with adherence below 60% must not ship as `[observed]` — move it to Gaps.
 
 ### What NOT to Include
 

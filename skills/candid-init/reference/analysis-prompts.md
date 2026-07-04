@@ -2,6 +2,19 @@
 
 Exact prompts for the five parallel Explore sub-agents. Each returns proposed rules with file:line evidence.
 
+## Required output format (all agents)
+
+For EVERY proposed rule, return:
+- Pattern statement (one line, concrete, checkable)
+- Evidence: 2-3 file:line citations that follow it
+- Adherence: N files follow / M violate — list the violating files (they become the
+  rule's known exceptions)
+- Negative evidence: patterns the codebase deliberately avoids (e.g., "0 of 47 modules
+  use default exports", "no barrel index.ts files") — propose these as explicit
+  "do not introduce X" rules; reviewers cannot infer absence from positive examples.
+
+Rules without adherence counts are discarded at synthesis.
+
 #### Agent 1: Architecture & Imports Agent
 
 **Prompt:**

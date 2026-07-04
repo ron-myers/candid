@@ -224,16 +224,19 @@ For each selected finding, in severity order (P0 first, then P1, …):
 1. Print the finding's `id`, `severity`, `category`, `title`, `repro`, `expected`, `actual`, `suggestedFix`, and any `evidence.filesLikelyTouched`.
 2. Read the files in `evidence.filesLikelyTouched`. If a path doesn't exist, log `[WARN] F-... — filesLikelyTouched path missing: <path>` and skip the finding (mark as failed in the summary).
 3. Apply the smallest change that resolves `actual` to match `expected`, using `suggestedFix` as guidance. NEVER write outside `evidence.filesLikelyTouched` without surfacing it explicitly.
-4. Append a one-line entry to `.context/findings/<base>.fixes.md` (create if missing): `<ISO-timestamp> | F-<id> | <title> | <files-changed>`.
+4. **Re-verify in the browser — mandatory.** If `context.environment.url` responds (curl 2xx/3xx) and Chrome MCP is available, re-run the finding's `repro` steps against the running app, flushing console/network first, and confirm behavior now matches `expected` with fresh telemetry as proof. Only then may the summary show `✓`.
+   - Fix applied but re-verification impossible (server down, no Chrome MCP) → mark `⚠ applied-unverified` in the final summary, never `✓`.
+   - Repro still shows `actual` → mark `✗ still-reproduces` and do not ship that fix.
+5. Append a one-line entry to `.context/findings/<base>.fixes.md` (create if missing): `<ISO-timestamp> | F-<id> | <title> | <files-changed>`.
 
 After all selected findings:
 
-5. If `chromeQAFix.testCommand` is set, run it. If it fails, print the error and ask: `"Tests failed. (a) Stop and let me debug, (b) Continue and ship anyway, (c) Stop and rollback?"` via `AskUserQuestion`. On (c), restore from `git stash`.
-6. Build the PR title and body:
+6. If `chromeQAFix.testCommand` is set, run it. If it fails, print the error and ask: `"Tests failed. (a) Stop and let me debug, (b) Continue and ship anyway, (c) Stop and rollback?"` via `AskUserQuestion`. On (c), restore from `git stash`.
+7. Build the PR title and body:
    - **Title** (≤ 72 chars): if issue map has Linear IDs, `"Fix N QA findings (TEAM-123, TEAM-124, …): <top finding title>"`. Otherwise `"Fix N QA findings: <top finding title>"`. Truncate to 72 with `…`.
    - **Body**: see template in Step 8d below.
-7. Hand off to `/candid-fast-ship` (if `--fast` is set) or `/candid-ship` for the single PR. Pass `--skip-review` since we just edited deliberate fixes — re-reviewing them with `candid-loop` is duplicative and slow. Pass the title and body.
-8. Capture the PR URL.
+8. Hand off to `/candid-fast-ship` (if `--fast` is set) or `/candid-ship` for the single PR. Pass `--skip-review` since we just edited deliberate fixes — re-reviewing them with `candid-loop` is duplicative and slow. Pass the title and body.
+9. Capture the PR URL.
 
 #### Step 8b: Per-finding mode (Conductor deep links, parallel)
 
@@ -287,7 +290,7 @@ Reference this issue in the commit body and PR description.
 Steps:
 1. Rename the branch as above.
 2. Read the files listed in evidence.filesLikelyTouched.
-3. Apply the smallest change that resolves `actual` to match `expected`, using `suggestedFix` as guidance.
+3. Apply the smallest change that resolves `actual` to match `expected`, using `suggestedFix` as guidance. After applying, re-verify the finding's repro steps in the browser before reporting fixed; if unverifiable, report applied-unverified.
 4. If `.candid/config.json` has `chromeQAFix.testCommand` set, run it. Fix or stop on failure — do NOT proceed past failing tests.
 5. Commit with message: "Fix QA: {{title}}"
    Body must include:
@@ -304,7 +307,7 @@ DO NOT modify files unrelated to this finding. DO NOT touch other findings' file
 
 #### Step 8c: Local-only mode
 
-Run Step 8a's per-finding loop (steps 1–4) but stop before Step 8a/5 (test command, PR creation). Print a summary of files changed. The fixes remain uncommitted in the working tree for the user to review.
+Run Step 8a's per-finding loop (steps 1–5) but stop before Step 8a/6 (test command, PR creation). Print a summary of files changed. The fixes remain uncommitted in the working tree for the user to review.
 
 #### Step 8d: PR body template (used by 8a)
 
@@ -349,7 +352,7 @@ Per finding:
   …
 ```
 
-Glyph legend: `✓` = fixed + shipped (or applied), `✗` = fix failed, `◦` = issues-only / no fix attempted, `→` = dispatched to Conductor (per-finding mode).
+Glyph legend: `✓` = fixed + re-verified in browser + shipped (or applied), `⚠` = applied-unverified (fix applied, browser re-verification impossible), `✗` = fix failed or still-reproduces, `◦` = issues-only / no fix attempted, `→` = dispatched to Conductor (per-finding mode).
 
 Omit the `Issue:` column entirely if `issueTracker.enabled === false` or `provider !== "linear"`.
 

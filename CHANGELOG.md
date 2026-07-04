@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **Effectiveness pass — 10 improvements to raise catch-rate and cut false positives** (+88 lines across 8 files):
+  - `candid-review`: new Hard Rules (read the enclosing function and grep callers before flagging; every issue needs quoted evidence + a concrete trigger); untracked files now reviewed, rename detection (`-M`), staged/unstaged-mix warning; severity boundary test (🔥 Critical requires a nameable trigger); auto-select contradiction with candid-loop resolved (loop `--mode auto` counts as explicit selection)
+  - `candid-loop`: new Loop Invariants — PASS requires a fresh post-fix review, zero-progress iterations exit INCOMPLETE, oscillation (a fixed issue reappearing) halts the loop, rejected issues aren't re-asked
+  - `agents/code-reviewer`: receives diff hunks, must verify reachability before flagging, and returns a verbatim `evidence` quote per issue
+  - `candid-init`: generated rules carry provenance tags — `[observed N/M]` with known exceptions vs `[recommended]`; analysis agents must report adherence counts and negative evidence (patterns the codebase deliberately avoids)
+  - `candid-validate-standards`: new 4.6 Codebase Spot-Check — samples real files per rule and flags stale/untrue/contested rules
+  - `candid-chrome-qa-fix`: mandatory in-browser re-verification of each finding's repro steps before a fix may be marked ✓; new `⚠ applied-unverified` and `✗ still-reproduces` outcomes
+  - `candid-ship`: test step must report actual test counts + exit code; exit 0 with zero tests executed is a failure, not a pass
+
 ## [1.19.1] - 2026-07-04
 
 ### Changed
