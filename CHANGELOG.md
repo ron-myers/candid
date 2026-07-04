@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.20.0] - 2026-07-04
+
 ### Changed
 
 - **Effectiveness pass — 10 improvements to raise catch-rate and cut false positives** (+88 lines across 8 files):
