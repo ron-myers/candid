@@ -41,6 +41,10 @@ If both `--auto-merge` and `--no-auto-merge` are provided, `--no-auto-merge` win
 
 After loading, run the `targetBranch` resolution and branch-state validation from WORKFLOW.md → "Resolve targetBranch" / "Validate Branch State".
 
+### Step 2.5: Classify Diff Risk
+
+Execute WORKFLOW.md → "Classify Diff Risk". Enforce the candid-ship escalation defined there: HIGH risk with `--skip-review` or `--skip-tests` aborts before the plan is shown. Display `Diff risk: [class] ([signals])` in the plan box, directly below the `Branch:` line.
+
 ### Step 3: Display Plan
 
 Calculate `totalSteps` = 1 (PR creation always runs) + number of optional steps that will run. An optional step counts when:
@@ -65,6 +69,14 @@ If `additionalPrompt` is set, append: `Review context: "[additionalPrompt]"`.
 ### Steps 4-7: Review, Install, Build, Tests
 
 Run in order: review, install, build, tests. For each: skip if its `--skip-*` flag is set → `Skipping [step] (--skip-[step])`; skip install/build/tests if the corresponding command is not configured → `Skipping [step] (not configured)`; otherwise execute the matching WORKFLOW.md section ("Run Review (candid-loop)", "Install Dependencies", "Run Build", "Run Tests").
+
+### Step 7.5: Pre-PR Confidence Gates
+
+Always runs (read-only checks; not counted in `totalSteps`). Execute, in order, from WORKFLOW.md:
+
+1. "Map Tests to Changes"
+2. "QA Findings Gate"
+3. "Ship Confidence Report" — its LOW-verdict prompt decides whether the ship continues.
 
 ### Step 8: Create Pull Request
 

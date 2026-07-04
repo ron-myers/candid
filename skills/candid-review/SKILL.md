@@ -12,7 +12,7 @@ You are a full-stack architect conducting a code review. Your approach is based 
 1. **Never flag a line you haven't read in context.** Before reporting, Read the full enclosing function and Grep its callers. If an upstream guard already handles the case, do not report it.
 2. **Every issue needs evidence:** file:line, the offending code quoted verbatim, and a concrete trigger (the input/state/sequence that causes the failure). No trigger → downgrade to 🤔 or drop.
 3. **Never report an issue in code the diff didn't touch** — unless the diff breaks it (changed signature, removed guard); then cite both sites.
-4. **Never skip Step 8 or auto-select fixes** when issues exist (sole exception: candid-loop auto mode, see Step 8).
+4. **Never skip Step 8 or auto-select fixes** when issues exist (exceptions: candid-loop auto mode, see Step 8, and `--triage`, see Step 3 — in both, the user's explicit mode/flag choice IS the selection).
 
 ## Workflow
 
@@ -168,6 +168,18 @@ Then proceed with normal review.
 
 **Previous review state schema:** `{timestamp, commit, branch, issues[]}` where each issue has
 `{id, file, line, category, title, description}` — the same format Step 10 writes.
+
+#### Triage-Only Mode (`--triage`)
+
+`--triage — review + triage queue only; apply nothing (CLI-only)`
+
+CLI-only flag (no config equivalent — apply-nothing must be an explicit per-run choice). When set:
+- Run Steps 1-7 and Step 10 normally: full triage queue, detailed issues, state saved to `.candid/last-review.json`.
+- Skip Steps 8, 9, and 9.5 entirely. The flag IS the user's selection — it satisfies Hard Rule 4 the same way candid-loop auto mode does: the user chose "review only" up front.
+- Create no todos and apply nothing; the queue + saved state is the deliverable (CI, pre-commit sanity checks, quick looks).
+- End with: `Triage complete: [N] issues (🔥[a] ⚠️[b] 📜[c] 📋[d] 🤔[e] 💭[f]). Nothing applied. Re-run without --triage to select fixes, or --re-review after fixing.`
+
+Output when active: `Triage-only mode: review and queue only, no fixes will be applied`
 
 ### Step 4: Load Tone Preference and Commit Mode
 
@@ -380,10 +392,23 @@ When --focus edge-case is active, read EDGE-CASE.md (same directory as this skil
 
 ### Step 7: Present Issues with Fixes
 
+#### Triage Queue (print first, right after the Summary paragraph)
+
+Number issues #1..#N in Step 6 severity order (🔥 first; Safe ✓ before Verify ⚡ before Careful ⚠️ within a severity). These numbers are canonical — reuse them in Step 8 prompts, todos, the Step 9 status report, and the commit message.
+
+| # | Sev | File | Title | Confidence | Est. scope |
+|---|-----|------|-------|------------|------------|
+| 1 | 🔥 | src/user.ts:42 | Missing null check on user | Safe ✓ | ~3 lines, 1 file |
+| 2 | ⚠️ | src/orders.ts:88 | N+1 query in findAll | Verify ⚡ | ~15 lines, 2 files |
+
+- **Est. scope** = lines/files the *fix* touches, not the issue.
+- Skip the table when there are 2 or fewer issues.
+- The detailed listing below MUST follow the same order, with the number in each heading: `### [Icon] #[N] [Title]`.
+
 For each issue, provide this structured format:
 
 ```markdown
-### [Icon] [Title]
+### [Icon] #[N] [Title]
 **File:** path/to/file.ts:42-45
 **Confidence:** [Safe ✓ | Verify ⚡ | Careful ⚠️]
 **Problem:** Clear description of what's wrong
@@ -457,15 +482,22 @@ Use AskUserQuestion to offer bulk action shortcuts:
 
 **Options:**
 1. "Apply all fixes" - Apply all proposed fixes without individual review
-2. "Apply Critical + Major only" - Apply only 🔥 and ⚠️ fixes automatically
+2. "Apply a subset" - Bulk-apply by severity or fix confidence (follow-up question)
 3. "Review each fix individually" - Go through each fix one by one (proceeds to Phase 8b)
 4. "None (track as todos)" - Don't apply any fixes, add all to todo list
 
 Store the user's choice and proceed based on their selection:
 - If "Apply all fixes" → Add all issues to selectedFixes array, skip to Phase 8c
-- If "Apply Critical + Major only" → Add only 🔥 and ⚠️ issues to selectedFixes array, skip to Phase 8c
+- If "Apply a subset" → see routing below
 - If "Review each fix individually" → Proceed to Phase 8b
 - If "None (track as todos)" → Set selectedFixes to empty array, skip to Step 9
+
+Routing for option 2 (AskUserQuestion allows max 4 options, so subsets live in a follow-up):
+- If "Apply a subset" → follow-up AskUserQuestion "Which subset?" with options:
+  1. "Critical + Major (🔥⚠️)" → add only 🔥 and ⚠️ issues to selectedFixes
+  2. "Safe ✓ only" → add only Safe ✓-confidence issues (mechanical, no behavior change) — matches candid-improve-implementation Phase 9a
+  3. "Critical + Major that are Safe ✓" → intersection of both filters
+  Then skip to Phase 8c.
 
 #### Phase 8b: Individual Fix Review (Only if "Review individually" was chosen)
 
@@ -481,13 +513,14 @@ Loop through each issue identified in Steps 6-7. For each issue:
    - **Question:** "Apply this fix?"
    - **Context to display before options:**
      ```
-     [Icon] [Title]
+     [Icon] #[N] [Title]
      File: [path/to/file.ts:line]
      Problem: [Brief description]
      ```
    - **Options:**
      - "Yes, apply this fix" — add this issue to selectedFixes array
      - "No, skip this fix" — continue to next issue without adding
+     - "Show me the exact diff" — Read the current file at the cited lines and present the precise change as a unified diff (built from real file content, not the Step 7 sketch), then re-ask "Apply this fix?" with Yes/No options only. A preview never counts as approval.
      - "I have a question about this" (only if `registerEnabled == true`) — use a follow-up AskUserQuestion: "What is your question about this issue?" Record the user's question as a new register entry (`status: open`, `Asked By: Author`, file/component from the issue). Continue to next issue without adding to selectedFixes.
 
    **For Clarification Needed ? issues (only when register is enabled):**
@@ -513,6 +546,13 @@ Before applying fixes, show a summary and get final confirmation:
 1. **Display summary:**
    - Show count: "Ready to apply [N] selected fixes:"
    - List each selected fix with: number, icon, short title, file:line
+   - Append a one-screen receipt so nothing is silently dropped (omit zero-count lines):
+     ```
+     Applying: [N] fixes → files touched: [deduped list]
+     Skipped: [K] — #s + short titles, one line each
+     Questions recorded in register: [Q]
+     ```
+     When invoked by candid-loop, also show `Ignored persistently: [I]`.
 
 2. **Call AskUserQuestion for confirmation:**
    - **Question:** "Apply these fixes?"
@@ -520,7 +560,7 @@ Before applying fixes, show a summary and get final confirmation:
      - "Yes, apply all selected" - Proceed to Step 9 with selectedFixes
      - "No, let me review again" - Return to Phase 8a and start over
 
-**Enforcement:** Do not auto-select fixes or assume user intent — the user must choose through one of these paths. **Sole exception:** when invoked by candid-loop with `--mode auto`, the user's mode choice IS the selection: select "Apply all fixes" (post-filtering per loop config) without prompting, and note `Auto-applied under candid-loop auto mode` in the output.
+**Enforcement:** Do not auto-select fixes or assume user intent — the user must choose through one of these paths. **Exceptions:** `--triage` skips Step 8 entirely (see Step 3); and when invoked by candid-loop with `--mode auto`, the user's mode choice IS the selection: select "Apply all fixes" (post-filtering per loop config) without prompting, and note `Auto-applied under candid-loop auto mode` in the output.
 
 ### Step 9: Apply Fixes or Create Todos
 
@@ -529,9 +569,10 @@ Use the selectedFixes array from Step 8 to determine what action to take.
 **If selectedFixes contains fixes to apply (not empty):**
 
 1. Create a todo list of the selected fixes using TodoWrite (all as `pending`)
-   - Use format: `[Icon] Fix: [issue summary] at [file:line]`
+   - Use format: `[Icon] #[N] Fix: [issue summary] at [file:line]` (reusing the canonical Triage Queue numbers from Step 7)
 2. Initialize empty set `modifiedFiles` to track changed files
 3. Work through each fix sequentially:
+   - **Order the queue first:** within each file apply bottom-up (highest start line first) so earlier edits don't shift later anchors.
    - Mark the current fix as `in_progress`
    - Apply the fix using Edit tool
    - Add the file path to `modifiedFiles` set
@@ -539,6 +580,9 @@ Use the selectedFixes array from Step 8 to determine what action to take.
 4. After all fixes are applied, summarize what was changed:
    - State how many fixes were applied
    - List the files that were modified
+5. **Per-fix status report:** end with a table, one row per selected fix:
+   `| # | Fix | File | Status |` — Status is `✅ applied` or `❌ failed — [one-line reason]`.
+   On an Edit failure: leave that todo `pending`, do not add the file to `modifiedFiles`, continue with remaining fixes (one failure never aborts the batch), and list failed items as todos at the end.
 
 **If selectedFixes is empty (user chose "None" in Step 8):**
 
@@ -546,16 +590,16 @@ Create todos for ALL issues found in Steps 6-7 using TodoWrite:
 
 ```json
 {
-  "content": "[Icon] Fix: [issue summary] at [file:line]",
+  "content": "[Icon] #[N] Fix: [issue summary] at [file:line]",
   "activeForm": "Fixing [issue summary] in [file]",
   "status": "pending"
 }
 ```
 
 **Example todos:**
-- `🔥 Fix: null check missing in UserService.getUser() at user.ts:42`
-- `⚠️ Fix: N+1 query in OrderRepository.findAll() at orders.ts:88`
-- `📜 Fix: missing error handling per Technical.md at api.ts:15`
+- `🔥 #1 Fix: null check missing in UserService.getUser() at user.ts:42`
+- `⚠️ #2 Fix: N+1 query in OrderRepository.findAll() at orders.ts:88`
+- `📜 #3 Fix: missing error handling per Technical.md at api.ts:15`
 
 After creating todos, confirm to user how many were added and remind them they can review the todos later.
 
@@ -598,8 +642,8 @@ Create detailed commit message with this format:
 Apply candid-review fixes ([N] issues)
 
 Fixed issues:
-- [icon] [title] in [relative-path]:[line]
-- [icon] [title] in [relative-path]:[line]
+- [icon] #[N] [title] in [relative-path]:[line]
+- [icon] #[N] [title] in [relative-path]:[line]
 [... list continues ...]
 
 Co-authored-by: Claude Sonnet 4.5 <noreply@anthropic.com>
@@ -765,7 +809,7 @@ Consider committing [registerPath]/review-decision-register.md to preserve decis
 
 Present your review in this order:
 
-1. **Summary** - One paragraph overview of the changes and overall assessment
+1. **Summary** - One paragraph overview of the changes and overall assessment, followed immediately by the Triage Queue table (Step 7)
 2. **🔥 Critical Issues** - Must fix before commit (if any)
 3. **⚠️ Major Concerns** - Should fix (if any)
 4. **📜 Standards Violations** - Technical.md violations (if any)

@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.21.0] - 2026-07-04
+
+### Added
+
+- **Fix selection, clearer and safer** (candid-review, candid-improve-implementation, candid-loop):
+  - **Triage Queue**: reviews open with a ranked table — #, severity, file, title, fix confidence, estimated fix scope — and the `#N` ids stay canonical through selection prompts, todos, the status report, and the commit message
+  - **"Show me the exact diff"**: any fix can be previewed as a unified diff built from real file content before saying yes (all three selection UIs); a preview never counts as approval
+  - **Confidence-tier bulk apply**: "Apply a subset" now offers Critical+Major, Safe ✓ only (mechanical, no behavior change), or the intersection
+  - **Selection receipt + per-fix status**: one-screen receipt (applying/skipped/recorded) before apply, and a per-fix ✅ applied / ❌ failed table after; one failure never aborts the batch; edits apply bottom-up per file so anchors don't shift
+  - **`--triage` mode**: review + queue + saved state, nothing applied — for CI and quick checks (CLI-only by design)
+- **Ship confidence** (candid-ship, candid-fast-ship):
+  - **Ship Confidence Report**: evidence panel (review/build/tests/QA findings/untested changes/diff risk) with a HIGH/MEDIUM/LOW verdict, printed pre-PR and embedded in the PR body; skipped signals render as SKIPPED — absence of evidence is visible, never hidden; LOW verdict requires explicit confirmation
+  - **Diff risk classification**: migrations/auth/API contracts/dependencies/config classify the diff HIGH risk — blocking `--skip-review`/`--skip-tests` on candid-ship and routing fast-ship to the full pipeline
+  - **QA Findings Gate**: open P0/P1 chrome-qa findings newer than the merge-base that overlap the diff must be acknowledged or the ship aborts; acknowledgments are recorded in the PR body
+  - **Test-to-change mapping**: changed source files with no test change and no covering test file are reported as untested changes (a hard prompt when risk is HIGH)
+  - **Rollback note**: every PR body ends with the exact revert command plus risk-derived caveats (migrations, config, dependencies, auth)
+
 ## [1.20.0] - 2026-07-04
 
 ### Changed

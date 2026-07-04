@@ -39,6 +39,10 @@ If both `--auto-merge` and `--no-auto-merge` are provided, `--no-auto-merge` win
 
 Priority: `fastShip.targetBranch` → `ship.targetBranch` → first `mergeTargetBranches` entry → `"main"`. Then run target-branch verification and branch-state validation per WORKFLOW.md → "Resolve targetBranch" / "Validate Branch State".
 
+#### Classify Diff Risk
+
+Execute skills/candid-ship/WORKFLOW.md → "Classify Diff Risk" with the fast-ship escalation: HIGH risk aborts (`Risk class HIGH ([signals]): use /candid-ship for this change.`) unless `fastShip.review` and `fastShip.tests` are both enabled and their `ship` commands are configured. Display `Diff risk: [class] ([signals])` below the `Branch:` line in the plan. This is the enforcement behind the "low-risk changes" promise in this skill's description.
+
 ### Step 3: Display Plan
 
 A step is **enabled** only when its `fastShip` toggle is `true` AND the underlying `ship` config is present:
@@ -70,6 +74,10 @@ If all optional steps are disabled, append `(All optional steps disabled — onl
 ### Steps 5-7: Install, Build, Tests
 
 For each of install/build/tests: skip if its `fastShip.[step]` toggle is `false` → `Skipping [step] (not enabled in fastShip config)`; skip if the toggle is `true` but the corresponding `ship` command (`installCommand`/`buildCommand`/`testCommand`) is unset → `Skipping [step] ([commandField] not configured in ship)`; otherwise execute the matching WORKFLOW.md section ("Install Dependencies", "Run Build", "Run Tests").
+
+### Step 7.5: Pre-PR Confidence Gates
+
+Always runs — these are read-only checks, not toggleable steps, and are not counted in `totalSteps`. Execute skills/candid-ship/WORKFLOW.md → "Map Tests to Changes", "QA Findings Gate", then "Ship Confidence Report". Steps disabled in `fastShip` config appear as `SKIPPED` rows in the report — the PR records exactly how little was verified, which is the honest cost of a fast ship.
 
 ### Step 8: Create Pull Request
 
