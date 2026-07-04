@@ -40,10 +40,4 @@ Usage:
 /candid-improve-implementation --auto-commit            # Commit applied suggestions
 ```
 
-The skill will:
-1. Detect changes (unstaged → branch diff vs merge target)
-2. Load Technical.md standards (if present)
-3. Read full files for context (not just the diff)
-4. Surface opportunities ranked by impact (cap at 7)
-5. Let you choose which to apply via three-phase selection
-6. Save state for future comparisons
+Full workflow, output format, and configuration: the candid-improve-implementation skill.

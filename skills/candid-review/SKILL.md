@@ -1,6 +1,6 @@
 ---
 name: candid-review
-description: Use when reviewing code changes before commit or PR - provides configurable code review (harsh or constructive tone) with project standards from Technical.md, architectural context, categorized issues with actionable fixes, todo integration for tracking selected issues, and optional automatic commit of applied fixes
+description: Use when reviewing code changes before commit or PR — configurable harsh or constructive review against Technical.md standards, with categorized issues, actionable fixes, todo tracking, and optional auto-commit.
 ---
 
 # Radical Candor Code Review
@@ -11,53 +11,21 @@ You are a full-stack architect conducting a code review. Your approach is based 
 
 Execute these steps in order:
 
+**Config resolution (standard precedence):** Unless a step says otherwise, every setting resolves: CLI flag → `.candid/config.json` → `~/.candid/config.json` → default; invalid values warn and fall through to the next source.
+
 ### Step 1: Load Project Standards
 
-Check for Technical.md (project-specific standards):
+Load project standards: `./Technical.md`, falling back to `./.candid/Technical.md`; if neither exists, proceed without them.
 
-```
-1. Read ./Technical.md (project root)
-2. If not found, read ./.candid/Technical.md
-3. If found, use these standards to inform your review
-4. If not found, proceed without project-specific standards
-```
-
-When Technical.md exists, you will flag violations as 📜 Standards Violation.
+When Technical.md exists, use these standards to inform your review and flag violations as 📜 Standards Violation.
 
 ### Step 1.5: Load Decision Register Config
 
 Check if the decision register feature is enabled. The decision register tracks questions and decisions from reviews, and — when a question has been answered before — automatically reuses the prior answer instead of re-asking.
 
-**Precedence (highest to lowest):**
-1. Project config (`.candid/config.json` → `decisionRegister`)
-2. User config (`~/.candid/config.json` → `decisionRegister`)
-3. Default (disabled)
-
-#### Check Project Config
-
-Read `.candid/config.json`:
-1. Check file existence → if missing, continue to user config
-2. Extract field: `jq -r '.decisionRegister // null'`
-3. Validate:
-   - If null → continue to user config
-   - If not object → warn "⚠️  Invalid config: decisionRegister must be an object. Ignoring." and continue
-   - Extract `enabled` (must be boolean, default `false`)
-   - Extract `path` (must be non-empty string, default `".candid/register"`)
-   - Extract `mode` (must be `"lookup"` or `"load"`, default `"lookup"`)
-4. Success: Store `registerEnabled`, `registerPath`, and `registerMode`
-
-#### Check User Config
-
-Same procedure for `~/.candid/config.json`.
-
-#### Apply Defaults
-
-If no config found:
-```
-registerEnabled = false
-registerPath = ".candid/register"
-registerMode = "lookup"
-```
+Read `decisionRegister` from `.candid/config.json`, then `~/.candid/config.json` (first valid wins); validate per CONFIG.md.
+Defaults: `enabled=false`, `path=".candid/register"`, `mode="lookup"`.
+Store `registerEnabled`, `registerPath`, `registerMode`.
 
 #### Load Existing Register (if enabled)
 
@@ -95,10 +63,7 @@ git diff --cached --stat
 # Then unstaged changes
 git diff --stat
 
-# If on a branch, compare to configured merge target branches (from Step 2.5)
-# Build fallback chain dynamically from mergeTargetBranches
-# For each branch: git diff <branch>...HEAD --stat 2>/dev/null
-# Example for ["develop", "main"]: git diff develop...HEAD --stat 2>/dev/null || git diff main...HEAD --stat 2>/dev/null
+# Compare to merge target per Runtime Branch Selection in Step 2.5
 ```
 
 **3. Decide what to review:**
@@ -113,38 +78,16 @@ git diff --stat
 
 ### Step 2.5: Load Merge Target Branches
 
-Determine which branches to compare against, following config precedence.
-
-**Precedence (highest to lowest):**
-1. CLI flags (`--merge-target <branch>`, repeatable)
-2. Project config (`.candid/config.json` → `mergeTargetBranches`)
-3. User config (`~/.candid/config.json` → `mergeTargetBranches`)
-4. Default (`["main", "stable", "master"]`)
+Determine which branches to compare against, following standard precedence.
 
 #### Check CLI Arguments
-If `--merge-target` flags provided:
+If `--merge-target` flags provided (repeatable):
 - Build array from args (e.g., `--merge-target develop --merge-target main` → `["develop", "main"]`)
 - Output: `Using merge target branches: [list] (from CLI flags)`
 - Skip to Step 3
 
-#### Check Project Config
-Read `.candid/config.json`:
-1. Check file existence → if missing, continue to user config
-2. Validate JSON (use `jq empty`) → if invalid, warn and continue
-3. Extract field: `jq -r '.mergeTargetBranches // null'`
-4. Validate:
-   - If null → continue to user config
-   - If not array → warn and continue
-   - If empty array → warn and continue
-   - If contains non-strings → warn and continue
-5. Success: Output `Using merge target branches: [list] (from project config)`, skip to Step 3
-
-#### Check User Config
-Same procedure as project config, using `~/.candid/config.json`.
-Success: Output `Using merge target branches: [list] (from user config)`, skip to Step 3
-
-#### Use Default
-Set to `["main", "stable", "master"]` (silent, no output)
+#### Check Config
+Read `mergeTargetBranches` from `.candid/config.json`, then `~/.candid/config.json` (first valid wins); must be a non-empty array of strings per CONFIG.md — warn and fall through on invalid. Output: `Using merge target branches: [list] (from [project config/user config])`. If none, default silently to `["main", "stable", "master"]`.
 
 #### Runtime Branch Selection (used in Step 2)
 When executing the git diff command:
@@ -160,11 +103,7 @@ Check CLI arguments for review options:
 
 #### Focus Mode (`--focus`)
 
-**Focus Precedence (highest to lowest):**
-1. CLI flag (`--focus security`)
-2. Project config (`.candid/config.json` → `focus` field)
-3. User config (`~/.candid/config.json` → `focus` field)
-4. No focus (review all categories)
+Resolve focus with standard precedence: `--focus` CLI flag → `focus` config field → no focus (review all categories).
 
 If focus is set, limit review to specific categories:
 
@@ -187,11 +126,7 @@ Also check config files for exclusions:
 1. `.candid/config.json` → `exclude` array
 2. `~/.candid/config.json` → `exclude` array
 
-Common patterns:
-- `*.generated.ts` - Generated code
-- `*.min.js` - Minified files
-- `vendor/*` - Third-party code
-- `**/node_modules/**` - Dependencies
+See CONFIG.md for common exclude patterns.
 
 Merge CLI exclusions with config exclusions. Apply to file list in Step 2.
 
@@ -218,100 +153,24 @@ Then proceed with normal review.
 - Store in `previousIssues` array for comparison in Step 7
 - Output: `Re-review mode: comparing against review from [timestamp]`
 
-**Previous Review State Format:**
-```json
-{
-  "timestamp": "2026-01-17T10:30:00Z",
-  "commit": "abc123",
-  "branch": "feature/auth",
-  "issues": [
-    {
-      "id": "hash-of-file-line-category",
-      "file": "src/auth.ts",
-      "line": 42,
-      "category": "critical",
-      "title": "Null check missing",
-      "description": "user.email accessed without null check"
-    }
-  ]
-}
-```
-
-#### Commit Mode (`--auto-commit`)
-
-If `--auto-commit` flag is provided, automatically create git commit after successfully applying fixes.
-
-**Requirements:**
-- Must be in git repository
-- At least one fix must be applied
-- Working directory must have changes after fixes
-
-**Commit behavior:**
-- Only commits files modified by candid-review (not other unstaged changes)
-- Commit message includes list of all applied fixes with file locations
-- Includes co-author tag: `Co-authored-by: Claude Sonnet 4.5 <noreply@anthropic.com>`
-- Commit failures preserve applied fixes and continue review
-
-**Output when enabled:** `Commit enabled: will create git commit after applying fixes (from CLI flag)`
+**Previous review state schema:** `{timestamp, commit, branch, issues[]}` where each issue has
+`{id, file, line, category, title, description}` — the same format Step 10 writes.
 
 ### Step 4: Load Tone Preference and Commit Mode
 
-#### Check for --auto-commit flag
+#### Determine Commit Mode
 
-Parse CLI arguments to determine if automatic commit is requested.
+Resolve auto-commit with standard precedence: `--auto-commit` CLI flag → project config `autoCommit` → user config `autoCommit` → default `false` (no output).
 
-If `--auto-commit` flag is provided:
-- Set `commitEnabled = true`
-- Output: `Commit enabled: will create git commit after applying fixes (from CLI flag)`
-- Skip to tone preference loading
+Validate `autoCommit` as boolean per the Config Validation Procedure in CONFIG.md; on invalid value warn and fall through to the next source.
 
-If `--auto-commit` flag is NOT provided, check config files:
-
-#### Check Project Config for Commit
-
-Read `.candid/config.json`:
-1. Check file existence → if missing, continue to user config
-2. Validate JSON (use `jq empty .candid/config.json 2>&1`) → if invalid, skip to user config
-3. Extract field: `jq -r '.autoCommit // null' .candid/config.json`
-4. Validate:
-   - If null or missing → continue to user config
-   - If not boolean → warn "⚠️  Invalid config at .candid/config.json: invalid type for autoCommit field (must be boolean). Falling back to user config." and continue to user config
-5. Success:
-   - Set `commitEnabled` to config value (true or false)
-   - If true: Output `Commit enabled: will create git commit after applying fixes (from project config)`
-   - Continue to tone preference loading
-
-#### Check User Config for Commit
-
-Read `~/.candid/config.json`:
-1. Check file existence → if missing, continue to default
-2. Validate JSON (use `jq empty ~/.candid/config.json 2>&1`) → if invalid, use default
-3. Extract field: `jq -r '.autoCommit // null' ~/.candid/config.json`
-4. Validate:
-   - If null or missing → use default
-   - If not boolean → warn "⚠️  Invalid config at ~/.candid/config.json: invalid type for autoCommit field (must be boolean). Using default." and use default
-5. Success:
-   - Set `commitEnabled` to config value (true or false)
-   - If true: Output `Commit enabled: will create git commit after applying fixes (from user config)`
-   - Continue to tone preference loading
-
-#### Default Commit Behavior
-
-If no CLI flag and no config specifies commit:
-- Set `commitEnabled = false`
-- (No output - default behavior)
+When enabled, output: `Commit enabled: will create git commit after applying fixes (from [CLI flag/project config/user config])`
 
 Store the `commitEnabled` boolean for use in Step 9.5.
 
 #### Load Tone Preference
 
-Load tone preference following precedence rules. See CONFIG.md for detailed validation instructions.
-
-**Precedence Order (highest to lowest):**
-1. CLI flags (`--harsh` or `--constructive`)
-2. Project config (`.candid/config.json`)
-3. User config (`~/.candid/config.json`)
-4. Interactive prompt
+Load tone preference following standard precedence, with the interactive prompt as the final fallback instead of a default. See CONFIG.md for detailed validation instructions.
 
 #### Check CLI Arguments
 
@@ -500,80 +359,8 @@ Before marking an issue as Clarification Needed, check `existingRegisterEntries`
 - Missing observability (logging, metrics)
 - Tight coupling between modules
 
-### Edge-Case Focus Mode Checklist
-
-When `--focus edge-case` is active, systematically check every code path for boundary conditions, error scenarios, and unusual inputs. Go beyond surface-level checks to exhaustively analyze edge cases.
-
-**Input Validation Matrix**
-For every input (function arguments, API parameters, user input, config values):
-- [ ] Null/undefined handling - Does code check for null/undefined before use?
-- [ ] Empty collection handling - How does code handle [], {}, "", empty Map/Set?
-- [ ] Type validation - Is type checked (string vs number, array vs object)?
-- [ ] Boundary values - Tested with 0, -1, Infinity, NaN, MIN/MAX values?
-- [ ] Length limits - Are string/array length limits enforced?
-- [ ] Special characters - Handles unicode, emoji, control characters, zero-width spaces?
-- [ ] Whitespace variations - Tested with leading, trailing, or whitespace-only input?
-- [ ] Extra/missing properties - Handles unexpected object properties or missing required fields?
-
-**Async Operation Safety**
-For every async operation (promises, async/await, callbacks):
-- [ ] Timeout configured - Is there a timeout to prevent hanging forever?
-- [ ] Cancellation on cleanup - Are operations cancelled on unmount/navigation?
-- [ ] Error handling - All failure modes caught (network, validation, business logic)?
-- [ ] Race condition analysis - What if multiple async operations complete out of order?
-- [ ] Double-invocation protection - What if user triggers operation twice quickly?
-- [ ] State validity after await - Is component/data still valid after async completes?
-
-**Data Structure Edge Cases**
-For every data query, transformation, or collection operation:
-- [ ] Empty result set - How does code handle zero results from query/filter?
-- [ ] Single item edge case - Does plural handling work correctly for 1 item?
-- [ ] Large dataset pagination - Is pagination implemented for potentially large results?
-- [ ] Sorting with null/equal values - How are null values or equal items sorted?
-- [ ] Filtering edge cases - Handles no matches, all matches, partial matches?
-- [ ] Duplicate handling - Are duplicates detected/prevented when required?
-
-**Network Resilience**
-For every network call (API, fetch, external service):
-- [ ] Timeout specified - Is request timeout configured (not infinite)?
-- [ ] Retry logic - Are retries implemented with exponential backoff?
-- [ ] 4xx/5xx error handling - Different handling for client vs server errors?
-- [ ] Network offline handling - Graceful degradation when offline?
-- [ ] Partial failure scenarios - What if some requests succeed, others fail?
-- [ ] Loading/error states - Does UI show appropriate feedback during/after request?
-
-**State Lifecycle**
-For every stateful component or module:
-- [ ] Cleanup on unmount - Are event listeners, timers, subscriptions cleaned up?
-- [ ] Concurrent update handling - What if state updates happen simultaneously?
-- [ ] State updates after navigation - Are updates prevented after user navigates away?
-- [ ] Re-initialization safety - Can component be safely re-initialized?
-- [ ] Memory leak potential - Are there circular references or retained closures?
-
-**Date/Time Edge Cases**
-For every date/time operation:
-- [ ] Timezone handling - Is timezone properly considered?
-- [ ] DST transitions - Tested with daylight saving time changes?
-- [ ] Leap year/second - Handles February 29th, leap seconds?
-- [ ] Invalid date handling - What happens with invalid date strings?
-- [ ] Locale-specific formatting - Works correctly across different locales?
-
-**Browser/Environment**
-For every browser API or environment-dependent code:
-- [ ] API availability check - Is feature detection done before using browser APIs?
-- [ ] Mobile vs desktop differences - Tested on both touch and mouse interactions?
-- [ ] Keyboard accessibility - Can all interactions be done via keyboard?
-- [ ] LocalStorage/Cookie unavailability - Graceful fallback if storage disabled?
-- [ ] Screen size variations - Responsive to different viewport sizes?
-- [ ] JavaScript disabled scenarios - Progressive enhancement where critical?
-
-**Security Edge Cases**
-For every security-sensitive operation:
-- [ ] CSRF token handling - Token refresh on expiration?
-- [ ] Session timeout - Graceful handling of expired sessions?
-- [ ] Permission changes mid-operation - What if permissions revoked during action?
-- [ ] Authentication token refresh - Automatic refresh before expiration?
-- [ ] XSS via unusual vectors - Sanitization covers edge cases (data URIs, SVG, etc.)?
+### Edge-Case Focus Mode
+When --focus edge-case is active, read EDGE-CASE.md (same directory as this skill) and systematically apply every checklist item in it to each code path.
 
 ### Step 7: Present Issues with Fixes
 
@@ -619,19 +406,7 @@ Include confidence in every issue. Users can use this to decide whether to apply
 > const email = user.email;
 > ```
 
-*Constructive tone example:*
-> ### 🔥 Missing null check on user access
-> **File:** src/user.ts:42
-> **Confidence:** Safe ✓
-> **Problem:** The code accesses `user.email` without verifying the user object exists.
-> **Impact:** If the user lookup fails or returns null, this will cause a runtime crash. This is especially risky in authentication flows where invalid states are common.
-> **Fix:**
-> ```typescript
-> if (!user?.email) {
->   throw new Error('User not found');
-> }
-> const email = user.email;
-> ```
+*Constructive tone uses the same structure with a neutral title (e.g., "Missing null check on user access") and an Impact section that explains why the failure mode matters.*
 
 *Clarification Needed example (when register is enabled and no prior answer found):*
 > ### ? Rate limiting absent on public endpoint
@@ -695,9 +470,9 @@ Loop through each issue identified in Steps 6-7. For each issue:
      Problem: [Brief description]
      ```
    - **Options:**
-     - "Yes, apply this fix"
-     - "No, skip this fix"
-     - "I have a question about this" (only if `registerEnabled == true`)
+     - "Yes, apply this fix" — add this issue to selectedFixes array
+     - "No, skip this fix" — continue to next issue without adding
+     - "I have a question about this" (only if `registerEnabled == true`) — use a follow-up AskUserQuestion: "What is your question about this issue?" Record the user's question as a new register entry (`status: open`, `Asked By: Author`, file/component from the issue). Continue to next issue without adding to selectedFixes.
 
    **For Clarification Needed ? issues (only when register is enabled):**
    - **Question:** "This issue needs your input:"
@@ -708,19 +483,10 @@ Loop through each issue identified in Steps 6-7. For each issue:
      Question: [The question from the issue]
      ```
    - **Options:**
-     - "Here's my answer" — Use a follow-up AskUserQuestion to get the answer text. Record the answer in the register entry as `answered` with the user's response.
+     - "Here's my answer" — Use a follow-up AskUserQuestion to get the answer text. Record the answer in the register entry as `answered` with the user's response. If the answer implies a fix should be applied, add to selectedFixes; if the answer is informational only, continue without adding.
      - "Skip for now" — Leave the register entry as `open`. Continue to next issue.
      - "No longer relevant / Superseded" — Mark the register entry as `superseded` (the question was made irrelevant by other changes). Continue to next issue.
      - "Not applicable / Decline" — Mark the register entry as `declined`. Continue to next issue.
-
-3. **Track selection:**
-   - If "Yes" → Add this issue to selectedFixes array
-   - If "No" → Continue to next issue without adding
-   - If "I have a question about this" → Use a follow-up AskUserQuestion: "What is your question about this issue?" Record the user's question as a new register entry (`status: open`, `Asked By: Author`, file/component from the issue). Continue to next issue without adding to selectedFixes.
-   - If "Here's my answer" → Mark the Clarification Needed entry as `answered`. If the answer implies a fix should be applied, add to selectedFixes. If the answer is informational only, continue without adding.
-   - If "Skip for now" → Continue to next issue
-   - If "No longer relevant / Superseded" → Mark as `superseded`, continue to next issue
-   - If "Not applicable / Decline" → Mark as `declined`, continue to next issue
 
 Repeat for all issues. After completing the loop, proceed to Phase 8c.
 
@@ -738,7 +504,7 @@ Before applying fixes, show a summary and get final confirmation:
      - "Yes, apply all selected" - Proceed to Step 9 with selectedFixes
      - "No, let me review again" - Return to Phase 8a and start over
 
-**Enforcement:** Do not proceed to Step 9 without completing this prompt. Do not auto-select fixes or assume user intent. The user MUST explicitly choose which fixes to apply through one of these paths.
+**Enforcement:** Do not auto-select fixes or assume user intent — the user must choose through one of these paths.
 
 ### Step 9: Apply Fixes or Create Todos
 
@@ -1026,34 +792,10 @@ For each issue in `previousIssues`:
 
 **3. Present issues in groups:**
 
-```markdown
-## ✅ Fixed Issues (N)
-
-These issues from the previous review have been resolved:
-
-1. ~~🔥 Null check missing in auth.ts:42~~ ✅
-2. ~~⚠️ N+1 query in orders.ts:88~~ ✅
-
----
-
-## 🔄 Still Present (M)
-
-These issues remain from the previous review:
-
-### 🔥 SQL injection vulnerability
-**File:** src/db.ts:15 (was line 12)
-...
-
----
-
-## 🆕 New Issues (P)
-
-Issues introduced since last review:
-
-### ⚠️ Missing error handling
-**File:** src/api.ts:42
-...
-```
+Present three sections in order:
+- `## ✅ Fixed Issues (N)` — numbered list, each item struck through (`~~...~~`) with trailing ✅
+- `## 🔄 Still Present (M)` — full issue format from Step 7, noting "(was line X)" if the line moved
+- `## 🆕 New Issues (P)` — full issue format from Step 7
 
 **4. Summary includes comparison:**
 ```
@@ -1082,12 +824,4 @@ Net change: [+/-X] issues
 - Offers multiple solution approaches
 - More encouraging about good practices
 
-## Remember
-
-Your goal is to **improve the code** and **help the developer grow**. Every issue you raise:
-1. Points to specific code (file:line)
-2. Explains why it matters
-3. Shows how to fix it
-4. Can be tracked as a todo
-
-The best code review is one where the developer leaves better equipped than before.
+Your goal is to improve the code and help the developer grow.

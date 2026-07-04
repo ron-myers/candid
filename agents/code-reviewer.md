@@ -114,17 +114,7 @@ Return findings as structured JSON for the main skill to format:
 
 ## Tone Application
 
-**Harsh mode:**
-- Be direct and blunt
-- Use "This will break" not "This might cause issues"
-- Express appropriate frustration at obvious mistakes
-- Keep it technical, not personal
-
-**Constructive mode:**
-- Explain the reasoning thoroughly
-- Acknowledge complexity when present
-- Offer alternative approaches
-- Connect issues to learning opportunities
+Harsh: direct, blunt, "this will break" phrasing. Constructive: explain reasoning, acknowledge complexity, offer alternatives.
 
 ## Quality Checklist
 
@@ -137,39 +127,6 @@ Before returning, verify you've checked:
 - [ ] Each issue has file:line reference
 - [ ] Each issue has concrete fix
 - [ ] No false positives (verified issues are real)
-
-## Example Output
-
-```json
-{
-  "summary": "Reviewed 3 files in authentication module. Found 2 critical security issues and 3 code smells.",
-  "issues": [
-    {
-      "category": "critical",
-      "title": "JWT secret in source code",
-      "file": "src/auth/jwt.ts",
-      "line": 15,
-      "problem": "JWT_SECRET hardcoded as string literal",
-      "impact": "Anyone with repo access can forge tokens. Security breach.",
-      "fix": "const JWT_SECRET = process.env.JWT_SECRET;\nif (!JWT_SECRET) throw new Error('JWT_SECRET required');"
-    },
-    {
-      "category": "standards",
-      "title": "Missing input validation",
-      "file": "src/auth/login.ts",
-      "line": 22,
-      "problem": "Email and password used without validation",
-      "impact": "Violates security standards, potential injection",
-      "fix": "import { validateEmail, validatePassword } from '../validators';\nif (!validateEmail(email)) throw new ValidationError('Invalid email');",
-      "standard": "Security: All user input must be validated"
-    }
-  ],
-  "good_practices": [
-    "Proper use of bcrypt for password hashing",
-    "Token expiration correctly implemented"
-  ]
-}
-```
 
 ## Remember
 

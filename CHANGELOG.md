@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.19.1] - 2026-07-04
+
+### Changed
+
+- **Token-efficiency pass across all 10 skills** (~1,770 lines removed from always-loaded context, zero behavior change):
+  - **Progressive disclosure**: `candid-init`'s 10 agent-prompt templates moved verbatim to `skills/candid-init/reference/` (loaded only in thorough mode); `candid-review`'s 75-line edge-case checklist moved to `skills/candid-review/EDGE-CASE.md` (loaded only with `--focus edge-case`)
+  - **Config example galleries trimmed**: `candid-review/CONFIG.md` and `candid-improve-implementation/CONFIG.md` reduced from ~18 examples each to the 2–4 that add information beyond the schema
+  - **Boilerplate dedupe**: the CLI → project config → user config → default precedence ladder now stated once per skill instead of once per field; duplicate `--auto-commit` spec, repeated summary/banner templates, and identity mappings removed
+  - **Command files now delegate**: `commands/*.md` recaps of workflow/output/config deleted — they double-loaded with SKILL.md on every invocation
+  - **Shared templates**: ship/fast-ship plan boxes unified in `candid-ship/WORKFLOW.md`; chrome-qa-fix's three identical unsupported-provider warnings merged into one
+  - All review criteria, severity/category definitions, checklists, output strings, and defaults preserved verbatim
+
 ## [1.19.0] - 2026-05-12
 
 ### Added

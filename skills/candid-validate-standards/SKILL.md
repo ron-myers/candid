@@ -88,6 +88,8 @@ Flag rules containing vague terms without specifics:
 | "avoid" (alone) | No guidance on alternatives |
 | "consider" | Not a requirement |
 
+Also flag: suitable, adequate, well-organized, well-written, scalable, flexible, robust, simple, straightforward, intuitive, obvious, sensible, meaningful, significant, as needed, prefer, try to, minimal, few, some, many, several, various.
+
 **Exception:** Terms are OK if followed by specific criteria:
 - "readable (functions under 50 lines)" ✓
 - "maintainable" ✗
@@ -104,6 +106,8 @@ Flag rules that imply quantity without numbers:
 | "minimal dependencies" | What's minimal? |
 | "few levels of nesting" | How few? |
 | "reasonable timeout" | What's reasonable? |
+
+Also flag: maximum/minimum, too many/too few, keep under/below, no more than — when no number follows.
 
 **Fix pattern:** Add specific numbers (e.g., "functions under 50 lines")
 
@@ -211,23 +215,14 @@ Rules that may have issues.
 [List of rules that passed validation]
 ```
 
+If zero issues: output a short pass message with file path and rule count instead of the full report.
+
 ### Step 6: Suggest Fixes (if --fix flag)
 
 If `--fix` argument provided, include specific rewrites:
 
 ```markdown
 ## 💡 Suggested Rewrites
-
-### Line 12: "Write clean code"
-**Original:** Write clean code
-**Suggested:**
-- Functions must be under 50 lines
-- No single-letter variable names except loop counters
-- Maximum 3 levels of nesting
-
-### Line 18: "Keep functions small"
-**Original:** Keep functions small
-**Suggested:** Functions must be under 50 lines (warning at 30)
 
 ### Line 24: "Use appropriate error handling"
 **Original:** Use appropriate error handling
@@ -258,75 +253,6 @@ End with actionable summary:
 3. Rewrite [W] vague rules with specific criteria
 
 Run `/candid-validate-standards --fix` for suggested rewrites.
-```
-
-## Output Examples
-
-### Clean Technical.md
-
-```
-✅ Technical.md Validation Passed
-
-File: ./Technical.md
-Rules analyzed: 24
-Issues found: 0
-
-All rules are specific and verifiable. Nice work!
-```
-
-### Issues Found
-
-```
-⚠️ Technical.md Validation: 8 issues found
-
-File: ./Technical.md
-Rules analyzed: 24
-Issues found: 8
-
-🌫️ Vague Language (3)
-  Line 12: "clean code" - subjective term
-  Line 18: "proper error handling" - "proper" undefined
-  Line 31: "when necessary" - undefined trigger
-
-📏 Missing Thresholds (2)
-  Line 15: "small functions" - no size specified
-  Line 22: "limit nesting" - no depth specified
-
-🔧 Linter Overlap (3)
-  Line 5: semicolons - handled by ESLint
-  Line 8: quote style - handled by Prettier
-  Line 11: import order - handled by ESLint
-
-Run `/candid-validate-standards --fix` for suggested rewrites.
-```
-
-## Vague Terms Reference
-
-Use this list to detect vague language:
-
-```
-clean, good, proper, appropriate, suitable, adequate
-well-designed, well-structured, well-organized, well-written
-readable, maintainable, scalable, flexible, robust
-best practices, industry standards, conventions
-simple, straightforward, intuitive, obvious
-reasonable, sensible, meaningful, significant
-when necessary, when appropriate, when needed, as needed
-avoid, prefer, consider, try to, should (without specifics)
-minimal, few, some, many, several, various
-```
-
-## Threshold Patterns Reference
-
-Patterns that need numbers:
-
-```
-small/short/brief + (function|method|class|file|module)
-limit/restrict/cap + (parameters|arguments|nesting|depth|complexity)
-maximum/minimum + (without number following)
-too many/too few + (without threshold)
-keep ... under/below + (without number)
-no more than + (without number)
 ```
 
 ## Remember

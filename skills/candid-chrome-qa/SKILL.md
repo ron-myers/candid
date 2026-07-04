@@ -24,7 +24,7 @@ CLI flags (full set):
 | `--goal "<text>"` | Pre-fill the goal prompt. Skip the interactive ask. |
 | `--prompt "<text>"` | Pre-fill the QA-plan prompt. Skip the interactive ask. |
 | `--routes "/p1,/p2"` | Comma-separated list of routes to walk. Each becomes one target, bypassing goal-derived target inference. |
-| `--severity-floor P3` | Persist only findings at or above this severity (`P0` highest, `P5` lowest). Default `P5` (all). Findings below the floor are still walked and counted toward the `summary` block — they're just not appended to the file. |
+| `--severity-floor P3` | Persist only findings at or above this severity (`P0` highest, `P5` lowest). Default `P5` (all). Below-floor findings are still walked — see per-target loop step 7. |
 | `--viewports "1440x900,390x844"` | Override `chromeQA.desktopViewport` / `chromeQA.mobileViewport` from config. First value = desktop, second = mobile. |
 | `--findings-dir <path>` | Override findings output directory (default `.context/findings`). The directory is `mkdir -p`'d on each pass. |
 | `--mobile-only` | Explicit opt-out from the desktop pass. Runs **only** the mobile pass. Documented exception to Hard Rule 6. |
@@ -215,12 +215,6 @@ After desktop pass:
 
 **Resize ceiling fallback:** Chrome may enforce a minimum content width of ~1075 px on the active tab depending on UI chrome. If `resize_window` to 390 wide doesn't take effect, try the smallest you can reach (often ~500 px) — the mobile breakpoint still triggers, the desktop sidebar still hides, and the hamburger drawer still appears. Note the actual width reached in the finding's `evidence`.
 
-**`--mobile-only` flag** inverts the default: skip the desktop pass entirely and run only the mobile sequence above. This is an **explicit opt-out** of Hard Rule 6 (which forbids running mobile without desktop). Use sparingly — most QA passes need both.
-
-**`--desktop-only` flag** skips the mobile pass entirely. Use when the surface is admin-only, internal tooling, or otherwise has no mobile contract to honor. Like `--mobile-only`, it's an explicit opt-out — without the flag, mobile is required.
-
-**`--mobile-only` + `--desktop-only` are mutually exclusive.** If both are passed, error and ask the user which one they meant. Don't silently pick one.
-
 ## Hot-spot stress — when the user provides recent commits or known weak points
 
 For each: drive the recently-changed surface harder. Resize to 700px tall to stress sidebar/scroll fixes; switch orgs mid-edit to stress org-scope; trigger validation; double-click save.
@@ -387,13 +381,12 @@ If you hit a hard blocker (server down mid-pass, dirty-state trap, unrecoverable
 
 ## Common rationalizations — STOP if you catch yourself
 
+If you catch yourself about to do any of these, stop and re-read the relevant section.
+
 | Excuse | Reality |
 |--------|---------|
 | "I'll write the schema my way, it's clearer" | Downstream consumers target `schemaVersion: "2.0"` — your custom fields get dropped, and missing v2-required fields break triage. |
-| "Source review is fine since data is missing" | Silent downgrade. Ask first. |
-| "I'll batch findings at the end for cleanliness" | Context exhausts. Findings lost. Append per-finding. |
 | "Mobile is similar to desktop, skip it" | Found mobile-only bugs ~30% of pass. Don't skip unless `--mobile-only` was passed. |
-| "Console looks clean, skip the probe" | Probes catch DOM-level a11y issues clicks miss. Run them. |
 | "Click-tested ~all interactions, no need for edge cases" | Edge cases (empty/invalid/rapid-double-click) are where the bugs live. Run at least one per target. |
 | "User said skip the pre-flight" | They didn't. Ask before skipping. |
 | "I'll add `body` back, it's cleaner for humans" | v2 dropped `body` deliberately — pure derivation. Render at consumption time. |
@@ -403,16 +396,3 @@ If you hit a hard blocker (server down mid-pass, dirty-state trap, unrecoverable
 | "User passed `--severity-floor P0` so I'll skip walking the lower-severity stuff" | Wrong layer. Walk everything; drop only at the persist step (#7). The `summary` block must reflect the full walk, otherwise `Top issues: none` becomes a lie when there were P3s you skipped. |
 | "I'll silently override `--viewports` if the second value won't fit" | Use the resize-ceiling fallback (mobile-pass section) and record the actual width reached in the finding's `evidence`. Never silently change user-provided viewports. |
 | "User passed `--routes` so I'll skip the cross-cutting probes" | Cross-cutting probes still run once per pass. `--routes` narrows the per-target loop, not the probes. |
-
-## Red flags — STOP and re-read this skill
-
-- About to write findings without `repro/expected/actual` structure
-- About to skip the desktop pass without `--mobile-only` having been passed
-- About to invent a new top-level field in the JSON
-- About to click "Delete" / "Disconnect" / "Force" without asking
-- About to silently use a stale tab from a prior session
-- About to skip the final summary (JSON `summary` block + stdout block)
-- About to call `mcp__claude-in-chrome__*` without having run Pre-flight step 0
-- About to write `"P0|P1|P2|P3|P4|P5"` as the value of a `severity` field
-
-All of these mean: stop, re-read the relevant section, follow the protocol.

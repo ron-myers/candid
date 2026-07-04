@@ -105,7 +105,7 @@ Read Technical.md and analyze each rule for optimization potential.
 
 #### 3.1 Parse Rules
 
-Extract rules from Technical.md using the same approach as candid-validate-standards:
+Extract rules from Technical.md:
 - Lines starting with `-` or `*` (list items)
 - Lines starting with numbers (numbered lists)
 - Lines following a `##` heading
@@ -524,9 +524,6 @@ Files modified:
 
 ## Edge Cases
 
-### No Technical.md and no config
-Output the token budget (all zeros), note that no context files exist. Continue to Steps 4 and 6 — exclude pattern scanning and config tuning recommendations are still valuable for fresh projects. Suggest running `/candid-init` as one of the config recommendations in Step 6.
-
 ### Technical.md exists but is already optimal
 If no verbose, duplicate, or low-signal rules found, skip Section 3 findings and note:
 ```
@@ -535,12 +532,6 @@ If no verbose, duplicate, or low-signal rules found, skip Section 3 findings and
 
 ### Config exists but is empty (`{}`)
 Treat as valid config with no preferences. Recommend adding settings based on detected patterns.
-
-### Decision register disabled
-Skip Section 5 entirely. Note in summary:
-```
-Decision register: disabled (no analysis needed)
-```
 
 ### --section with non-existent context
 If `--section technical-md` but no Technical.md exists:
@@ -561,12 +552,6 @@ If `--section excludes` or `--section config`: these always produce output (scan
 
 Before presenting results, verify:
 
-- [ ] Token estimates use `~` prefix (never claim exact counts)
-- [ ] Every recommendation includes an estimated token savings or states "improves quality"
 - [ ] Technical.md edits are applied in reverse line-number order
 - [ ] Config changes are batched into a single write
-- [ ] `mkdir -p .candid` runs before any config file creation
-- [ ] Invalid JSON in existing config is detected and warned about, not silently overwritten
-- [ ] Low-signal rule detection does not flag rules with domain-specific technical terms
-- [ ] Duplicate detection is capped at 5 pairs maximum
 - [ ] The before/after summary re-reads modified files for accurate "After" estimates

@@ -1,6 +1,6 @@
 ---
 name: candid-improve-implementation
-description: Use when the code works and you want a focused pass on opportunities to improve approach, clarity, and quality - distinct from candid-review's defect hunt. Surfaces simpler structures, clearer names, idiomatic alternatives, dead weight to remove, and abstractions to collapse or introduce. Each suggestion comes with a concrete before/after, why it's better, what's traded off, and confidence level. Three-phase fix selection mirrors candid-review.
+description: Use when the code works and you want a focused pass on improving approach, clarity, and quality — distinct from candid-review's defect hunt. Each suggestion includes a concrete before/after, tradeoffs, and confidence level.
 ---
 
 # Improvement Lens — candid-improve-implementation
@@ -32,14 +32,7 @@ Quality over quantity. Cap output at **`maxOpportunities` high-signal opportunit
 
 ### Step 1: Load Project Standards
 
-Check for Technical.md (project-specific standards):
-
-```
-1. Read ./Technical.md (project root)
-2. If not found, read ./.candid/Technical.md
-3. If found, use these standards to inform your review
-4. If not found, proceed without project-specific standards
-```
+Load project standards: ./Technical.md, falling back to ./.candid/Technical.md; if neither exists, proceed without them.
 
 When Technical.md exists, cite the relevant section when an opportunity aligns with or contradicts a standard.
 
@@ -86,54 +79,17 @@ For each branch in `mergeTargetBranches`, try `git diff <branch>...HEAD --stat 2
 
 ### Step 3: Parse Options
 
-Check CLI arguments for review options.
+All options resolve CLI flag → project config (`.candid/config.json`) → user config (`~/.candid/config.json`) → default. Validation, jq extraction paths, and warning formats are in `CONFIG.md`; invalid values warn and fall through to the next source.
 
-#### Focus Mode (`--focus`)
+| Option | CLI flag | Config field | Values / default |
+|---|---|---|---|
+| Focus | `--focus <area>` | `improve.focus` | `approach` \| `clarity` \| `quality` (case-sensitive); default: all three categories. When set, surface only the matching category (🧭/🔍/✨) and output `Focusing review on: [area]` |
+| Exclusions | `--exclude <glob>` | `exclude` | merge CLI + config patterns; apply to Step 2 file list (same as candid-review) |
+| Bugs section | `--no-bugs` | `improve.noBugs` | default `false`; when suppressed from any source, omit the 🐛 section |
+| Max opportunities | — | `improve.maxOpportunities` | positive integer 1-50, default `7`; store as `maxOpportunities` for Step 7's cap |
+| Auto-commit | `--auto-commit` | `autoCommit` | default `false`; enables Step 10.5 |
 
-**Focus Precedence (highest to lowest):**
-1. CLI flag (`--focus approach`)
-2. Project config (`.candid/config.json` → `improve.focus` field — extract via `jq -r '.improve.focus // "none"'`)
-3. User config (`~/.candid/config.json` → `improve.focus` field — same path)
-4. No focus (review all three categories)
-
-**Important:** the path is `improve.focus` (nested), not the top-level `focus` field. Top-level `focus` belongs to `candid-review` and uses different valid values (`security|performance|architecture|edge-case`). Reading the wrong field cross-contaminates the two skills.
-
-Valid values for `improve.focus`: `"approach"`, `"clarity"`, or `"quality"` (case-sensitive). Invalid values show a warning and are ignored.
-
-| Focus Area | Categories Surfaced |
-|------------|---------------------|
-| `approach` | 🧭 Approach / design only |
-| `clarity` | 🔍 Clarity only |
-| `quality` | ✨ Quality only |
-
-When focus is set: `Focusing review on: [area]`
-
-#### File Exclusions (`--exclude`)
-
-Same behavior as `candid-review`: merge CLI exclusions with config exclusions, apply to file list in Step 2. Common patterns: `*.generated.ts`, `vendor/*`, `**/node_modules/**`.
-
-#### Bugs Section (`--no-bugs`)
-
-**Precedence (highest to lowest):**
-1. CLI flag `--no-bugs` (suppress)
-2. Project config (`.candid/config.json` → `improve.noBugs` boolean — extract via `jq -r '.improve.noBugs // null'`)
-3. User config (`~/.candid/config.json` → `improve.noBugs` boolean — same path)
-4. Default `false` (bugs section included)
-
-If suppression is active from any source, do not flag any defects in the 🐛 Bugs section. Otherwise emit one-line each, route to `/candid-review`. Invalid (non-boolean) config values show a warning and fall through to the next source.
-
-#### Max Opportunities (`improve.maxOpportunities`)
-
-**Precedence (highest to lowest):**
-1. Project config (`.candid/config.json` → `improve.maxOpportunities` integer — extract via `jq -r '.improve.maxOpportunities // null'`)
-2. User config (`~/.candid/config.json` → `improve.maxOpportunities` integer — same path)
-3. Default `7`
-
-Validate: must be a positive integer in range 1-50. Out-of-range or non-integer values show a warning and fall through. Store the resolved value as `maxOpportunities` and use it in Step 7's cap (do not use the literal `7`).
-
-#### Auto-Commit (`--auto-commit`)
-
-If `--auto-commit` is provided OR config sets `autoCommit: true`, automatically create a git commit after applying suggestions. Same behavior as candid-review's auto-commit (see Step 10.5 below).
+**Important:** the focus path is `improve.focus` (nested) — top-level `focus` belongs to `candid-review` with different values (`security|performance|architecture|edge-case`); reading the wrong field cross-contaminates the skills.
 
 ### Step 4: Load Tone Preference
 
@@ -270,26 +226,7 @@ For each opportunity, use this structured format:
 >
 > **Tradeoff:** One more import at the call site. Worth it.
 
-*Constructive tone example:*
-> ### 🧭 `formatPrice` already exists in lib/format.ts — reuse it
-> **File:** src/checkout/Cart.tsx:88
-> **Category:** Approach
-> **Confidence:** Safe ✓
->
-> **Current:**
-> ```tsx
-> const display = `$${(amount / 100).toFixed(2)}`;
-> ```
->
-> **Suggested:**
-> ```tsx
-> import { formatPrice } from '@/lib/format';
-> const display = formatPrice(amount);
-> ```
->
-> **Why it's better:** `formatPrice` at `lib/format.ts:14` handles the cents-to-dollars conversion plus locale-aware formatting (commas for thousands), which the inline version misses. Two other components in `src/checkout/` already use it — staying consistent makes the next refactor easier.
->
-> **Tradeoff:** None — strictly better.
+*Constructive tone:* same format; the **Why it's better** section explains the reasoning in full (cite the existing helper's path and what it handles that the inline version misses) and acknowledges tradeoffs explicitly.
 
 ### Step 9: Fix Selection (MANDATORY)
 
@@ -354,45 +291,18 @@ TodoWrite all opportunities from Step 7 as pending todos. Confirm count to user.
 
 ### Step 10.5: Auto-Commit (Optional)
 
-**Pre-condition:** `commitEnabled = true` AND `selectedFixes` non-empty AND git repo available.
+**Pre-condition:** auto-commit enabled (Step 3) AND `selectedFixes` non-empty AND git repo. If `git diff --stat` is empty: `No file changes detected, skipping commit` and skip to Step 11. Otherwise `git add` the files in `modifiedFiles` and commit (heredoc) with:
 
-**1. Verify changes:**
-```bash
-git diff --stat
-```
-If empty: `No file changes detected, skipping commit`. Skip to Step 11.
-
-**2. Stage modified files:**
-```bash
-git add <file1> <file2> ...
-```
-Use files from `modifiedFiles` set.
-
-**3. Commit message format:**
 ```
 Apply candid-improve-implementation suggestions ([N] items)
 
 Improvements:
-- [icon] [title] in [path]:[line]
-- [icon] [title] in [path]:[line]
-[...]
+- [icon] [title] in [path]:[line]   (truncate at 10 entries with "- ... and [M] more")
 
 Co-authored-by: Claude Sonnet 4.5 <noreply@anthropic.com>
 ```
 
-Truncate at 10 entries with `- ... and [M] more`.
-
-**4. Create commit:**
-```bash
-git commit -m "$(cat <<'EOF'
-[generated message]
-EOF
-)"
-```
-
-Success: `✅ Created commit: "Apply candid-improve-implementation suggestions ([N] items)"`.
-
-Failure never aborts the workflow — fixes stay applied; user commits manually.
+Success: `✅ Created commit: "Apply candid-improve-implementation suggestions ([N] items)"`. Failure never aborts — fixes stay applied; user commits manually.
 
 ### Step 11: Save State
 
@@ -450,35 +360,10 @@ Present in this order:
 
 ---
 
-## Your Character
-
-**Core traits:**
-- **Curious** — you ask "what's the simplest version of this?" before "what's wrong?"
-- **Specific** — every suggestion has a `file:line` and a concrete before/after
-- **Honest about cost** — every Tradeoff line is filled in; "None — strictly better" only when truly so
-- **Restrained** — you'd rather surface 4 great opportunities than 12 mediocre ones
-
-**Harsh mode adds:**
-- Direct, no hedging
-- Calls out lazy design choices and quietly misleading names by name
-- "This name is doing PR for the function" energy
-
-**Constructive mode adds:**
-- Explains the *why* in full
-- Acknowledges where the existing approach was a reasonable first cut
-- Multiple alternative phrasings when the call is close
-
----
-
 ## Remember
 
-The goal is **the next version of this code** — not the perfect version, not the version with every feature, just the version someone returning to it in 3 months will thank the past author for.
+The goal is **the next version of this code** — the one someone returning in 3 months will thank the author for. Be curious ("what's the simplest version?"), specific (every item has file:line + concrete before/after), honest about cost (Tradeoff always filled; "None — strictly better" only when true), and restrained (4 great opportunities beat 12 mediocre ones).
 
-Every opportunity:
-1. Names a specific file:line
-2. Shows a concrete before/after (not just prose)
-3. Says what's gained
-4. Says what's traded off
-5. Can be applied or tracked
+Harsh mode: direct, no hedging, names lazy choices ("this name is doing PR for the function"). Constructive mode: full *why*, acknowledges the existing approach as a reasonable first cut.
 
-If you can't fill in all five, the opportunity isn't ready. Drop it.
+If an opportunity can't name file:line, show a before/after, and state both gain and tradeoff — drop it.

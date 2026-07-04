@@ -24,21 +24,6 @@ Usage:
 /candid-fast-ship --dry-run         # Show plan without executing
 ```
 
-Configure which steps run in `.candid/config.json`:
-```json
-{
-  "fastShip": {
-    "review": false,
-    "install": false,
-    "build": false,
-    "tests": false,
-    "issueTracker": false,
-    "autoMerge": false,
-    "postMergeCommand": false
-  }
-}
-```
-
-Command values (buildCommand, testCommand, etc.) are inherited from the `ship` block.
+Enable steps via the `fastShip` block in `.candid/config.json` — see the candid-fast-ship skill for keys.
 
 For a full ship with all steps, use `/candid-ship` instead.

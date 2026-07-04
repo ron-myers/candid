@@ -40,12 +40,4 @@ Usage:
 /candid-ship --dry-run              # Show plan without executing
 ```
 
-The workflow:
-1. Pre-flight checks (gh CLI, git repo, branch validation)
-2. Run candid-loop to review and fix code issues
-3. Install dependencies (when ship.installCommand is configured)
-4. Execute configured build command
-5. Execute configured test command
-6. Create pull request via gh CLI
-7. Optionally update issue tracker (Linear) via MCP
-8. Optionally auto-merge via gh pr merge --squash --auto
+Full workflow, output format, and configuration: the candid-ship skill.

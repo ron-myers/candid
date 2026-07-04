@@ -205,7 +205,7 @@ For supported providers, iterate the issue-creation list (selected, unselected, 
 3. Else, build the payload (see WORKFLOW.md → `Linear Payload`) and call `mcp__claude_ai_Linear__save_issue`.
 4. Capture `{ findingId, issueId, url, status: "created" | "reused" | "failed" | "skipped-ambiguous" }` into the **issue map**.
 
-Pre-create confirmation: if creating ≥ 5 new issues, show the list and ask `"Create N issues in <provider>:<teamKey>? (Y/n)"` via `AskUserQuestion`.
+Pre-create confirmation: if creating ≥ 5 new issues, follow WORKFLOW.md → Pre-fan-out Confirmation before the first create call.
 
 After the loop, print:
 
@@ -345,10 +345,8 @@ Issues filed:  <I> created, <R> reused, <F> failed   (omit row if tracker disabl
 
 Per finding:
   ✓ F-a3f29b71 [P0] Save button does nothing — PR: https://github.com/.../pull/123 | Issue: TEAM-1234
-  ✓ F-7c29f912 [P1] Icon button missing label — applied locally | Issue: reused TEAM-1180
   ✗ F-2bff1004 [P1] Stale state on org switch — failed (test failure: <line>) | Issue: TEAM-1235
-  ◦ F-9af00103 [P2] Touch target too small — issues-only | Issue: TEAM-1236
-  → F-1c00abcd [P1] Settings save loop — Conductor: ron-myers/qa-fix-settings-save-loop
+  …
 ```
 
 Glyph legend: `✓` = fixed + shipped (or applied), `✗` = fix failed, `◦` = issues-only / no fix attempted, `→` = dispatched to Conductor (per-finding mode).
@@ -359,34 +357,9 @@ Omit the `Issue:` column entirely if `issueTracker.enabled === false` or `provid
 
 ## Configuration
 
-### Config File Schema
-
-Add to `.candid/config.json`:
-
-```json
-{
-  "version": 1,
-  "chromeQAFix": {
-    "defaultStrategy": "batched",
-    "maxParallel": 4,
-    "testCommand": "npm test",
-    "branchPrefix": "ron-myers",
-    "conductorRepoPath": "candid-v1",
-    "issueTracker": {
-      "enabled": false,
-      "provider": "linear",
-      "teamKey": "ENG",
-      "state": "Backlog",
-      "labels": ["qa-finding", "chrome-qa"],
-      "priorityMap": { "P0": 1, "P1": 2, "P2": 3, "P3": 3, "P4": 4, "P5": 0 },
-      "dedupe": true,
-      "prompt": "Create one Linear issue from this single QA finding only — this issue only. Do not create issues for any other findings. Do not search for or update any other Linear issues. Use the structured payload exactly."
-    }
-  }
-}
-```
-
 ### Field Reference
+
+Add under `chromeQAFix` in `.candid/config.json`:
 
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
@@ -400,9 +373,9 @@ Add to `.candid/config.json`:
 | `issueTracker.teamKey` | string | none | **Required** when `provider === "linear"` and `enabled === true`. Linear team key (e.g. `"ENG"`). |
 | `issueTracker.state` | string | `"Backlog"` | Initial state for new issues. |
 | `issueTracker.labels` | array | `["qa-finding", "chrome-qa"]` | Base labels. The finding's `category` is appended at create time. |
-| `issueTracker.priorityMap` | object | see schema | Map from finding severity to Linear priority (0=No-priority…4=Low; 1=Urgent). |
+| `issueTracker.priorityMap` | object | `{"P0":1,"P1":2,"P2":3,"P3":3,"P4":4,"P5":0}` | Map from finding severity to Linear priority (0=No-priority…4=Low; 1=Urgent). |
 | `issueTracker.dedupe` | boolean | `true` | If true, search for existing issues with the same `F-id` before creating. |
-| `issueTracker.prompt` | string | see schema | Encodes the **single-issue invariant**. Custom prompts must contain one of `"only this one issue"`, `"only this single issue"`, `"only one issue"`, `"this issue only"`. |
+| `issueTracker.prompt` | string | `"Create one Linear issue from this single QA finding only — this issue only. Do not create issues for any other findings. Do not search for or update any other Linear issues. Use the structured payload exactly."` | Encodes the **single-issue invariant**. Custom prompts must contain one of `"only this one issue"`, `"only this single issue"`, `"only one issue"`, `"this issue only"`. |
 
 ### Examples
 
@@ -424,40 +397,9 @@ Add to `.candid/config.json`:
   }
 }
 ```
-
-**Force local-only by default with issues filed (review then ship manually):**
-```json
-{
-  "chromeQAFix": {
-    "defaultStrategy": "local",
-    "issueTracker": { "enabled": true, "provider": "linear", "teamKey": "ENG" }
-  }
-}
-```
-
-## CLI Examples
-
-```bash
-# Resolve latest findings file, prompt for selection and strategy
-/candid-chrome-qa-fix
-
-# Specific file, only P0 + P1 findings
-/candid-chrome-qa-fix --file .context/findings/2026-04-25-agent-config-ai-setup.json --severity P0,P1
-
-# Per-finding mode — emit deep links but don't open them (dry run)
-/candid-chrome-qa-fix --strategy per-finding --print-links
-
-# File-only mode (no fixes) — file every fixable finding into Linear
-/candid-chrome-qa-fix --strategy issues-only
-
-# Batched + Linear issues + override team
-/candid-chrome-qa-fix --strategy batched --create-issues --tracker-team DIS
-
-# Force-disable tracker even if config has it on
-/candid-chrome-qa-fix --no-create-issues
-```
-
 ## CLI Flags
+
+e.g. `/candid-chrome-qa-fix --file <path> --severity P0,P1 --strategy batched --create-issues`
 
 | Flag | Description |
 |---|---|

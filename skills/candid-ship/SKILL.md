@@ -54,23 +54,7 @@ Calculate `totalSteps` = 1 (PR creation always runs) + number of optional steps 
 
 Renumber the displayed step list to skip rows for any disabled optional steps.
 
-```
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Candid Ship Plan
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-Branch: [currentBranch] → [targetBranch]
-
-Steps (numbers assigned dynamically — only running steps get a number):
-  [N]. 🔍 Review code (candid-loop)           [or SKIP]
-  [N]. 🛠️  Install: [installCommand]          [only if installCommand is set]
-  [N]. 🔨 Build: [buildCommand]               [or SKIP — not configured]
-  [N]. 🧪 Tests: [testCommand]                [or SKIP — not configured]
-  [N]. 📋 Create pull request
-  [N]. 🎯 Update issue tracker ([provider]): state="[state]"  [only if issueTracker.enabled]
-  [N]. 🔀 Auto-merge: enabled                 [or disabled]
-  [N]. 🚀 Post-merge: [postMergeCommand]      [only if postMergeCommand is set]
-```
+Render the plan per WORKFLOW.md → "Display Plan": header `Candid Ship Plan`, statuses `[or SKIP]` / `[or SKIP — not configured]` per the enablement rules above.
 
 If `additionalPrompt` is set, append: `Review context: "[additionalPrompt]"`.
 
@@ -78,21 +62,9 @@ If `additionalPrompt` is set, append: `Review context: "[additionalPrompt]"`.
 
 **Otherwise:** Use AskUserQuestion: "Proceed with this shipping plan?" with options "Yes, ship it" / "No, cancel". On "No, cancel": exit with `Ship cancelled.`
 
-### Step 4: Run Review
+### Steps 4-7: Review, Install, Build, Tests
 
-**Skip if** `--skip-review` is set → `Skipping review (--skip-review)`. Otherwise execute WORKFLOW.md → "Run Review (candid-loop)".
-
-### Step 5: Install Dependencies
-
-**Skip if** `--skip-install` is set → `Skipping install (--skip-install)`. Skip if `installCommand` is not configured → `Skipping install (not configured)`. Otherwise execute WORKFLOW.md → "Install Dependencies".
-
-### Step 6: Run Build
-
-**Skip if** `--skip-build` is set → `Skipping build (--skip-build)`. Skip if `buildCommand` is not configured → `Skipping build (not configured)`. Otherwise execute WORKFLOW.md → "Run Build".
-
-### Step 7: Run Tests
-
-**Skip if** `--skip-tests` is set → `Skipping tests (--skip-tests)`. Skip if `testCommand` is not configured → `Skipping tests (not configured)`. Otherwise execute WORKFLOW.md → "Run Tests".
+Run in order: review, install, build, tests. For each: skip if its `--skip-*` flag is set → `Skipping [step] (--skip-[step])`; skip install/build/tests if the corresponding command is not configured → `Skipping [step] (not configured)`; otherwise execute the matching WORKFLOW.md section ("Run Review (candid-loop)", "Install Dependencies", "Run Build", "Run Tests").
 
 ### Step 8: Create Pull Request
 
@@ -146,12 +118,7 @@ Add to `.candid/config.json`:
 
 ### Field Reference
 
-For full type, default, and validation rules see `skills/candid-review/CONFIG.md` (the `ship` section). Highlights:
-
-- `buildCommand` / `testCommand` / `installCommand` / `additionalPrompt` / `postMergeCommand` default to `null` — the corresponding step is skipped if not set.
-- `targetBranch` defaults to first `mergeTargetBranches` entry, else `"main"`.
-- `autoMerge` defaults to `false`.
-- `issueTracker` is opt-in (`enabled: false` by default). When enabled, `provider: "linear"` is the only supported value today; other values warn and skip. The default `prompt` is documented in CONFIG.md and codifies the four safety invariants.
+Types, defaults, and validation live in `skills/candid-review/CONFIG.md` (`ship` section); WORKFLOW.md → "Load Configuration" summarizes the defaults.
 
 > **Note:** `issueTracker` is an optional integration. When omitted, the issue-tracker step is skipped silently — the rest of the ship runs unchanged. To request support for another tracker (Asana, Jira, GitHub Issues, etc.), open an issue at https://github.com/ron-myers/candid/issues.
 
@@ -207,10 +174,4 @@ For full type, default, and validation rules see `skills/candid-review/CONFIG.md
 
 ## Remember
 
-The goal of candid-ship is to **automate the entire shipping workflow** so you can go from code to merged PR with one command.
-
-**Fail-fast principle:** Any failure (review incomplete, install/build/test fail) aborts immediately with a clear message. Post-PR steps (issue tracker, auto-merge, post-merge) warn but never abort — the PR is already created and shouldn't be wasted.
-
-**Pre-flight checks:** Always validate the environment before starting. It's frustrating to complete a full review + install + build + test cycle only to discover gh isn't installed.
-
-**Install before build:** Setting `installCommand` (e.g. `pnpm install`, `npm ci`, `poetry install`) keeps build/test failures focused on real code issues rather than missing dependencies.
+Fail-fast: any pre-PR failure aborts immediately; post-PR steps (issue tracker, auto-merge, post-merge) warn but never abort — the PR already exists. Set `installCommand` (e.g. `npm ci`) so build/test failures reflect real code issues, not missing dependencies.

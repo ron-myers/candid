@@ -36,10 +36,4 @@ Usage:
 /candid-review --re-review               # Compare to previous review
 ```
 
-The review will:
-1. Detect your changes (staged > unstaged > branch diff)
-2. Load Technical.md standards (if present)
-3. Analyze with architectural context
-4. Present categorized issues with fixes
-5. Let you choose which fixes to apply
-6. Save review state for future comparisons
+Full workflow, output format, and configuration: the candid-review skill.

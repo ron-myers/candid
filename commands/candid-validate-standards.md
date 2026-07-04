@@ -20,8 +20,4 @@ Usage:
 /candid-validate-standards --fix        # Include suggested rewrites
 ```
 
-Checks for:
-- Vague rules that can't be verified ("write clean code")
-- Rules that duplicate what linters already check
-- Rules without clear boundaries or thresholds
-- Overly complex rules that span multiple concerns
+Full workflow, output format, and configuration: the candid-validate-standards skill.
