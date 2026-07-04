@@ -158,6 +158,16 @@ Flag rules that can't be checked by reading code:
 - "Use common sense"
 - References to external documents without specifics
 
+#### 4.6 Codebase Spot-Check (🔬)
+
+For up to 10 rules that cite a path, glob, or naming pattern:
+1. Verify every cited file/directory exists (`ls` it). Missing → flag **stale**.
+2. Sample 3 files the rule applies to (find/grep by the rule's stated scope) and check
+   whether the rule actually holds in each.
+3. 0/3 hold → flag **untrue** ("rule contradicts this codebase — remove or move to Gaps").
+   1-2/3 hold → flag **contested** ("add known exceptions or relax the rule").
+Report in a `🔬 Spot-Check` section listing the sampled files per rule.
+
 ### Step 5: Generate Report
 
 Present findings organized by severity:
@@ -207,6 +217,12 @@ Rules that may have issues.
 | Line | Rule | Suggestion |
 |------|------|------------|
 | 22 | "Functions should be pure, small, and documented" | Split into 3 rules |
+
+---
+
+## 🔬 Spot-Check
+
+[Per rule checked: verdict (stale/untrue/contested) with the 3 sampled files]
 
 ---
 

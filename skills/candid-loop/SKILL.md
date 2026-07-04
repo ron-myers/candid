@@ -82,6 +82,13 @@ IF iteration >= maxIterations AND remainingIssues > 0:
     List remaining issues
 ```
 
+### Loop Invariants — do not violate
+
+1. **PASS requires a fresh clean review.** Status PASS only if the final iteration ran candid-review AFTER the last fix was applied and found 0 filtered issues. Verify `.candid/last-review.json` timestamp postdates the last Edit. Never infer PASS from an earlier iteration.
+2. **No progress → stop.** If an iteration applies 0 fixes and filtered issues remain, exit INCOMPLETE immediately — repeating the identical review cannot converge.
+3. **Oscillation check.** If an issue id already in `allFixedIssues` reappears in a later iteration, stop: `Oscillation detected: fix for [id] was undone or reintroduced.` List both fixes for manual resolution.
+4. **Don't re-ask rejected issues.** Add ids skipped via "No"/"Skip" to `sessionSkipped`; filter them in Step 3.4 in later iterations. They count toward INCOMPLETE, not re-prompts.
+
 #### Step 3.1: Run candid-review
 
 Display iteration header:
