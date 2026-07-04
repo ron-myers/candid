@@ -226,6 +226,7 @@ Problem: [description]
 **Options:**
 1. "Yes, apply this fix"
 2. "No, skip this fix"
+3. "Show exact diff" — present the fix as a unified before/after diff from current file content, then re-ask with the Yes/No options only
 
 Track user choices:
 - If "Yes" → Apply the fix, increment totalFixesApplied

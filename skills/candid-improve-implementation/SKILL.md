@@ -261,7 +261,7 @@ Loop through opportunities. For each:
 1. Show issue number `[1/N]`, icon, title, file location, brief problem
 2. AskUserQuestion:
    - **Question:** "Apply this suggestion?"
-   - **Options:** "Yes, apply", "No, skip"
+   - **Options:** "Yes, apply", "No, skip", "Show me the exact diff" (present a unified before/after diff built from current file content, then re-ask Yes/No — preview never counts as approval)
 3. If Yes → add to `selectedFixes`. If No → continue.
 
 After loop, proceed to 9c.
@@ -284,6 +284,7 @@ Do not proceed to Step 10 without explicit confirmation.
 2. Initialize `modifiedFiles` set
 3. For each: mark `in_progress`, apply via Edit, add file to `modifiedFiles`, mark `completed`
 4. Summarize: count applied + list of modified files
+5. End with a per-item status table (`| # | Item | File | Status |`) — `✅ applied` or `❌ failed — [reason]`; failures stay `pending` in todos and never abort the batch.
 
 **If `selectedFixes` is empty (user chose "None"):**
 

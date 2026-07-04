@@ -66,6 +66,32 @@ If `0`: abort with `No commits ahead of [targetBranch]. Nothing to ship.`
 
 ---
 
+## Classify Diff Risk
+
+Classify immediately after branch-state validation, from changed paths only:
+
+```bash
+git diff --name-only $target_ref..HEAD
+```
+
+Assign the **highest** matching class and record which signals matched:
+
+| Class | Signals (path match, case-insensitive) |
+|-------|----------------------------------------|
+| **HIGH** | DB migrations (`migrat`, `*.sql`); auth/session (`auth`, `session`, `token`, `passw`, `crypt`); API contracts (`openapi`, `*.proto`, `routes`, `api/`); dependency manifests/lockfiles (`package.json`, `*.lock`, `go.mod`, `Gemfile`, `requirements`); config/env/CI (`.env*`, `Dockerfile`, `.github/workflows/`) |
+| **LOW** | every changed file is docs (`*.md`), tests (`*test*`, `*spec*`), styles (`*.css`, `*.scss`), or fixtures |
+| **MEDIUM** | everything else |
+
+Store as `riskClass` + `riskSignals`. Output: `Diff risk: [class] ([signal]: [example files])`.
+
+**Escalation at HIGH:**
+- candid-ship: abort if `--skip-review` or `--skip-tests` was passed — `Risk class HIGH ([signals]): [flag] not allowed. Run the full pipeline or split out the risky files.` If `testCommand` is unset, warn that confidence will be capped at LOW.
+- candid-fast-ship: abort with `Risk class HIGH ([signals]): use /candid-ship for this change.` unless `fastShip.review` AND `fastShip.tests` are both enabled.
+
+`riskClass` feeds the Ship Confidence Report, the "Map Tests to Changes" exception, and the PR Rollback note.
+
+---
+
 ## Display Plan
 
 Both skills render the plan with this box. The calling skill supplies `[Header]`, the `[STATUS]` text per row (its enablement/skip semantics), and the renumbering-note wording.
@@ -149,6 +175,71 @@ On success, verify before declaring: extract the runner's own counts from the ou
 
 ---
 
+## Map Tests to Changes
+
+Read-only heuristic; runs whether or not tests ran. Do not execute tests here.
+
+1. Changed source files: `git diff --name-only $target_ref..HEAD`, excluding docs (`*.md`), styles, fixtures, and test files (`*test*`, `*spec*`).
+2. For each, look for a coverage signal, in order:
+   - a test file **in the same diff** whose name references it (`foo.test.ts`, `foo.spec.js`, `test_foo.py`, `foo_test.go`);
+   - an existing covering test file in the repo: `git ls-files '*test*' '*spec*' | grep -i "<basename>"`, or a test file importing the module.
+3. Files with neither signal → `untestedChanges`.
+
+Output (warning, not a gate):
+```
+Untested changes: src/auth/session.ts, src/api/rates.ts (no test change, no covering test file — heuristic filename/import match)
+```
+or `All changed source files have coverage signals.`
+
+**Exception — HIGH risk:** if `riskClass` is HIGH and `untestedChanges` is non-empty, AskUserQuestion: "HIGH-risk files have no test coverage: [files]. Ship anyway?" with "Yes, ship" / "No, abort". On abort: `Ship aborted: untested high-risk changes.`
+
+Feeds the "Untested changes" row of the Ship Confidence Report.
+
+---
+
+## QA Findings Gate
+
+Check candid-chrome-qa output for unresolved high-severity findings before the PR exists.
+
+1. Findings dir: `.context/findings`. If it doesn't exist: `QA findings: not checked (no findings directory)` — stop here.
+2. Select findings files newer than the branch point:
+```bash
+merge_base=$(git merge-base $target_ref HEAD)
+find .context/findings -name '*.json' -newermt "$(git show -s --format=%ci $merge_base)"
+```
+3. From each matching file, collect findings with severity `P0` or `P1`. The findings schema has no lifecycle status — treat every P0/P1 as open unless the user says otherwise.
+4. Keep findings that plausibly overlap the diff: `repro`/`suggestedFix`/`evidence` mentions a changed file path, or the finding's `url` maps to a changed route/component. **If overlap cannot be determined, keep the finding** (safe default).
+5. None kept → `QA findings: none open (N files checked since merge-base)`.
+6. Any kept → list each as `[P0|P1] <id> <title> — <url>`, then AskUserQuestion: "N open P0/P1 QA findings may touch this change. Ship anyway?" with "Yes — acknowledge and ship" / "No, abort". On abort: `Ship aborted: open P0/P1 QA findings.` On acknowledge, record the finding IDs.
+
+Outcome (`none open` | `N acknowledged: <ids>` | `not checked`) feeds the "QA findings" row of the Ship Confidence Report and PR body — the acknowledgment is permanently visible to reviewers.
+
+---
+
+## Ship Confidence Report
+
+Build after the last pre-PR step, before pushing. Every row uses evidence captured **this run** — never from memory or a previous session.
+
+| Signal | Evidence |
+|--------|----------|
+| Review | candid-loop outcome (iterations, issues found/fixed), cross-checked against `.candid/last-review.json` (its `branch` must equal `currentBranch`). `SKIPPED` if not run. |
+| Build | `PASS (exit 0)` from "Run Build", or `SKIPPED`. |
+| Tests | runner-reported count + exit code from "Run Tests" (e.g. `42 tests, exit 0`). Zero tests executed = FAIL per the test-honesty rule. |
+| QA findings | outcome of "QA Findings Gate": `none open`, `N acknowledged: <ids>`, or `not checked`. |
+| Untested changes | outcome of "Map Tests to Changes": `none` or the file list. |
+| Diff risk | `riskClass` + signals from "Classify Diff Risk". |
+
+Verdict:
+- **HIGH** — review, build, and tests all ran and passed; QA findings row is `none open` (or `not checked` because no findings dir exists); and risk is LOW/MEDIUM, or risk is HIGH with zero untested changes.
+- **MEDIUM** — everything that ran passed, but at least one row is `SKIPPED`, lists untested changes, or has acknowledged QA findings.
+- **LOW** — risk HIGH with review or tests skipped; or tests matched zero tests; or any evidence could not be verified.
+
+Print the panel before "Create Pull Request": `Ship Confidence: [verdict]`, the table, then one reason line per row keeping the verdict below HIGH. Embed the identical table in the PR body (see "Generate Body"), and repeat `Confidence: [verdict]` as the first row of "Display Summary".
+
+If verdict is **LOW**: AskUserQuestion "Confidence is LOW ([reasons]). Ship anyway?" with "Yes, ship at LOW confidence" / "No, abort". On abort: `Ship aborted: low confidence.`
+
+---
+
 ## Create Pull Request
 
 Display:
@@ -182,17 +273,35 @@ Store output as `commitSubjects` (one commit subject per line).
 ## Summary
 [each line of commitSubjects prefixed with "- "]
 
-## Verification
-- Install: [PASS | SKIPPED]
-- Review: [PASS — N iterations, M issues fixed | SKIPPED]
-- Build: [PASS | SKIPPED]
-- Tests: [PASS | SKIPPED]
+## Ship Confidence: [HIGH | MEDIUM | LOW]
+
+| Signal | Result |
+|--------|--------|
+| Review | [PASS — N iterations, M issues fixed | SKIPPED] |
+| Build | [PASS (exit 0) | SKIPPED] |
+| Tests | [PASS (N tests, exit 0) | SKIPPED] |
+| QA findings | [none open | N acknowledged: <ids> | not checked] |
+| Untested changes | [none | file list] |
+| Diff risk | [LOW | MEDIUM | HIGH — <signals>] |
+
+[One line per reason the verdict is below HIGH. Omit when HIGH.]
+
+## Rollback
+
+Revert: `git revert -m 1 <merge-sha>` (squash merge: `git revert <squash-sha>`), then push.
+[Only when `riskClass` is HIGH — one caveat line per matched `riskSignals` entry:]
+- DB migrations changed — `git revert` does not undo applied schema changes; run the down-migration first.
+- Config/env changed — redeploy after revert so services re-read configuration.
+- Dependency manifests changed — run `[installCommand]` after revert to restore the lockfile state.
+- Auth/session code changed — sessions/tokens issued by the new code may need invalidation after revert.
 
 ---
 *Shipped with [candid-ship](https://github.com/ron-myers/candid)*
 ```
 
-Omit any Verification row whose step was skipped. (Or keep with `SKIPPED` — match the calling skill's footer convention.)
+Never omit rows — a signal that didn't run renders as `SKIPPED`/`not checked`. Absence of evidence must be visible to reviewers, not hidden.
+
+Rollback caveats derive from `riskSignals` (see "Classify Diff Risk"). If risk classification is unavailable, emit only the Revert line. Keep the whole Rollback block ≤ 6 lines in the rendered PR.
 
 ### Push and Create
 
@@ -302,6 +411,7 @@ Execute. On non-zero exit: warn `⚠️  Post-merge command failed: [error outpu
 [Candid Ship Complete | Candid Fast Ship Complete]
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
+Confidence: [HIGH | MEDIUM | LOW]
 Install:  [PASS | SKIPPED]
 Review:   [PASS (N iterations, M issues fixed) | SKIPPED]
 Build:    [PASS | SKIPPED]
