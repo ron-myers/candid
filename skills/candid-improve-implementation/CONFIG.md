@@ -64,39 +64,7 @@ Validation: must be `"approach"`, `"clarity"`, or `"quality"`.
 
 ## Error Handling
 
-### Invalid JSON
-- **Error message:** `"malformed JSON"`
-- **Action:** Show warning, continue to next precedence level
-
-### Invalid `improve.focus` Value
-- **Error message:** `'invalid improve.focus "[value]" (must be "approach", "clarity", or "quality")'`
-- **Action:** Show warning, continue to next precedence level
-
-### Invalid `improve.maxOpportunities` Value
-- **Error message:** `'invalid improve.maxOpportunities "[value]" (must be positive integer 1-50)'`
-- **Action:** Show warning, use default (7)
-
-### Invalid `improve.noBugs` Value
-- **Error message:** `'invalid improve.noBugs "[value]" (must be boolean)'`
-- **Action:** Show warning, use default (false)
-
-## Warning Message Template
-
-```
-⚠️  Invalid config at [path]: [specific error]. Falling back to [next source].
-```
-
-### Examples
-
-**Invalid focus:**
-```
-⚠️  Invalid config at .candid/config.json: invalid improve.focus "design" (must be "approach", "clarity", or "quality"). Falling back to user config.
-```
-
-**Invalid maxOpportunities:**
-```
-⚠️  Invalid config at ~/.candid/config.json: invalid improve.maxOpportunities "100" (must be positive integer 1-50). Using default (7).
-```
+On any invalid value, show `⚠️  Invalid config at [path]: [specific error]. Falling back to [next source].` and continue to the next precedence level (or the default for maxOpportunities/noBugs). Specific errors: `malformed JSON`; `invalid improve.focus "[value]" (must be "approach", "clarity", or "quality")`; `invalid improve.maxOpportunities "[value]" (must be positive integer 1-50)`; `invalid improve.noBugs "[value]" (must be boolean)`.
 
 ## Success Message Template
 
@@ -119,45 +87,6 @@ Capping opportunities at [N] (from [source])
 ## Config File Examples
 
 ### Valid Configs
-
-**Minimal (use defaults):**
-```json
-{
-  "tone": "constructive"
-}
-```
-
-**Improvement-focused defaults:**
-```json
-{
-  "tone": "harsh",
-  "improve": {
-    "focus": "approach",
-    "noBugs": true
-  }
-}
-```
-
-**Tight cap on opportunities:**
-```json
-{
-  "tone": "constructive",
-  "improve": {
-    "maxOpportunities": 3
-  }
-}
-```
-
-**With exclusions:**
-```json
-{
-  "tone": "harsh",
-  "exclude": ["*.generated.ts", "vendor/*", "**/*.min.js"],
-  "improve": {
-    "focus": "clarity"
-  }
-}
-```
 
 **Full config (improve + shared fields):**
 ```json
@@ -190,31 +119,4 @@ Capping opportunities at [N] (from [source])
 ```
 Here `focus: "security"` applies to `/candid-review`; `improve.focus: "clarity"` applies to `/candid-improve-implementation`. They do not interfere.
 
-### Invalid Configs
-
-**Invalid focus value:**
-```json
-{
-  "improve": {
-    "focus": "design"
-  }
-}
-```
-
-**Wrong type for noBugs:**
-```json
-{
-  "improve": {
-    "noBugs": "yes"
-  }
-}
-```
-
-**Out-of-range maxOpportunities:**
-```json
-{
-  "improve": {
-    "maxOpportunities": 200
-  }
-}
-```
+Wrong-type or out-of-range improve.* values warn and fall through to the next source.

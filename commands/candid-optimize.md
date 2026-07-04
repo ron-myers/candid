@@ -27,9 +27,4 @@ Usage:
 /candid-optimize --section config         # Only analyze config tuning
 ```
 
-The audit covers:
-1. **Token budget estimation** — breakdown of what consumes context during reviews
-2. **Technical.md efficiency** — verbose rules, near-duplicates, low-signal rules
-3. **Exclude patterns** — generated files, build output, lock files missing from exclusions
-4. **Decision register** — size, mode optimization, pruning old entries
-5. **Config tuning** — missing config, branch targets, focus mode suggestions
+Full workflow, output format, and configuration: the candid-optimize skill.

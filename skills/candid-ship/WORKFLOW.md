@@ -66,6 +66,34 @@ If `0`: abort with `No commits ahead of [targetBranch]. Nothing to ship.`
 
 ---
 
+## Display Plan
+
+Both skills render the plan with this box. The calling skill supplies `[Header]`, the `[STATUS]` text per row (its enablement/skip semantics), and the renumbering-note wording.
+
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[Header]
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Branch: [currentBranch] → [targetBranch]
+
+Steps (numbers assigned dynamically — only [running | enabled+configured] steps get a number):
+  [N]. 🔍 Review code (candid-loop)           [STATUS]
+  [N]. 🛠️  Install: [installCommand]          [STATUS]
+  [N]. 🔨 Build: [buildCommand]               [STATUS]
+  [N]. 🧪 Tests: [testCommand]                [STATUS]
+  [N]. 📋 Create pull request
+  [N]. 🎯 Update issue tracker ([provider])   [STATUS]
+  [N]. 🔀 Auto-merge                          [STATUS]
+  [N]. 🚀 Post-merge: [postMergeCommand]      [STATUS]
+```
+
+Row variations:
+- **candid-ship** appends `: state="[state]"` to the issue-tracker row (shown only if `issueTracker.enabled`), and renders the auto-merge row as `🔀 Auto-merge: enabled` or `🔀 Auto-merge: disabled`.
+- **candid-fast-ship** uses the rows as-is with its `[ENABLED | SKIPPED — ...]` statuses.
+
+---
+
 ## Install Dependencies
 
 Display:

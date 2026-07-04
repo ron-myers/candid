@@ -55,23 +55,7 @@ A step is **enabled** only when its `fastShip` toggle is `true` AND the underlyi
 
 Calculate `totalSteps` = 1 (PR creation) + count of enabled steps. Renumber displayed step rows so disabled steps don't take a number.
 
-```
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Candid Fast Ship Plan
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-Branch: [currentBranch] → [targetBranch]
-
-Steps (numbers assigned dynamically — only enabled+configured steps get a number):
-  [N]. 🔍 Review code (candid-loop)           [ENABLED | SKIPPED — not enabled]
-  [N]. 🛠️  Install: [installCommand]          [ENABLED | SKIPPED — not enabled | SKIPPED — not configured]
-  [N]. 🔨 Build: [buildCommand]               [ENABLED | SKIPPED — not enabled | SKIPPED — not configured]
-  [N]. 🧪 Tests: [testCommand]                [ENABLED | SKIPPED — not enabled | SKIPPED — not configured]
-  [N]. 📋 Create pull request
-  [N]. 🎯 Update issue tracker ([provider])   [ENABLED | SKIPPED — not enabled | SKIPPED — not configured]
-  [N]. 🔀 Auto-merge                          [ENABLED | SKIPPED — not enabled]
-  [N]. 🚀 Post-merge: [postMergeCommand]      [ENABLED | SKIPPED — not enabled | SKIPPED — not configured]
-```
+Render the plan per skills/candid-ship/WORKFLOW.md → "Display Plan": header `Candid Fast Ship Plan`, statuses `[ENABLED | SKIPPED — not enabled | SKIPPED — not configured]`.
 
 If all optional steps are disabled, append `(All optional steps disabled — only PR creation will run)`.
 
@@ -83,17 +67,9 @@ If all optional steps are disabled, append `(All optional steps disabled — onl
 
 **Skip if** `fastShip.review` is `false` → `Skipping review (not enabled in fastShip config)`. Otherwise execute WORKFLOW.md → "Run Review (candid-loop)". Use `ship.additionalPrompt` if set.
 
-### Step 5: Install Dependencies
+### Steps 5-7: Install, Build, Tests
 
-**Skip if** `fastShip.install` is `false` → `Skipping install (not enabled in fastShip config)`. Skip if `fastShip.install` is `true` but `ship.installCommand` is not set → `Skipping install (installCommand not configured in ship)`. Otherwise execute WORKFLOW.md → "Install Dependencies".
-
-### Step 6: Run Build
-
-**Skip if** `fastShip.build` is `false` → `Skipping build (not enabled in fastShip config)`. Skip if `fastShip.build` is `true` but `ship.buildCommand` is not set → `Skipping build (buildCommand not configured in ship)`. Otherwise execute WORKFLOW.md → "Run Build".
-
-### Step 7: Run Tests
-
-**Skip if** `fastShip.tests` is `false` → `Skipping tests (not enabled in fastShip config)`. Skip if `fastShip.tests` is `true` but `ship.testCommand` is not set → `Skipping tests (testCommand not configured in ship)`. Otherwise execute WORKFLOW.md → "Run Tests".
+For each of install/build/tests: skip if its `fastShip.[step]` toggle is `false` → `Skipping [step] (not enabled in fastShip config)`; skip if the toggle is `true` but the corresponding `ship` command (`installCommand`/`buildCommand`/`testCommand`) is unset → `Skipping [step] ([commandField] not configured in ship)`; otherwise execute the matching WORKFLOW.md section ("Install Dependencies", "Run Build", "Run Tests").
 
 ### Step 8: Create Pull Request
 
@@ -151,11 +127,6 @@ For full validation rules see `skills/candid-review/CONFIG.md` (the `fastShip` s
 { "fastShip": {} }
 ```
 
-**Build check + PR only:**
-```json
-{ "fastShip": { "build": true } }
-```
-
 **Install + build + auto-merge:**
 ```json
 {
@@ -169,11 +140,6 @@ For full validation rules see `skills/candid-review/CONFIG.md` (the `fastShip` s
     "autoMerge": true
   }
 }
-```
-
-**Docs change — just PR and issue tracker update:**
-```json
-{ "fastShip": { "issueTracker": true, "autoMerge": true } }
 ```
 
 ## CLI Examples

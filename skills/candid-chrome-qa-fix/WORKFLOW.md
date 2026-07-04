@@ -164,47 +164,21 @@ Proceed?
 
 For `N < 5`, no confirmation needed — proceed.
 
-## Create Issue From Finding (GitHub)
+## Unsupported providers (github, jira, asana)
 
-**Not yet implemented.** When invoked, output:
+Not yet implemented. Output (substitute the provider name):
 
 ```
-⚠️  Issue tracker provider "github" is not yet supported.
+⚠️  Issue tracker provider "<provider>" is not yet supported.
 Request support at: https://github.com/ron-myers/candid/issues
 Skipping tracker step. Code fixes will still proceed.
 ```
 
-When implementing in a future PR, the contract surface is:
+Future contract notes:
 
-- Map finding to GitHub issue title + body
-- Map severity to GitHub label (e.g., `priority:p0` … `priority:p5`)
-- Use `gh issue create --repo <owner/repo> --title <title> --body <body> --label <labels>` via Bash (no GitHub MCP required)
-- Dedup probe: `gh issue list --search "F-<id> in:body" --state all --json number,url,title`
-- Output `{ id: "<owner>/<repo>#<number>", url, status }`
-
-## Create Issue From Finding (Jira)
-
-**Not yet implemented.** When invoked, output:
-
-```
-⚠️  Issue tracker provider "jira" is not yet supported.
-Request support at: https://github.com/ron-myers/candid/issues
-Skipping tracker step. Code fixes will still proceed.
-```
-
-Future contract: REST API via `JIRA_TOKEN` env var, project key from config, severity mapped to priority field, F-id stored in `customfield_xxxxx` for dedup.
-
-## Create Issue From Finding (Asana)
-
-**Not yet implemented.** When invoked, output:
-
-```
-⚠️  Issue tracker provider "asana" is not yet supported.
-Request support at: https://github.com/ron-myers/candid/issues
-Skipping tracker step. Code fixes will still proceed.
-```
-
-Future contract: Asana API via `ASANA_TOKEN`, project GID from config, severity mapped to custom field, F-id in description for dedup.
+- **GitHub**: map finding to issue title + body; map severity to `priority:pN` labels; create via `gh issue create --repo <owner/repo> --title --body --label` (no MCP); dedup via `gh issue list --search "F-<id> in:body" --state all --json number,url,title`; output `{ id: "<owner>/<repo>#<number>", url, status }`.
+- **Jira**: REST API via `JIRA_TOKEN`, project key from config, severity→priority field, F-id in a custom field for dedup.
+- **Asana**: API via `ASANA_TOKEN`, project GID from config, severity→custom field, F-id in description for dedup.
 
 ## Provider: "none"
 

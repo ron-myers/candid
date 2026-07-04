@@ -218,154 +218,10 @@ Using constructive tone (from interactive prompt)
 
 ### Valid Configs
 
-**Harsh tone:**
+**Minimal:**
 ```json
 {
   "tone": "harsh"
-}
-```
-
-**Harsh tone with version:**
-```json
-{
-  "version": 1,
-  "tone": "harsh"
-}
-```
-
-**Constructive tone:**
-```json
-{
-  "tone": "constructive"
-}
-```
-
-**No preference (empty):**
-```json
-{}
-```
-
-**With exclusions:**
-```json
-{
-  "tone": "harsh",
-  "exclude": ["*.generated.ts", "vendor/*", "**/*.min.js"]
-}
-```
-
-**With focus area:**
-```json
-{
-  "tone": "constructive",
-  "focus": "security"
-}
-```
-
-**Full config:**
-```json
-{
-  "version": 1,
-  "tone": "harsh",
-  "exclude": ["*.generated.ts", "vendor/*"],
-  "focus": "performance",
-  "autoCommit": true
-}
-```
-
-**With decision register (default lookup mode):**
-```json
-{
-  "tone": "constructive",
-  "decisionRegister": {
-    "enabled": true
-  }
-}
-```
-
-**With decision register (load mode, custom path):**
-```json
-{
-  "tone": "harsh",
-  "decisionRegister": {
-    "enabled": true,
-    "path": "docs/decisions",
-    "mode": "load"
-  }
-}
-```
-
-**Full config with decision register:**
-```json
-{
-  "version": 1,
-  "tone": "harsh",
-  "exclude": ["*.generated.ts", "vendor/*"],
-  "focus": "performance",
-  "autoCommit": true,
-  "decisionRegister": {
-    "enabled": true,
-    "path": ".candid/register",
-    "mode": "lookup"
-  }
-}
-```
-
-**With ship configuration:**
-```json
-{
-  "version": 1,
-  "tone": "constructive",
-  "ship": {
-    "buildCommand": "npm run build",
-    "testCommand": "npm test",
-    "targetBranch": "main",
-    "autoMerge": false
-  }
-}
-```
-
-**With install before build:**
-```json
-{
-  "ship": {
-    "installCommand": "pnpm install",
-    "buildCommand": "pnpm build",
-    "testCommand": "pnpm test",
-    "targetBranch": "main"
-  }
-}
-```
-
-**With Linear issue tracker:**
-```json
-{
-  "version": 1,
-  "tone": "constructive",
-  "ship": {
-    "buildCommand": "npm run build",
-    "targetBranch": "main",
-    "issueTracker": {
-      "provider": "linear",
-      "enabled": true,
-      "teamPrefixes": ["DIS", "ENG"],
-      "state": "In Review"
-    }
-  }
-}
-```
-
-**With custom issue tracker prompt:**
-```json
-{
-  "ship": {
-    "issueTracker": {
-      "provider": "linear",
-      "enabled": true,
-      "teamPrefixes": ["DIS"],
-      "state": "Code Review",
-      "prompt": "Move {issueId} to \"{state}\" and add a comment that the PR is ready. Only modify this single issue."
-    }
-  }
 }
 ```
 
@@ -404,17 +260,6 @@ Using constructive tone (from interactive prompt)
 }
 ```
 
-**With fast ship only (minimal PR creation):**
-```json
-{
-  "ship": {
-    "buildCommand": "npm run build",
-    "targetBranch": "main"
-  },
-  "fastShip": {}
-}
-```
-
 **Fast ship with build and auto-merge:**
 ```json
 {
@@ -429,28 +274,7 @@ Using constructive tone (from interactive prompt)
 }
 ```
 
-**With future fields (ignored):**
-```json
-{
-  "tone": "harsh",
-  "future_setting": "some_value"
-}
-```
-
 ### Invalid Configs
-
-**Malformed JSON (missing closing brace):**
-```json
-{
-  "tone": "harsh"
-```
-
-**Invalid tone value:**
-```json
-{
-  "tone": "medium"
-}
-```
 
 **Wrong type for tone:**
 ```json
@@ -458,3 +282,4 @@ Using constructive tone (from interactive prompt)
   "tone": true
 }
 ```
+Non-string / unknown enum values warn and fall through.

@@ -47,13 +47,4 @@ Usage:
 /candid-chrome-qa --desktop-only                            # Desktop pass only (skip mobile)
 ```
 
-When invoked, you'll be asked for any inputs not provided via flags:
-- **goal** — what surface to test (e.g. "Agent Config tabs, all 16")
-- **prompt** — free-form QA plan (edge cases, hot spots, recently-changed surfaces)
-- **app URL** — verified before any work begins (curl health check)
-
-Output:
-- **JSON findings file** at `<findings-dir>/<YYYY-MM-DD>-<slug>.json` — v2.0 schema with `context`, `findings`, and end-of-pass `summary` blocks
-- **Stdout summary** at end of pass — severity counts, category breakdown, and titles + URLs of every P0/P1 finding
-
-Requires the `mcp__claude-in-chrome__*` tools to be available (auto-loaded via ToolSearch on first use).
+Full workflow, output format, and configuration: the candid-chrome-qa skill.
