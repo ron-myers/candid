@@ -46,6 +46,7 @@ Codex has built-in slash commands (`/plugins`, `/skills`, `/model`, etc.) but no
 | `/candid-init` | `$candid-init` |
 | `/candid-optimize` | `$candid-optimize` |
 | `/candid-validate-standards` | `$candid-validate-standards` |
+| `/candid-improve` | `$candid-improve` |
 | `/candid-improve-implementation` | `$candid-improve-implementation` |
 | `/candid-chrome-qa` | `$candid-chrome-qa` |
 | `/candid-chrome-qa-fix` | `$candid-chrome-qa-fix` |

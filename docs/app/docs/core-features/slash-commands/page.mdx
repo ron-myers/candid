@@ -30,6 +30,40 @@ Run a code review on your changes.
 /candid-review --re-review
 ```
 
+## /candid-improve
+
+Improve an output — copy, a doc, an answer, a plan, any text — against your goal via a critique→refine loop. Distinct from `/candid-review` and `/candid-improve-implementation` (both code-only); this refines generic text artifacts. Defaults to improving the last session output in a single pass.
+
+```
+/candid-improve
+```
+
+### Options
+
+| Flag | Description |
+|------|-------------|
+| `--file <path>` | Read the artifact to improve from this path (default: last session output) |
+| `--criteria "<text>"` | Explicit success bar / rubric — loop until met |
+| `--iterations <N>` | Number of critique→refine cycles (default: 1, single pass) |
+| `--until-converged` | Loop until a cycle yields no meaningful improvement (capped by max-iterations) |
+| `--max-iterations <N>` | Hard cap for converge/rubric loops (default: 5) |
+| `--mode <auto\|review-each\|interactive>` | Interaction level (default: auto) |
+| `--out <path>` | Write the improved output to this path |
+| `--in-place` | Overwrite the source file (confirmed first) |
+| `--harsh` / `--constructive` | Critique tone |
+
+### Examples
+
+```
+/candid-improve
+/candid-improve --file README.md --iterations 2
+/candid-improve --until-converged --criteria "punchier, under 120 words, active voice"
+/candid-improve --mode interactive --file pitch.md
+/candid-improve --harsh --criteria "no marketing fluff, concrete claims only"
+```
+
+See [Candid Improve](/docs/core-features/candid-improve) for full documentation.
+
 ## /candid-loop
 
 Run code review in a loop until all issues are resolved.

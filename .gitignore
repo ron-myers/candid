@@ -4,6 +4,7 @@
 # Candid review state (user-specific)
 .candid/last-review.json
 .candid/last-improve.json
+.candid/last-improve-output.json
 .candid/register
 
 # macOS metadata

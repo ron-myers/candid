@@ -5,6 +5,7 @@ export default {
   'technical-md': 'Technical.md',
   'auto-commit': 'Auto-Commit',
   're-review': 'Re-Review',
+  'candid-improve': 'Candid Improve',
   'candid-loop': 'Candid Loop',
   'decision-register': 'Decision Register',
   'context-optimization': 'Context Optimization',
