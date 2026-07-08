@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.22.0] - 2026-07-07
+
+### Added
+
+- **`/candid-improve`** — a new skill that refines a **generic output** (marketing copy, docs, an answer, a plan, a prompt, any text) against your goal, distinct from the code-only `candid-review` and `candid-improve-implementation`:
+  - **Critique → refine loop**: each cycle names weaknesses across five lenses (🎯 Intent fit, 🧩 Completeness, 🔍 Clarity, ✂️ Concision, 🎨 Craft), then rewrites to address them with a before→after preview
+  - **Fully generic input**: improves whatever you point at — `--file <path>`, pasted text, or (default) the most recent substantive output in the session
+  - **Configurable stop conditions**: single pass by default; opt into `--iterations N`, `--until-converged`, or a `--criteria "..."` rubric, all capped by `--max-iterations` (default 5)
+  - **Modes mirroring candid-loop**: `auto` / `review-each` / `interactive` via `--mode` or `improveOutput.mode`
+  - **Source-aware destination**: file sources default to writing back (`--in-place`/`--out`, overwrite confirmed first); inline/session sources print to chat
+  - **Loop invariants**: convergence requires a fresh pass, no-progress and oscillation halt the loop
+  - New `skills/candid-improve/{SKILL.md,CONFIG.md}`, `commands/candid-improve.md`, docs page, and full site wiring (core-features nav, slash-commands reference, homepage command list, Codex command mapping)
+  - Config namespace `improveOutput` and state file `.candid/last-improve-output.json` — deliberately separate from `candid-improve-implementation`'s `improve` block
+
 ## [1.21.0] - 2026-07-04
 
 ### Added

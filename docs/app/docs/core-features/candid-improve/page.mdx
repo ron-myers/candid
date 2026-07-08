@@ -1,0 +1,132 @@
+export const metadata = {
+  title: 'Candid Improve - Refine Any Output Against Your Goal',
+  description: 'Use candid-improve to make an output better — copy, a doc, an answer, a plan, any text — via a critique→refine loop with configurable stop conditions and auto/review-each/interactive modes.',
+}
+
+# Candid Improve
+
+Where `/candid-review` and `/candid-improve-implementation` work on **code**, this skill works on **any output you already have** — marketing copy, documentation, an answer, a plan, a prompt, an email, a spec. It runs a **critique → refine** loop: name what's weak against your goal, rewrite to fix it, repeat until the stop condition is met.
+
+## Quick Start
+
+```
+/candid-improve
+```
+
+With no arguments, it improves the **last output in this session** in a **single pass**, using the current context to decide what "better" means. Point it at a file or paste text to improve something else.
+
+## When to Use It
+
+- You have a draft — copy, docs, an email, a plan — and want a sharper version
+- An answer or explanation you just produced needs tightening
+- A prompt or spec that isn't landing the way you want
+- Any text artifact where you can name a goal ("punchier", "under 120 words", "no jargon")
+
+Not the right tool for: reviewing code for defects (use `/candid-review`), a code-quality pass (use `/candid-improve-implementation`), or generating something from scratch (just ask).
+
+## How It Works
+
+1. **Resolve the target** — `--file <path>`, inline text you paste, or (default) the most recent substantive output in the session. Ambiguous? It asks.
+2. **Resolve the goal** — your `--criteria`/rubric, the surrounding context, or (default) an intent inferred from the session, stated back so you can correct it.
+3. **Resolve the destination** — file source defaults to writing back (overwrite confirmed first); inline/session source prints to chat. Override with `--out`/`--in-place`.
+4. **Critique → refine loop** — each cycle names weaknesses across the active lenses, then rewrites to address them, showing a before→after preview.
+5. **Stop** — when the rubric is met, iterations are exhausted, the cycle converges, no progress is made, or `--max-iterations` is hit.
+6. **Save state** — writes `.candid/last-improve-output.json`.
+
+## Critique Lenses
+
+Each cycle critiques against the goal using these lenses (adapted to the artifact type; restrict the set via `improveOutput.lenses`):
+
+- 🎯 **Intent fit** — does it actually satisfy the goal / answer the ask?
+- 🧩 **Completeness** — missing pieces, unsupported claims, gaps?
+- 🔍 **Clarity** — ambiguous, confusing, poorly ordered, jargon?
+- ✂️ **Concision** — padding, redundancy, filler, hedging?
+- 🎨 **Craft** — tone, correctness, rhythm, polish for the medium.
+
+## Stop Conditions
+
+By default the loop runs **exactly one pass**. Opt into looping:
+
+| You want | Use |
+|----------|-----|
+| One pass (default) | *(nothing)* |
+| A fixed number of cycles | `--iterations N` |
+| Loop until it stops improving | `--until-converged` |
+| Loop until a bar is met | `--criteria "..."` |
+| Cap converge/rubric loops | `--max-iterations N` (default 5) |
+
+If `--criteria` is set it is the stop bar; else `--until-converged` loops to convergence; else `iterations` cycles run. All looping is capped by `--max-iterations`.
+
+## Modes
+
+Mirror `/candid-loop`. Set with `--mode` or `improveOutput.mode`.
+
+- **auto** (default) — accept every critique point and rewrite.
+- **review-each** — per-point Yes/No before it's applied (offers the rewrite as a preview).
+- **interactive** — per-point Apply / Skip / Edit-the-goal / Stop-all.
+
+## Flags
+
+| Flag | Description | Default |
+|------|-------------|---------|
+| `--file <path>` | Read the artifact from this path | Last session output |
+| `--criteria "<text>"` | Explicit success bar / rubric — loop until met | Inferred from context |
+| `--iterations <N>` | Critique→refine cycles | `1` |
+| `--until-converged` | Loop until no meaningful improvement | Off |
+| `--max-iterations <N>` | Hard cap for converge/rubric loops | `5` |
+| `--mode <m>` | `auto`, `review-each`, `interactive` | `auto` |
+| `--out <path>` | Write the improved output to this path | Source-based |
+| `--in-place` | Overwrite the source file (confirmed first) | Off |
+| `--harsh` / `--constructive` | Critique tone | Interactive prompt |
+
+## Examples
+
+```bash
+# Refine the last session output, single pass
+/candid-improve
+
+# Two cycles on a file
+/candid-improve --file README.md --iterations 2
+
+# Loop until it hits the bar
+/candid-improve --until-converged --criteria "punchier, under 120 words, active voice"
+
+# Step through each critique point on a draft
+/candid-improve --mode interactive --file pitch.md
+
+# Blunt tone, concrete criteria, overwrite the source
+/candid-improve --harsh --file draft.md --in-place --criteria "no marketing fluff, concrete claims only"
+```
+
+## Configuration
+
+Add to `.candid/config.json`:
+
+```json
+{
+  "tone": "constructive",
+  "improveOutput": {
+    "mode": "auto",
+    "iterations": 1,
+    "maxIterations": 5,
+    "lenses": ["intent", "completeness", "clarity", "concision", "craft"],
+    "defaultDestination": "chat"
+  }
+}
+```
+
+| Field | Type | Description | Default |
+|-------|------|-------------|---------|
+| `improveOutput.mode` | `"auto" \| "review-each" \| "interactive"` | Interaction level | `"auto"` |
+| `improveOutput.iterations` | integer | Cycles when no other stop condition set | `1` |
+| `improveOutput.maxIterations` | integer (1-20) | Cap for converge/rubric loops | `5` |
+| `improveOutput.lenses` | array | Which critique lenses run | All five |
+| `improveOutput.defaultDestination` | `"chat" \| "file"` | Destination default | Source-based |
+
+The `improveOutput` block is deliberately separate from `/candid-improve-implementation`'s `improve` block — different jobs, no shared config or state. `tone` is shared with `/candid-review`.
+
+## See Also
+
+- [Candid Review](/docs/core-features/candid-review) — defect / risk / security review of code
+- [Candid Improve Implementation](/docs/core-features/candid-improve-implementation) — code-quality pass on working code
+- [Candid Loop](/docs/core-features/candid-loop) — fix-review-fix loop for code

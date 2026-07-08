@@ -528,6 +528,10 @@ export default function HomePage() {
             <span>Review your changes. Pick tone (<code>--harsh</code>/<code>--constructive</code>) and focus area.</span>
           </li>
           <li>
+            <code>/candid-improve</code>
+            <span>Refine any output — copy, docs, an answer, a plan — against your goal in a critique→refine loop.</span>
+          </li>
+          <li>
             <code>/candid-ship</code>
             <span>Run install/build/test, open the PR, optionally auto-merge and update Linear.</span>
           </li>
