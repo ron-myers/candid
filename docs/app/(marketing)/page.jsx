@@ -50,6 +50,7 @@ export default function HomePage() {
   const howItWorksRef = useRef(null)
   const configRef = useRef(null)
   const qaFlowRef = useRef(null)
+  const chromeQaCtaRef = useRef(null)
   const commandsRef = useRef(null)
   const communityRef = useRef(null)
   const faqRef = useRef(null)
@@ -83,7 +84,7 @@ export default function HomePage() {
 
     const observer = new IntersectionObserver(observerCallback, observerOptions)
 
-    const refs = [featuresRef, howItWorksRef, configRef, qaFlowRef, commandsRef, communityRef, faqRef, ctaRef]
+    const refs = [featuresRef, howItWorksRef, configRef, qaFlowRef, chromeQaCtaRef, commandsRef, communityRef, faqRef, ctaRef]
     refs.forEach(ref => {
       if (ref.current) {
         observer.observe(ref.current)
@@ -514,6 +515,40 @@ export default function HomePage() {
             </div>
           </li>
         </ol>
+      </section>
+
+      <section className="chrome-qa-cta scroll-animate" ref={chromeQaCtaRef}>
+        <div className="chrome-qa-cta-inner">
+          <div className="chrome-qa-cta-text">
+            <span className="section-badge">CHROME QA</span>
+            <h2>Parallel agents. Real browser. One command.</h2>
+            <p>
+              <code>/candid-chrome-qa</code> dispatches independent audit agents across your live app — A11y, layout, copy, performance — all running concurrently in real Chrome. Findings come back as structured JSON, ready for <code>/candid-chrome-qa-fix</code>.
+            </p>
+            <Pre className="step-code" trackingId="chrome_qa_cta_install">
+              <code>{`npx skills add https://github.com/ron-myers/candid`}</code>
+            </Pre>
+            <Link
+              href="/docs/core-features/candid-chrome-qa"
+              className="btn-primary"
+              onClick={() => trackEvent(EVENTS.CHROME_QA_CTA_CLICK)}
+            >
+              See how Chrome QA works
+              <svg className="btn-icon" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M6 3L11 8L6 13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </Link>
+          </div>
+          <div className="chrome-qa-cta-screenshot">
+            <Image
+              src="/screenshots/candid-chrome-qa-parallel-agents.png"
+              alt="Candid Chrome QA dispatching parallel audit agents — A11y, responsive, copy, and performance agents running concurrently"
+              width={1628}
+              height={440}
+              className="chrome-qa-screenshot-image"
+            />
+          </div>
+        </div>
       </section>
 
       <section className="commands-section scroll-animate" ref={commandsRef}>

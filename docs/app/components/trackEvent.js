@@ -27,4 +27,7 @@ export const EVENTS = {
 
   // Code interactions
   CODE_COPY: 'code_copy',
+
+  // Chrome QA CTA
+  CHROME_QA_CTA_CLICK: 'chrome_qa_cta_click',
 }
