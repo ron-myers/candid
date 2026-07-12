@@ -1081,9 +1081,6 @@ header a:has(.logo):hover {
   margin: 0;
 }
 
-.chrome-qa-cta-text .step-code-wrapper {
-  width: 100%;
-}
 
 .chrome-qa-cta-screenshot {
   border-radius: 12px;
