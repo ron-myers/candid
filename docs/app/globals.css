@@ -1046,6 +1046,65 @@ header a:has(.logo):hover {
   margin: 0 auto 2rem;
 }
 
+/* Chrome QA CTA section */
+.chrome-qa-cta {
+  padding: var(--spacing-section) 0;
+}
+
+.chrome-qa-cta-inner {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3rem;
+  align-items: center;
+}
+
+.chrome-qa-cta-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1.25rem;
+}
+
+.chrome-qa-cta-text h2 {
+  font-family: var(--font-display);
+  font-size: var(--text-section);
+  font-weight: 600;
+  margin: 0;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+}
+
+.chrome-qa-cta-text p {
+  color: var(--text-secondary);
+  font-size: var(--text-body);
+  line-height: 1.6;
+  margin: 0;
+}
+
+
+.chrome-qa-cta-screenshot {
+  border-radius: 12px;
+  overflow: hidden;
+  border: 2px solid var(--border-light);
+  box-shadow: var(--shadow-elevated);
+}
+
+.chrome-qa-screenshot-image {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+@media (max-width: 768px) {
+  .chrome-qa-cta-inner {
+    grid-template-columns: 1fr;
+  }
+
+  .chrome-qa-cta-screenshot {
+    order: -1;
+  }
+}
+
 .code-block {
   background: #1a1a1a;
   color: #e5e5e5;
@@ -1680,6 +1739,18 @@ html.dark .screenshot-wrapper:hover {
 
 html.dark .screenshot-caption {
   color: var(--text-secondary-dark);
+}
+
+html.dark .chrome-qa-cta-text h2 {
+  color: var(--text-primary-dark);
+}
+
+html.dark .chrome-qa-cta-text p {
+  color: var(--text-secondary-dark);
+}
+
+html.dark .chrome-qa-cta-screenshot {
+  border-color: var(--border-light-dark);
 }
 
 /* ===== Responsive ===== */
