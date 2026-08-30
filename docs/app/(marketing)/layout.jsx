@@ -66,7 +66,7 @@ export default function MarketingLayout({ children }) {
         <div className="marketing-banner" role="region" aria-label="Announcement">
           <a
             className="marketing-banner-text"
-            href="https://www.actmorehuman.com"
+            href="https://www.actmorehuman.com/?ref=candid-banner"
             target="_blank"
             rel="noopener noreferrer"
             onClick={() => trackEvent(EVENTS.ACT_MORE_HUMAN_CLICK)}
@@ -156,7 +156,7 @@ export default function MarketingLayout({ children }) {
           </a>
           {' · '}
           <a
-            href="https://www.actmorehuman.com"
+            href="https://www.actmorehuman.com/?ref=candid-footer"
             target="_blank"
             rel="noopener noreferrer"
             onClick={() => trackEvent(EVENTS.ACT_MORE_HUMAN_CLICK)}
