@@ -220,6 +220,61 @@ h3 {
   flex-direction: column;
 }
 
+.marketing-banner {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 0.625rem 3rem;
+  background: linear-gradient(90deg, rgba(212, 162, 127, 0.12), rgba(184, 143, 111, 0.12));
+  border-bottom: 1px solid var(--border-light);
+  text-align: center;
+}
+
+.marketing-banner-text {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--text-primary);
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.marketing-banner-text strong {
+  color: var(--accent-hover);
+  font-weight: 600;
+}
+
+.marketing-banner-text:hover {
+  text-decoration: underline;
+}
+
+.marketing-banner-text:hover strong {
+  color: var(--accent-main);
+}
+
+.marketing-banner-close {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.25rem;
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  border-radius: 4px;
+  transition: color 0.15s ease, background 0.15s ease;
+}
+
+.marketing-banner-close:hover {
+  color: var(--text-primary);
+  background: rgba(0, 0, 0, 0.05);
+}
+
 .marketing-header {
   border-bottom: 1px solid var(--border-light);
   padding: 1rem 2rem;
@@ -1320,6 +1375,32 @@ html.dark article p code,
 html.dark article li code {
   background: rgba(212, 162, 127, 0.15);
   color: var(--accent-hover-dark);
+}
+
+html.dark .marketing-banner {
+  background: linear-gradient(90deg, rgba(212, 162, 127, 0.1), rgba(184, 143, 111, 0.1));
+  border-color: var(--border-light-dark);
+}
+
+html.dark .marketing-banner-text {
+  color: var(--text-primary-dark);
+}
+
+html.dark .marketing-banner-text strong {
+  color: var(--accent-hover-dark);
+}
+
+html.dark .marketing-banner-text:hover strong {
+  color: var(--accent-main-dark);
+}
+
+html.dark .marketing-banner-close {
+  color: var(--text-secondary-dark);
+}
+
+html.dark .marketing-banner-close:hover {
+  color: var(--text-primary-dark);
+  background: rgba(255, 255, 255, 0.08);
 }
 
 html.dark .marketing-header {

@@ -6,11 +6,34 @@ import { trackEvent, EVENTS } from '../components/trackEvent'
 import Logo from '../components/Logo'
 import GitHubStars from '../components/GitHubStars'
 
+const BANNER_DISMISS_KEY = 'amh-banner-dismissed'
+
 export default function MarketingLayout({ children }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [bannerVisible, setBannerVisible] = useState(false)
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen)
   const closeMenu = () => setIsMenuOpen(false)
+
+  // Show banner unless previously dismissed (avoids SSR flash)
+  useEffect(() => {
+    try {
+      if (localStorage.getItem(BANNER_DISMISS_KEY) !== '1') {
+        setBannerVisible(true)
+      }
+    } catch {
+      setBannerVisible(true)
+    }
+  }, [])
+
+  const dismissBanner = () => {
+    setBannerVisible(false)
+    try {
+      localStorage.setItem(BANNER_DISMISS_KEY, '1')
+    } catch {
+      /* localStorage unavailable — dismiss for this session only */
+    }
+  }
 
   // Prevent body scroll when menu is open
   useEffect(() => {
@@ -39,6 +62,31 @@ export default function MarketingLayout({ children }) {
 
   return (
     <div className="marketing-layout">
+      {bannerVisible ? (
+        <div className="marketing-banner" role="region" aria-label="Announcement">
+          <a
+            className="marketing-banner-text"
+            href="https://www.actmorehuman.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() => trackEvent(EVENTS.ACT_MORE_HUMAN_CLICK)}
+          >
+            Candid is built by the team at{' '}
+            <strong>Act More Human</strong>
+            {' — explore our paid services →'}
+          </a>
+          <button
+            className="marketing-banner-close"
+            onClick={dismissBanner}
+            aria-label="Dismiss announcement"
+          >
+            <svg viewBox="0 0 24 24" fill="none" width="16" height="16">
+              <line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+              <line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+            </svg>
+          </button>
+        </div>
+      ) : null}
       <header className="marketing-header">
         <nav className="marketing-nav">
           <Link href="/">
@@ -105,6 +153,15 @@ export default function MarketingLayout({ children }) {
             onClick={() => trackEvent(EVENTS.FRITTER_FACTORY_CLICK)}
           >
             Fritter Factory
+          </a>
+          {' · '}
+          <a
+            href="https://www.actmorehuman.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() => trackEvent(EVENTS.ACT_MORE_HUMAN_CLICK)}
+          >
+            Act More Human
           </a>
           {' · '}
           <a
